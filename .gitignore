@@ -1,0 +1,16 @@
+.venv/
+node_modules/
+**/bin/
+**/obj/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+*.tfplan
+local.settings.json
+.env
+.env.*
+!.env.example
+site/
+__pycache__/
+.DS_Store
