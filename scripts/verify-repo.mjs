@@ -73,12 +73,23 @@ function walkFiles(dir) {
   return out;
 }
 
+function stripHtmlTags(input) {
+  let result = input;
+  let previous;
+  do {
+    previous = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== previous);
+  return result.replace(/[<>]/g, '');
+}
+
 function slugifyHeading(raw) {
-  return raw
-    .replace(/`([^`]*)`/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[*_~]/g, '')
-    .replace(/<[^>]+>/g, '')
+  return stripHtmlTags(
+    raw
+      .replace(/`([^`]*)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[*_~]/g, '')
+  )
     .trim()
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s-]/gu, '')
