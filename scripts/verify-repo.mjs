@@ -323,7 +323,22 @@ for (const rootDoc of ['README.md', 'CONTRIBUTING.md', 'THIRD_PARTY_NOTICES.md']
   }
 }
 
-// 5. Enforce safe GitHub Actions workflows
+// 5. Ensure npm lockfiles only reference public registry.npmjs.org
+for (const lockRel of [
+  'package-lock.json',
+  'tools/netbench/dashboard/api/package-lock.json',
+  'tools/firewall-monitor/firewall-mon-app/package-lock.json',
+]) {
+  const lockFull = path.join(ROOT, lockRel);
+  if (fs.existsSync(lockFull)) {
+    const lockText = fs.readFileSync(lockFull, 'utf8');
+    if (/pkgs\.visualstudio\.com/i.test(lockText)) {
+      fail(`${lockRel}: contains private Azure Artifacts feed URL instead of registry.npmjs.org`);
+    }
+  }
+}
+
+// 6. Enforce safe GitHub Actions workflows
 const wfDir = path.join(ROOT, '.github', 'workflows');
 const allowedWorkflows = new Set(['checks.yml', 'deploy-pages.yml']);
 const actualWorkflows = fs.existsSync(wfDir) ? fs.readdirSync(wfDir) : [];

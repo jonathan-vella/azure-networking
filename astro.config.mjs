@@ -34,27 +34,27 @@ export default defineConfig({
         },
         {
           label: '1. Foundations',
-          autogenerate: { directory: '01-foundations' },
+          items: [{ autogenerate: { directory: '01-foundations' } }],
         },
         {
           label: '2. Core Topologies',
-          autogenerate: { directory: '02-core-topologies' },
+          items: [{ autogenerate: { directory: '02-core-topologies' } }],
         },
         {
           label: '3. Hybrid Connectivity',
-          autogenerate: { directory: '03-hybrid-connectivity' },
+          items: [{ autogenerate: { directory: '03-hybrid-connectivity' } }],
         },
         {
           label: '4. Network Security & Private Link',
-          autogenerate: { directory: '04-network-security' },
+          items: [{ autogenerate: { directory: '04-network-security' } }],
         },
         {
           label: '5. Workload Networking',
-          autogenerate: { directory: '05-workload-networking' },
+          items: [{ autogenerate: { directory: '05-workload-networking' } }],
         },
         {
           label: '6. Day-2 Ops, Reviews & Labs',
-          autogenerate: { directory: '06-operations-reviews' },
+          items: [{ autogenerate: { directory: '06-operations-reviews' } }],
         },
       ],
     }),

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { filter } from 'rhea-promise';
 import { EncryptionService } from './encryption.service';
 
 @Injectable({
