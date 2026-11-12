@@ -18,3 +18,9 @@ variable "storage_account_resource_group" {
   description = "The resource group where the storage account is located."
   type        = string
 }
+
+variable "storage_table_name" {
+  description = "The Azure Table Storage table name where benchmark results are stored."
+  type        = string
+  default     = "perf"
+}

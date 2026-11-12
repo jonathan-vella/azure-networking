@@ -26,12 +26,12 @@ enum TimestampFormat { GMT, local };
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
-  @ViewChild('searchInput') searchInput!: ElementRef;
+  @ViewChild('searchInput') searchInput?: ElementRef;
   private firewallSource: IFirewallSource;
   private intervalSubscription: Subscription | null = null;
 
   ngAfterViewInit() {
-    this.searchInput.nativeElement.focus();
+    this.searchInput?.nativeElement?.focus();
   }
 
   constructor(
@@ -59,7 +59,7 @@ export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.advSearchVisibility = !this.advSearchVisibility;
 
     if (this.advSearchVisibility) {
-      this.searchInput.nativeElement.focus();
+      this.searchInput?.nativeElement?.focus();
     }
   }
   @HostListener('document:keypress', ['$event'])
@@ -72,7 +72,7 @@ export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     this.advSearchVisibility = true;
-    this.searchInput.nativeElement.focus();
+    this.searchInput?.nativeElement?.focus();
 
   }
 
@@ -479,7 +479,7 @@ export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.timestampFilterMinutes = 0;
     this.searchFieldService.resetParams({ includeTimeFilter: true });
     this.searchFieldService.promptType = PromptType.Classic;
-    this.searchInput.nativeElement.focus();
+    this.searchInput?.nativeElement?.focus();
 
     this.refreshList();
   }
@@ -489,7 +489,7 @@ export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.timestampFilterMinutes = 0;
     this.searchFieldService.resetParams({ includeTimeFilter: true });
     this.searchFieldService.promptType = PromptType.Chatgpt;
-    this.searchInput.nativeElement.focus();
+    this.searchInput?.nativeElement?.focus();
 
     this.refreshList();
   }

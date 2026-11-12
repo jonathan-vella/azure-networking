@@ -32,6 +32,65 @@ module "subnet" {
   address_prefixes     = ["10.200.0.0/25"]
 }
 
+resource "azurerm_network_security_group" "this" {
+  name                = "nsg-netperf-tst-${module.locations.short_name}-001"
+  location            = var.location
+  resource_group_name = module.resource_group.name
+
+  security_rule {
+    name                       = "AllowQperfIntraVnet"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "19765-19766"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  security_rule {
+    name                       = "AllowIperf3IntraVnet"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "5201"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  security_rule {
+    name                       = "AllowPrivateEndpointHttpsIntraVnet"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "VirtualNetwork"
+  }
+
+  security_rule {
+    name                       = "DenyInternetInbound"
+    priority                   = 4000
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "Internet"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "this" {
+  subnet_id                 = module.subnet.id
+  network_security_group_id = azurerm_network_security_group.this.id
+}
+
 module "linux_virtual_machine_server" {
   count                         = 3
   source                        = "azurerm/resources/azure//modules/linux_virtual_machine"
@@ -50,6 +109,7 @@ module "linux_virtual_machine_server" {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az${count.index + 1}")
     "physical-zone" = "az${count.index + 1}"
   }
+  depends_on = [azurerm_subnet_network_security_group_association.this]
 }
 
 module "linux_virtual_machine_client_1" {
@@ -63,7 +123,7 @@ module "linux_virtual_machine_client_1" {
   size                          = var.size
   priority                      = "Spot"
   zone                          = lookup(local.locationMappings[var.location], "az1")
-  custom_data                   = base64encode(file("${path.module}/cloud-init-client.txt"))
+  custom_data                   = local.client_cloud_init
   enable_accelerated_networking = true
   identity_type                 = "UserAssigned"
   identity_ids = [
@@ -73,7 +133,13 @@ module "linux_virtual_machine_client_1" {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az1")
     "physical-zone" = "az1"
   }
-  depends_on = [module.linux_virtual_machine_server]
+  depends_on = [
+    module.linux_virtual_machine_server,
+    azurerm_subnet_network_security_group_association.this,
+    azurerm_private_endpoint.this,
+    azurerm_private_dns_zone_virtual_network_link.this,
+    azurerm_role_assignment.this
+  ]
 }
 
 resource "time_sleep" "wait_client_2" {
@@ -92,7 +158,7 @@ module "linux_virtual_machine_client_2" {
   size                          = var.size
   priority                      = "Spot"
   zone                          = lookup(local.locationMappings[var.location], "az2")
-  custom_data                   = base64encode(file("${path.module}/cloud-init-client.txt"))
+  custom_data                   = local.client_cloud_init
   enable_accelerated_networking = true
   identity_type                 = "UserAssigned"
   identity_ids = [
@@ -121,7 +187,7 @@ module "linux_virtual_machine_client_3" {
   size                          = var.size
   priority                      = "Spot"
   zone                          = lookup(local.locationMappings[var.location], "az3")
-  custom_data                   = base64encode(file("${path.module}/cloud-init-client.txt"))
+  custom_data                   = local.client_cloud_init
   enable_accelerated_networking = true
   identity_type                 = "UserAssigned"
   identity_ids = [

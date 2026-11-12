@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure Network Internal Zone Latency Benchmark Dashboard</title>
+    <title>Azure Network Internal Zone Latency &amp; Throughput Benchmark Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -40,7 +40,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="bi bi-speedometer2 me-2"></i>
-                Azure Network Internal Zone One-Way Latency Benchmark Dashboard
+                Azure Network Internal Zone Latency &amp; Throughput Benchmark Dashboard
             </a>
         </div>
     </nav>
@@ -59,9 +59,9 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
+        <div class="row row-cols-1 row-cols-md-5 g-3 mb-4">
+            <div class="col">
+                <div class="card bg-primary text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -75,8 +75,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
+            <div class="col">
+                <div class="card bg-success text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -90,12 +90,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
+            <div class="col">
+                <div class="card bg-warning text-dark h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h6 class="card-title">Avg. One-Way Latency</h6>
+                                <h6 class="card-title">Avg. Latency (qperf)</h6>
                                 <h3 id="avgLatency">0 μs</h3>
                             </div>
                             <div class="align-self-center">
@@ -105,8 +105,24 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-danger text-white">
+            <div class="col">
+                <div class="card bg-info text-dark h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Avg. Throughput (iperf3)</h6>
+                                <h3 id="avgThroughput">N/A</h3>
+                                <small id="avgThroughputSub" class="opacity-75"></small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-lightning-charge fs-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card bg-danger text-white h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -156,8 +172,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <div class="col-md-12">
+                        <div class="row mt-3 align-items-center">
+                            <div class="col-md-6 mb-2 mb-md-0">
                                 <button class="btn btn-outline-secondary me-2" onclick="window.dashboard.clearFilters()">
                                     <i class="bi bi-x-circle me-1"></i>
                                     Clear Filters
@@ -171,6 +187,20 @@
                                     Refresh Data
                                 </button>
                             </div>
+                            <div class="col-md-6 text-md-end">
+                                <span class="me-2 fw-semibold">Chart Metric:</span>
+                                <div class="btn-group" role="group" aria-label="Chart Metric Toggle">
+                                    <button type="button" class="btn btn-primary btn-sm" id="metricLatencyBtn" onclick="window.dashboard.setMetric('latency')">
+                                        <i class="bi bi-clock me-1"></i>Latency (µs)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="metricThroughputGbpsBtn" onclick="window.dashboard.setMetric('throughputGbps')">
+                                        <i class="bi bi-lightning-charge me-1"></i>Throughput (Gbps)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="metricThroughputMbpsBtn" onclick="window.dashboard.setMetric('throughputMbps')">
+                                        <i class="bi bi-speedometer me-1"></i>Throughput (Mbps)
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -179,31 +209,18 @@
 
         <!-- Charts -->
         <div class="row mb-4">
-            <!-- <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Bandwidth by Region</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="bandwidthChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6"> -->
             <div class="col-md-12">    
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Latency by Region</h5>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.dashboard.sortLatencyChart('asc')" title="Sort by ascending latency">
+                        <h5 class="mb-0" id="regionChartTitle">Latency (µs) by Region</h5>
+                        <div class="btn-group" role="group" id="regionSortGroup">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.dashboard.sortLatencyChart('asc')" title="Sort ascending">
                                 <i class="bi bi-sort-numeric-up"></i> Ascending
                             </button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.dashboard.sortLatencyChart('desc')" title="Sort by descending latency">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.dashboard.sortLatencyChart('desc')" title="Sort descending">
                                 <i class="bi bi-sort-numeric-down"></i> Descending
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.dashboard.sortLatencyChart('alphabetical')" title="Sort alphabetically">
+                            <button type="button" class="btn btn-outline-secondary btn-sm active" onclick="window.dashboard.sortLatencyChart('alphabetical')" title="Sort alphabetically">
                                 <i class="bi bi-sort-alpha-down"></i> Alphabetical
                             </button>
                         </div>
@@ -221,7 +238,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Latency Evolution by Region</h5>
+                        <h5 id="evolutionChartTitle">Latency (µs) Evolution by Region</h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -236,7 +253,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Detailed Latency Evolution by AZ Pairs</h5>
+                        <h5 id="azPairsChartTitle">Detailed Latency (µs) Evolution by AZ Pairs</h5>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -252,7 +269,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-danger text-white">
-                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Abnormal Results - TCP One-Way : Intra-zone Latency > 500 μs or Inter-zone Latency > 1000 μs</h5>
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Abnormal Results - TCP One-Way : Intra-zone Latency &gt; 500 μs or Inter-zone Latency &gt; 1000 μs</h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-warning" id="noAbnormalResults" style="display: none;">
@@ -267,8 +284,8 @@
                                         <th>Region</th>
                                         <th>Source</th>
                                         <th>Destination</th>
-                                        <th>Bandwidth</th>
-                                        <th class="text-danger fw-bold">Latency</th>
+                                        <th>Throughput (iperf3)</th>
+                                        <th class="text-danger fw-bold">Latency (µs)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="abnormalResultsTableBody">
@@ -286,7 +303,7 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Recent Test Results TCP One-Way</h5>
+                        <h5>Recent Test Results (qperf Latency + iperf3 Throughput)</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -297,8 +314,8 @@
                                         <th>Region</th>
                                         <th>Source</th>
                                         <th>Destination</th>
-                                        <th>Bandwidth</th>
-                                        <th>Latency</th>
+                                        <th>Throughput (iperf3)</th>
+                                        <th>Latency (µs)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dataTableBody">
@@ -314,8 +331,9 @@
 
     <footer class="bg-dark text-white text-center py-3 mt-5">
         <div class="container">
-            <p>&copy; 2025 - Azure Network Internal Zone Latency Benchmark Dashboard.<br>
-            <i class="bi bi-github"></i><a href="https://github.com/vmisson/azure-netbench" target="_blank"> vmisson/azure-netbench</a></p>
+            <p class="mb-0">&copy; Azure Network Internal Zone Latency &amp; Throughput Benchmark Dashboard.<br>
+            <i class="bi bi-github"></i> <a href="https://github.com/jonathan-vella/azure-networking/tree/main/tools/netbench" class="text-light" target="_blank">jonathan-vella/azure-networking</a>
+            &middot; Upstream credit: <a href="https://github.com/vmisson/azure-netbench" class="text-light" target="_blank">vmisson/azure-netbench</a></p>
         </div>
     </footer>
 

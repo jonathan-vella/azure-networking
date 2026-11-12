@@ -5,5 +5,40 @@ package_reboot_if_required: true
 packages:
   - iperf3
   - qperf
+write_files:
+  - path: /etc/systemd/system/qperf-server.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=qperf TCP latency benchmark server daemon
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/qperf
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/systemd/system/iperf3-server.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=iperf3 throughput benchmark server daemon
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=forking
+      ExecStart=/usr/bin/iperf3 -s -D
+      Restart=always
+      RestartSec=2
+
+      [Install]
+      WantedBy=multi-user.target
 runcmd:
- - qperf 
+  - systemctl daemon-reload
+  - systemctl enable --now qperf-server.service
+  - systemctl enable --now iperf3-server.service

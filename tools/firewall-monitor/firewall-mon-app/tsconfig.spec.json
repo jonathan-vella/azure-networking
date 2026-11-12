@@ -1,14 +1,14 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
+/* To learn more about this file see: https://angular.dev/reference/configs/file-structure#typescript-configuration-files */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": [
-      "jasmine"
+      "vitest/globals"
     ]
   },
   "files": [
-    "src/test.ts",
+    "src/main.ts",
     "src/polyfills.ts"
   ],
   "include": [

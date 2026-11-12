@@ -1,0 +1,51 @@
+---
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+
+<script>
+  import mermaid from 'mermaid';
+
+  function currentTheme(): 'dark' | 'default' {
+    return document.documentElement.dataset.theme === 'light' ? 'default' : 'dark';
+  }
+
+  async function renderDiagrams() {
+    const nodes = document.querySelectorAll<HTMLElement>('pre.mermaid');
+    if (!nodes.length) return;
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: currentTheme(),
+      securityLevel: 'strict',
+      fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
+    });
+
+    for (const el of nodes) {
+      const src = el.getAttribute('data-mermaid-src');
+      if (!src) continue;
+      el.removeAttribute('data-processed');
+      el.textContent = src;
+    }
+
+    await mermaid.run({ nodes });
+  }
+
+  document.addEventListener('astro:page-load', renderDiagrams);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderDiagrams);
+  } else {
+    renderDiagrams();
+  }
+
+  const observer = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === 'data-theme') {
+        renderDiagrams();
+        break;
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>

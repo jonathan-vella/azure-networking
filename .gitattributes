@@ -1,1 +1,12 @@
-* -text
+* text=auto
+*.sh text eol=lf
+*.azcli text eol=lf
+*.conf text eol=lf
+*cloud-init*.txt text eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+
+

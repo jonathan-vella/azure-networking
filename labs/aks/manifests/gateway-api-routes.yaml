@@ -1,0 +1,214 @@
+# Application Gateway for Containers (Managed ALB Controller) — Kubernetes Gateway API Lab
+# Demonstrates GatewayClass (azure-alb-external), Gateway, and HTTPRoute with:
+#   1. Path-based routing (/orders -> orders-api)
+#   2. Header-based canary routing (X-Canary: true -> web-v2)
+#   3. Default traffic routing (/ -> web-v1)
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: azure-alb-external
+spec:
+  controllerName: alb.networking.azure.io/alb-controller
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agc-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-v1
+  namespace: agc-demo
+  labels:
+    app: web-v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-v1
+  template:
+    metadata:
+      labels:
+        app: web-v1
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0
+          args:
+            - "-text=agc-backend: web-v1 (stable)"
+            - "-listen=:8080"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-v1
+  namespace: agc-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: web-v1
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-v2
+  namespace: agc-demo
+  labels:
+    app: web-v2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-v2
+  template:
+    metadata:
+      labels:
+        app: web-v2
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0
+          args:
+            - "-text=agc-backend: web-v2 (canary)"
+            - "-listen=:8080"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-v2
+  namespace: agc-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: web-v2
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+  namespace: agc-demo
+  labels:
+    app: orders-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orders-api
+  template:
+    metadata:
+      labels:
+        app: orders-api
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:1.0
+          args:
+            - "-text=agc-backend: orders-api (/orders)"
+            - "-listen=:8080"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-api
+  namespace: agc-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: orders-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: agc-gateway
+  namespace: agc-demo
+  annotations:
+    alb.networking.azure.io/alb-namespace: alb-infra
+    alb.networking.azure.io/alb-name: agc-alb
+spec:
+  gatewayClassName: azure-alb-external
+  listeners:
+    - name: http-listener
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: agc-app-routes
+  namespace: agc-demo
+spec:
+  parentRefs:
+    - name: agc-gateway
+      namespace: agc-demo
+  rules:
+    # Rule 1: Path-based routing for /orders
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /orders
+      backendRefs:
+        - name: orders-api
+          port: 8080
+    # Rule 2: Header-based canary routing (X-Canary: true -> web-v2)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+          headers:
+            - type: Exact
+              name: X-Canary
+              value: "true"
+      backendRefs:
+        - name: web-v2
+          port: 8080
+    # Rule 3: Default traffic to web-v1
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: web-v1
+          port: 8080

@@ -1,7 +1,8 @@
 <div align="center">
 
-> Local sanitized import. Source workflows are inactive references. Deployment links still target upstream material. A credential-bearing example comment was removed; publication remains blocked until its owner confirms revocation or that it was never valid. Do not enter credentials in frontend code.
-<img alt="logo" src="images/logo.png" width="72" height="72" style="vertical-align:middle; background-color: DimGray;border-radius: 15%;">
+> Consolidated into [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) under `tools/firewall-monitor/` from upstream [`nicolgit/azure-firewall-mon`](https://github.com/nicolgit/azure-firewall-mon). Do not hardcode Event Hub connection strings or credentials in frontend code.
+
+<img alt="logo" src="firewall-mon-app/src/assets/logo.png" width="72" height="72" style="vertical-align:middle; background-color: DimGray;border-radius: 15%;">
 </div>
 <h1 align="center">az-firewall-mon🧑‍🚒</h1>
 
@@ -53,7 +54,7 @@ Some examples of queries are as follows:
 ![chatgpt](images/03-chatgpt.gif)
 
 # Set up a connection with your Azure Firewall
-Azure-Firewall-mon is an open-source [Single Page Application](https://en.wikipedia.org/wiki/Single-page_application) written in [Angular](https://angular.io/) with an [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview) backend written in C# .NET. 
+Azure-Firewall-mon is an open-source [Single Page Application](https://en.wikipedia.org/wiki/Single-page_application) written in [Angular](https://angular.dev/) (Angular 20, tested with Vitest) with an [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview) v4 isolated worker backend written in C# (.NET 8).
 
 Here's the current architecture:
 
@@ -61,44 +62,57 @@ Here's the current architecture:
 
 To use this app with **YOUR FIREWALL data**, you have 2 options:
 
-1. Use the Azure Firewall mon sample deployment available at <https://az-firewall-mon.duckiesfarm.com> 
-2. Deploy Azure Firewall mon in your environment
+1. Deploy `az-firewall-mon` in your own Azure subscription (**recommended** — keeps all telemetry, OpenAI prompts, and Event Hub traffic inside your tenant)
+2. Use the upstream sample deployment at <https://az-firewall-mon.duckiesfarm.com> for non-sensitive testing only
 
-The recommended option is number 2, as this way you can be 100% sure your logs are not going outside your environment. I suggest using the public deployment only for testing purposes.
+> <https://az-firewall-mon.duckiesfarm.com> is an upstream community demo with strict rate limits on Azure Maps and Azure OpenAI. Deploying your own instance in [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) (see [INSTALL.md](INSTALL.md)) gives you full control over performance, network isolation, and data residency.
 
-> <https://az-firewall-mon.duckiesfarm.com> uses resources from my subscription (Azure Maps API, Azure OpenAI, Azure Static Web App Standard). These resources have a cost, so I am limiting their usage as much as possible. As a result, the tool may be quite slow. In your own deployment, you can dedicate more resources and achieve better performance.
+# Azure Firewall Structured Logs & Event Hub Security (2026 Guidance)
 
-# Use az-firewall-mon sample deployment
-To use this version with your data, you must perform the following steps on your Azure Subscription:
+### Prefer Resource-Specific Structured Logs over Legacy `AzureDiagnostics`
+When configuring **Diagnostic Settings** on Azure Firewall, select **Resource-specific** structured log categories instead of the legacy `AzureDiagnostics` mode:
 
-1. Create an Azure Event Hub Namespace
-2. Create an Azure Event Hub inside the namespace, with a `1-day retention` and `1 partition`
-3. Create a Shared Access Policy, with _Listen_ claim
-4. Open the Azure Firewall instance you want to monitor, go to Monitoring > Diagnostic Settings > Add Diagnostic Settings: 
+| Structured Category | Description | Key Parsed Fields in `az-firewall-mon` |
+|---|---|---|
+| `AZFWNetworkRule` | L3/L4 Network rule evaluations | `Protocol`, `SourceIp`, `SourcePort`, `DestinationIp`, `DestinationPort`, `Action`, `Policy`, `RuleCollectionGroup`, `RuleCollection`, `Rule`, `ActionReason` |
+| `AZFWApplicationRule` | L7 FQDN / HTTP(S) / Web Category rules | `Protocol`, `SourceIp`, `Fqdn`, `DestinationPort`, `TargetUrl`, `WebCategory`, `Action`, `Policy` |
+| `AZFWNatRule` | Inbound DNAT rule translations | `Protocol`, `SourceIp`, `SourcePort`, `TranslatedIp`, `TranslatedPort`, `Policy` |
+| `AZFWDnsQuery` | DNS Proxy queries and responses | `SourceIp`, `Protocol`, `QueryId`, `QueryType`, `QueryName`, `ResponseCode` |
+| `AZFWIdpsSignature` | Azure Firewall Premium IDPS alerts/drops | `Protocol`, `SourceIp`, `DestinationIp`, `Action`, `Severity`, `SignatureId`, `Category`, `Description` |
+| `AZFWThreatIntel` | Threat intelligence indicator matches | `Protocol`, `SourceIp`, `Fqdn`, `Action`, `ThreatDescription` |
 
-    - Select _all_ _logs_ and "Stream to Event Hub"
-    - Select the Event Hub Namespace and Hub created above
-    - click `SAVE`
+Structured logs emit strongly typed JSON properties rather than packing free-form strings into `properties.msg`, avoiding brittle regex/string parsing, reducing payload overhead, and supporting Premium IDPS and Threat Intelligence categories natively. Legacy categories (`AzureFirewallNetworkRule`, `AzureFirewallApplicationRule`, `AzureFirewallDnsProxy`) remain parsed for backward compatibility, but new deployments should use the `AZFW*` categories above.
 
-If you are a lazy engineer, like me, you can perform all these steps by clicking the following button 😊
+### Event Hub SAS Least-Privilege Security (`Listen` Only)
+Because the Angular SPA streams events directly from Azure Event Hubs over AMQP-over-WebSockets (`@azure/event-hubs`), apply strict least-privilege controls:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnicolgit%2Fazure-firewall-mon%2Fmain%2Fbicep%2Ffirewall-mon-azure-stuff.json)
+* **Scope SAS to the Event Hub entity, never the Namespace**: Do **not** use `RootManageSharedAccessKey`. Create an Event Hub–level Shared Access Policy with **only** the `Listen` claim (never `Manage` or `Send`).
+* **Short retention & dedicated consumer group**: Configure a `1-day` message retention and `1` partition for real-time inspection, and use a dedicated consumer group (or `$Default` if no other reader shares the hub) so readers do not contend over offsets.
+* **Credential hygiene**: Rotate SAS keys regularly and never hardcode connection strings in source files or commit them to Git. Connection strings entered in the UI are AES-encrypted in browser `localStorage` for the active browser profile only.
 
-Open the Azure Firewall instance you want to monitor from the Azure portal, go to Monitoring > Diagnostic Settings > Add Diagnostic Settings:
+# Stream Azure Firewall Logs to Event Hub
 
-* Select all logs and "Stream to Event Hub"
-* Select the Event Hub Namespace and Hub created above
-* Click SAVE
+1. Provision an Event Hub Namespace, Event Hub (`1-day` retention, `1` partition), and a least-privilege `Listen`-only Shared Access Policy using [`bicep/firewall-mon-azure-stuff.bicep`](bicep/firewall-mon-azure-stuff.bicep) from [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking):
 
-Now, open <https://az-firewall-mon.duckiesfarm.com/> and do the following:
+   ```bash
+   az deployment group create \
+     --resource-group <your-resource-group> \
+     --template-file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep
+   ```
 
-1. Copy the connection string of the Shared Access Policy created above into the `Event Hub Connection String` field
-2. Copy the corresponding `Event Hub Consumer Group` name
-3. Click on `Let's begin`.
+2. Open the Azure Firewall instance you want to monitor in the Azure Portal, go to **Monitoring** > **Diagnostic settings** > **Add diagnostic setting**:
+   * Select the structured log categories (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWDnsQuery`, `AZFWIdpsSignature`, `AZFWThreatIntel`)
+   * Select **Stream to an event hub**, and pick the Event Hub Namespace and Event Hub (`fwmonhub` by default) created above
+   * Click **Save**
+
+3. Open your deployed `az-firewall-mon` web app (see [INSTALL.md](INSTALL.md)):
+   * Paste the connection string of the **`Listen`-only** Event Hub Shared Access Policy (`fwmonkey` by default) into **Event Hub connection string**
+   * Enter the **Event Hub Consumer Group** name (for example `$Default`)
+   * Click **Let's begin**
 
 # Install az-firewall-mon in your environment
 
-To install az-firewall-mon in your environment, follow [this guide](INSTALL.md). Once the instance is ready and working, you can go back and follow the instructions in the [Use az-firewall-mon sample deployment](#use-az-firewall-mon-sample-deployment) section. Just replace the URL with the one from your deployment.
+To deploy a private instance of `az-firewall-mon` (Azure Static Web App, Azure Functions API, Azure Maps, Azure OpenAI, and Application Insights), follow [INSTALL.md](INSTALL.md). Once deployed, follow [Stream Azure Firewall Logs to Event Hub](#stream-azure-firewall-logs-to-event-hub) using your Static Web App URL.
 
 # More Information
 

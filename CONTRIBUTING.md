@@ -1,39 +1,34 @@
 # Contributing
 
-Keep architectural articles and their assets together. Preserve each lab or tool's
-deployment boundary, dependency manifests, lockfiles, and scoped license notices.
-Record source-file moves, deduplicated aliases, and exclusions in `sources.json`.
-Do not replace an upstream author's attribution with the fork owner's name.
+## Guiding Principles
 
-Use `python scripts/verify_consolidation.py`, `node scripts/verify.mjs`,
-`python -m unittest discover -s scripts -p "test_*.py"`, and
-`python -m mkdocs build --strict` in an environment installed from
-`requirements.txt`. Run case-sensitive documentation checks on Linux as well.
-The verifier prints blocked sources; `--require-complete` makes those blockers fail.
+- **Practitioner clarity over boilerplate**: Write concise, opinionated Field Architect guidance. Highlight trade-offs, failure modes, and current platform limits verified against Microsoft Learn.
+- **Keep boundaries isolated**: Preserve standalone dependency manifests and lockfiles for root documentation (`package.json`), `tools/firewall-monitor/`, and `tools/netbench/`.
+- **Safe CI by default**: Repository workflows validate builds, links, Bicep templates, and Terraform syntax using read-only checks (`contents: read`), with GitHub Pages publishing isolated to `.github/workflows/deploy-pages.yml`. Never commit Azure credentials, local settings, Terraform state, or unapproved deployment schedules.
+- **Respect attribution**: Retain upstream authorship and license notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Build the playground with
-`az bicep build --file labs/virtual-wan-playground/main.bicep --outfile <temporary-file>`.
-For Netbench, run `terraform fmt -check -recursive`, `terraform init -backend=false`,
-and `terraform validate` from `tools/netbench/`. Do not connect to production state,
-apply infrastructure, or run cleanup during migration validation.
+## Local Validation
 
-The playground's stale Network and Compute API versions were updated to stable
-versions accepted by its existing lint rules. Resource properties and deployment
-parameters are unchanged. Keep `ARM/main.json` generated from `main.bicep`;
-compile all `bicepparams/*.bicepparam` scenarios when changing modules.
+### Handbook & Repository Checks
 
-Firewall Monitor and its source automation are withheld from the public tree.
-Its successful API, Angular and Bicep build receipts remain in private preparation.
-Do not add withheld material before its publication gates are resolved.
-Prepared files with `publication_blocks` are still checked for fidelity, and
-`--require-complete` must fail until those blocks are explicitly resolved.
+```powershell
+npm ci
+npm run build
+npm run verify
+```
 
-Deployment, cleanup, schedules, source PR merges, repository settings, GitHub Pages
-publication, and fork detachment require separate approval. Reference workflows
-are intentionally outside `.github/workflows/`; copying them back without adapting
-their paths, permissions, credentials, and safeguards is unsafe.
+### Infrastructure & Labs
 
-Do not commit private backups, permission correspondence, local settings, credentials,
-Terraform state, generated sites, or installed dependencies. Use local redacted
-secret scanning before publishing. Previously public material is not automatically
-licensed for redistribution.
+```powershell
+az bicep build --file labs/virtual-wan-playground/main.bicep --stdout > $null
+az bicep build --file tools/firewall-monitor/bicep/setup.bicep --stdout > $null
+```
+
+### Operational Tools
+
+- **Firewall Monitor (`tools/firewall-monitor/`)**:
+  - Frontend: `cd tools/firewall-monitor/firewall-mon-app && npm ci && npm run build && npm test`
+  - API: `dotnet build tools/firewall-monitor/firewall-mon-api/api.csproj`
+- **Netbench (`tools/netbench/`)**:
+  - Terraform: `cd tools/netbench && terraform fmt -check -recursive && terraform init -backend=false && terraform validate`
+

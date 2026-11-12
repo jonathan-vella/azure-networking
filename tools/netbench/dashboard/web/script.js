@@ -7,6 +7,7 @@ class NetworkBenchmarkDashboard {
         this.eventListenersSetup = false;
         this.refreshInterval = null;
         this.latencySortOrder = 'alphabetical'; // Default sort order
+        this.selectedMetric = 'latency'; // 'latency' | 'throughputGbps' | 'throughputMbps'
         
         this.init();
     }
@@ -36,8 +37,8 @@ class NetworkBenchmarkDashboard {
                 this.data = this.generateMockData();
             } else {
                 try {
-                    // Real call to Azure Table Storage via Function App
-                    const apiUrl = 'https://fa-azure-network-benchmark.azurewebsites.net/api/data';
+                    // Real call to Azure Table Storage via Function App (configurable via window.NETBENCH_API_URL, defaults to /api/data with legacy fallback)
+                    const apiUrl = window.NETBENCH_API_URL || '/api/data';
                     console.log('Fetching data from API:', apiUrl);
                     
                     const response = await fetch(apiUrl);
@@ -93,16 +94,25 @@ class NetworkBenchmarkDashboard {
 
                             // Simulate variable performance based on distance
                             const isSameAZ = source === destination;
-                            const baseBandwidth = isSameAZ ? 25 : Math.random() * 20 + 5;
-                            const baseLatency = isSameAZ ? 10 : Math.random() * 500 + 50;
+                            const baseBandwidth = isSameAZ ? 12.2 : Math.random() * 4 + 8.5;
+                            const baseLatency = isSameAZ ? 65 : Math.random() * 350 + 110;
+                            const tpGbps = Number(Math.max(0.5, baseBandwidth + (Math.random() - 0.5) * 1.5).toFixed(3));
+                            const tpMbps = Number((tpGbps * 1000).toFixed(2));
+                            const latUs = Math.max(15, Math.round(baseLatency + (Math.random() - 0.5) * 40));
 
                             mockData.push({
-                                PartitionKey: `test-${Math.random().toString(36).substr(2, 9)}`,
+                                PartitionKey: `test-${Math.random().toString(36).slice(2, 11)}`,
                                 RowKey: region,
                                 Source: source,
                                 Destination: destination,
-                                Bandwidth: `${(baseBandwidth + (Math.random() - 0.5) * 5).toFixed(2)} Gb/sec`,
-                                Latency: `${Math.round(baseLatency + (Math.random() - 0.5) * 100)} us`,
+                                Bandwidth: `${tpGbps.toFixed(3)} Gb/sec`,
+                                ThroughputGbps: tpGbps,
+                                ThroughputMbps: tpMbps,
+                                throughputGbps: tpGbps,
+                                throughputMbps: tpMbps,
+                                Latency: `${latUs} us`,
+                                LatencyUs: latUs,
+                                latencyUs: latUs,
                                 Timestamp: timestamp.toISOString()
                             });
                         });
@@ -118,32 +128,67 @@ class NetworkBenchmarkDashboard {
         console.log('Processing data:', this.data.length, 'items');
         console.log('Sample raw data:', this.data.slice(0, 2));
         
-        // Convert raw data to internal format
+        // Convert raw data to internal format (preserving backward compatibility with latency-only rows)
         this.data = this.data.map(item => {
-            // Parse bandwidth - handle various formats
-            let bandwidth = 0;
-            if (typeof item.Bandwidth === 'string') {
-                const bwMatch = item.Bandwidth.match(/([\d.]+)/);
-                if (bwMatch) {
-                    bandwidth = parseFloat(bwMatch[1]);
-                    // Convert to Gbps if needed
-                    if (item.Bandwidth.toLowerCase().includes('mb')) {
-                        bandwidth = bandwidth / 1000;
-                    }
-                }
-            } else {
-                bandwidth = parseFloat(item.Bandwidth) || 0;
+            let throughputMbps = null;
+            let throughputGbps = null;
+
+            const directMbps = item.throughputMbps ?? item.ThroughputMbps;
+            const directGbps = item.throughputGbps ?? item.ThroughputGbps;
+
+            if (directMbps !== undefined && directMbps !== null && String(directMbps).trim() !== '' && !Number.isNaN(Number(directMbps))) {
+                throughputMbps = Number(directMbps);
+            }
+            if (directGbps !== undefined && directGbps !== null && String(directGbps).trim() !== '' && !Number.isNaN(Number(directGbps))) {
+                throughputGbps = Number(directGbps);
             }
 
-            // Parse latency - handle various formats  
+            if (throughputMbps === null && throughputGbps !== null) {
+                throughputMbps = Number((throughputGbps * 1000).toFixed(2));
+            } else if (throughputGbps === null && throughputMbps !== null) {
+                throughputGbps = Number((throughputMbps / 1000).toFixed(3));
+            }
+
+            // Fallback to legacy Bandwidth field when present
+            if (throughputMbps === null && throughputGbps === null && item.Bandwidth !== undefined && item.Bandwidth !== null && String(item.Bandwidth).trim() !== '') {
+                if (typeof item.Bandwidth === 'string') {
+                    const bwMatch = item.Bandwidth.match(/([\d.]+)\s*(gb|gbit|gbps|mb|mbit|mbps|kb|kbit|kbps)?/i);
+                    if (bwMatch) {
+                        const val = parseFloat(bwMatch[1]);
+                        const unit = (bwMatch[2] || 'gb').toLowerCase();
+                        if (unit.startsWith('gb')) {
+                            throughputGbps = val;
+                            throughputMbps = val * 1000;
+                        } else if (unit.startsWith('kb')) {
+                            throughputMbps = val / 1000;
+                            throughputGbps = val / 1000000;
+                        } else {
+                            throughputMbps = val;
+                            throughputGbps = val / 1000;
+                        }
+                    }
+                } else if (typeof item.Bandwidth === 'number' && Number.isFinite(item.Bandwidth)) {
+                    throughputMbps = item.Bandwidth;
+                    throughputGbps = item.Bandwidth / 1000;
+                }
+            }
+
+            // Parse latency - prefer numeric LatencyUs / latencyUs, fallback to Latency string
             let latency = 0;
-            if (typeof item.Latency === 'string') {
-                const latMatch = item.Latency.match(/([\d.]+)/);
+            const directLatUs = item.latencyUs ?? item.LatencyUs;
+            if (directLatUs !== undefined && directLatUs !== null && String(directLatUs).trim() !== '' && !Number.isNaN(Number(directLatUs))) {
+                latency = Number(directLatUs);
+            } else if (typeof item.Latency === 'string') {
+                const latMatch = item.Latency.match(/([\d.]+)\s*(ns|us|µs|μs|ms|s|sec)?/i);
                 if (latMatch) {
                     latency = parseFloat(latMatch[1]);
-                    // Convert to microseconds if needed
-                    if (item.Latency.toLowerCase().includes('ms')) {
+                    const unit = (latMatch[2] || 'us').toLowerCase();
+                    if (unit === 'ns') {
+                        latency = latency / 1000;
+                    } else if (unit === 'ms') {
                         latency = latency * 1000;
+                    } else if (unit === 's' || unit === 'sec') {
+                        latency = latency * 1000000;
                     }
                 }
             } else {
@@ -155,9 +200,11 @@ class NetworkBenchmarkDashboard {
                 region: item.RowKey || 'unknown',
                 source: item.Source || 'unknown',
                 destination: item.Destination || 'unknown',
-                bandwidth: bandwidth,
+                bandwidth: throughputGbps ?? 0,
+                throughputMbps,
+                throughputGbps,
                 latency: latency,
-                raw: item // Keep raw data for debugging
+                raw: item
             };
         });
 
@@ -167,6 +214,80 @@ class NetworkBenchmarkDashboard {
         
         // Apply initial filters
         this.applyFilters();
+    }
+
+    getMetricMeta() {
+        switch (this.selectedMetric) {
+            case 'throughputGbps':
+                return {
+                    label: 'Average Throughput (Gbps)',
+                    shortLabel: 'Throughput (Gbps)',
+                    axisTitle: 'Throughput (Gbps)',
+                    barBg: 'rgba(13, 202, 240, 0.65)',
+                    barBorder: 'rgba(13, 202, 240, 1)',
+                    decimals: 2
+                };
+            case 'throughputMbps':
+                return {
+                    label: 'Average Throughput (Mbps)',
+                    shortLabel: 'Throughput (Mbps)',
+                    axisTitle: 'Throughput (Mbps)',
+                    barBg: 'rgba(25, 135, 84, 0.65)',
+                    barBorder: 'rgba(25, 135, 84, 1)',
+                    decimals: 0
+                };
+            case 'latency':
+            default:
+                return {
+                    label: 'Average Latency (µs)',
+                    shortLabel: 'Latency (µs)',
+                    axisTitle: 'Latency (µs)',
+                    barBg: 'rgba(255, 185, 0, 0.65)',
+                    barBorder: 'rgba(255, 185, 0, 1)',
+                    decimals: 1
+                };
+        }
+    }
+
+    getItemMetricValue(item) {
+        if (this.selectedMetric === 'throughputGbps') {
+            return item.throughputGbps;
+        }
+        if (this.selectedMetric === 'throughputMbps') {
+            return item.throughputMbps;
+        }
+        return item.latency;
+    }
+
+    setMetric(metric) {
+        this.selectedMetric = metric;
+        const buttonIds = {
+            latency: 'metricLatencyBtn',
+            throughputGbps: 'metricThroughputGbpsBtn',
+            throughputMbps: 'metricThroughputMbpsBtn'
+        };
+
+        Object.entries(buttonIds).forEach(([key, id]) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            if (key === metric) {
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            }
+        });
+
+        const meta = this.getMetricMeta();
+        const regionTitle = document.getElementById('regionChartTitle');
+        const evolutionTitle = document.getElementById('evolutionChartTitle');
+        const azPairsTitle = document.getElementById('azPairsChartTitle');
+        if (regionTitle) regionTitle.textContent = `${meta.shortLabel} by Region`;
+        if (evolutionTitle) evolutionTitle.textContent = `${meta.shortLabel} Evolution by Region`;
+        if (azPairsTitle) azPairsTitle.textContent = `Detailed ${meta.shortLabel} Evolution by AZ Pairs`;
+
+        this.renderCharts();
     }
 
     setupEventListeners() {
@@ -298,17 +419,18 @@ class NetworkBenchmarkDashboard {
         }
         
         const data = this.filteredData;
+        const meta = this.getMetricMeta();
         const regionStats = this.calculateRegionStats(data);
 
-        // Sort the data based on current sort order
-        let sortedRegions = Object.keys(regionStats);
+        // Only include regions that have at least one data point for the active metric
+        let sortedRegions = Object.keys(regionStats).filter(region => regionStats[region].avgMetric !== null);
         
         switch (this.latencySortOrder) {
             case 'asc':
-                sortedRegions.sort((a, b) => regionStats[a].avgLatency - regionStats[b].avgLatency);
+                sortedRegions.sort((a, b) => regionStats[a].avgMetric - regionStats[b].avgMetric);
                 break;
             case 'desc':
-                sortedRegions.sort((a, b) => regionStats[b].avgLatency - regionStats[a].avgLatency);
+                sortedRegions.sort((a, b) => regionStats[b].avgMetric - regionStats[a].avgMetric);
                 break;
             case 'alphabetical':
             default:
@@ -321,10 +443,10 @@ class NetworkBenchmarkDashboard {
             data: {
                 labels: sortedRegions.map(region => this.formatRegionName(region)),
                 datasets: [{
-                    label: 'Average Latency (μs)',
-                    data: sortedRegions.map(region => regionStats[region].avgLatency),
-                    backgroundColor: 'rgba(255, 185, 0, 0.6)',
-                    borderColor: 'rgba(255, 185, 0, 1)',
+                    label: meta.label,
+                    data: sortedRegions.map(region => Number(regionStats[region].avgMetric.toFixed(meta.decimals))),
+                    backgroundColor: meta.barBg,
+                    borderColor: meta.barBorder,
                     borderWidth: 1
                 }]
             },
@@ -341,7 +463,7 @@ class NetworkBenchmarkDashboard {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Latency (μs)'
+                            text: meta.axisTitle
                         }
                     }
                 }
@@ -362,6 +484,7 @@ class NetworkBenchmarkDashboard {
         }
         
         const data = this.filteredData;
+        const meta = this.getMetricMeta();
         const latencyEvolution = this.calculateLatencyEvolutionByRegion(data);
 
         this.charts.latencyEvolution = new Chart(canvas, {
@@ -376,7 +499,7 @@ class NetworkBenchmarkDashboard {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Latency Evolution by Region Over Time'
+                        text: `${meta.shortLabel} Evolution by Region Over Time`
                     },
                     legend: {
                         position: 'top'
@@ -387,7 +510,7 @@ class NetworkBenchmarkDashboard {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Latency (μs)'
+                            text: meta.axisTitle
                         }
                     },
                     x: {
@@ -422,6 +545,7 @@ class NetworkBenchmarkDashboard {
         }
         
         const data = this.filteredData;
+        const meta = this.getMetricMeta();
         const azPairsEvolution = this.calculateLatencyEvolutionByAZPairs(data);
 
         this.charts.latencyAZPairs = new Chart(canvas, {
@@ -436,7 +560,7 @@ class NetworkBenchmarkDashboard {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Detailed Latency Evolution by AZ Pairs (with Traffic Direction)'
+                        text: `Detailed ${meta.shortLabel} Evolution by AZ Pairs (with Traffic Direction)`
                     },
                     legend: {
                         position: 'top',
@@ -451,7 +575,7 @@ class NetworkBenchmarkDashboard {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Latency (μs)'
+                            text: meta.axisTitle
                         }
                     },
                     x: {
@@ -521,43 +645,63 @@ class NetworkBenchmarkDashboard {
             if (!stats[item.region]) {
                 stats[item.region] = {
                     totalBandwidth: 0,
+                    bandwidthCount: 0,
                     totalLatency: 0,
-                    count: 0
+                    count: 0,
+                    totalMetric: 0,
+                    metricCount: 0
                 };
             }
             
-            stats[item.region].totalBandwidth += item.bandwidth;
+            if (item.throughputGbps !== null) {
+                stats[item.region].totalBandwidth += item.throughputGbps;
+                stats[item.region].bandwidthCount++;
+            }
             stats[item.region].totalLatency += item.latency;
             stats[item.region].count++;
+
+            const metricVal = this.getItemMetricValue(item);
+            if (metricVal !== null && Number.isFinite(metricVal)) {
+                stats[item.region].totalMetric += metricVal;
+                stats[item.region].metricCount++;
+            }
         });
 
         Object.keys(stats).forEach(region => {
-            stats[region].avgBandwidth = stats[region].totalBandwidth / stats[region].count;
+            stats[region].avgBandwidth = stats[region].bandwidthCount > 0
+                ? stats[region].totalBandwidth / stats[region].bandwidthCount
+                : 0;
             stats[region].avgLatency = stats[region].totalLatency / stats[region].count;
+            stats[region].avgMetric = stats[region].metricCount > 0
+                ? stats[region].totalMetric / stats[region].metricCount
+                : null;
         });
 
         return stats;
     }
 
     calculateLatencyEvolutionByRegion(data) {
-        // Group data by time period and region
+        // Group data by time period and region for the currently selected metric
         const timeRegionStats = {};
         const timeFilter = document.getElementById('timeFilter').value;
+        const meta = this.getMetricMeta();
         
         data.forEach(item => {
+            const metricVal = this.getItemMetricValue(item);
+            if (metricVal === null || !Number.isFinite(metricVal)) {
+                return;
+            }
+
             let timeKey;
-            // Use hourly granularity for 72h filter, daily for others
             if (timeFilter === '72h') {
-                // Group by hour for 72h filter
                 const hour = new Date(item.timestamp);
-                hour.setMinutes(0, 0, 0); // Round to hour
+                hour.setMinutes(0, 0, 0);
                 timeKey = hour.toISOString();
             } else {
-                // Group by day for other filters
-                timeKey = item.timestamp.toISOString().split('T')[0]; // Get YYYY-MM-DD format
+                timeKey = item.timestamp.toISOString().split('T')[0];
             }
             
-            const region = item.region; // Use RowKey as region identifier
+            const region = item.region;
             
             if (!timeRegionStats[timeKey]) {
                 timeRegionStats[timeKey] = {};
@@ -565,39 +709,35 @@ class NetworkBenchmarkDashboard {
             
             if (!timeRegionStats[timeKey][region]) {
                 timeRegionStats[timeKey][region] = {
-                    totalLatency: 0,
+                    total: 0,
                     count: 0
                 };
             }
             
-            // Add latency data (this automatically averages aller/retour since we're grouping by region only)
-            timeRegionStats[timeKey][region].totalLatency += item.latency;
+            timeRegionStats[timeKey][region].total += metricVal;
             timeRegionStats[timeKey][region].count++;
         });
 
-        // Get all time periods and regions
         const timePeriods = Object.keys(timeRegionStats).sort();
-        const regions = [...new Set(data.map(item => item.region))].sort();
+        const regions = [...new Set(data.filter(item => this.getItemMetricValue(item) !== null).map(item => item.region))].sort();
         
-        // Colors for regions
         const colors = [
-            'rgba(255, 99, 132, 1)',    // Red
-            'rgba(54, 162, 235, 1)',    // Blue
-            'rgba(255, 205, 86, 1)',    // Yellow
-            'rgba(75, 192, 192, 1)',    // Teal
-            'rgba(153, 102, 255, 1)',   // Purple
-            'rgba(255, 159, 64, 1)',    // Orange
-            'rgba(199, 199, 199, 1)',   // Grey
-            'rgba(83, 102, 255, 1)',    // Indigo
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 205, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)',
+            'rgba(83, 102, 255, 1)',
         ];
 
-        // Create datasets for each region
         const datasets = regions.map((region, index) => {
             const regionData = timePeriods.map(timePeriod => {
                 const stats = timeRegionStats[timePeriod][region];
                 return stats ? {
                     x: new Date(timePeriod),
-                    y: stats.totalLatency / stats.count
+                    y: Number((stats.total / stats.count).toFixed(meta.decimals))
                 } : null;
             }).filter(point => point !== null);
 
@@ -608,7 +748,7 @@ class NetworkBenchmarkDashboard {
                 backgroundColor: colors[index % colors.length].replace('1)', '0.1)'),
                 fill: false,
                 tension: 0.1,
-                spanGaps: true, // Connect points even if some data is missing
+                spanGaps: true,
                 pointRadius: 3,
                 pointHoverRadius: 6
             };
@@ -621,20 +761,23 @@ class NetworkBenchmarkDashboard {
     }
 
     calculateLatencyEvolutionByAZPairs(data) {
-        // Group data by time period and AZ pair
+        // Group data by time period and AZ pair for the currently selected metric
         const timeStats = {};
         const timeFilter = document.getElementById('timeFilter').value;
+        const meta = this.getMetricMeta();
         
         data.forEach(item => {
+            const metricVal = this.getItemMetricValue(item);
+            if (metricVal === null || !Number.isFinite(metricVal)) {
+                return;
+            }
+
             let timeKey;
-            // Use hourly granularity for 72h filter, daily for others
             if (timeFilter === '72h') {
-                // Group by hour for 72h filter
                 const hour = new Date(item.timestamp);
-                hour.setMinutes(0, 0, 0); // Round to hour
+                hour.setMinutes(0, 0, 0);
                 timeKey = hour.toISOString();
             } else {
-                // Group by day for other filters
                 timeKey = item.timestamp.toISOString().split('T')[0];
             }
             
@@ -646,14 +789,13 @@ class NetworkBenchmarkDashboard {
             
             if (!timeStats[timeKey][azPair]) {
                 timeStats[timeKey][azPair] = {
-                    latencies: []
+                    values: []
                 };
             }
             
-            timeStats[timeKey][azPair].latencies.push(item.latency);
+            timeStats[timeKey][azPair].values.push(metricVal);
         });
 
-        // Get all unique time periods and AZ pairs
         const allTimePeriods = Object.keys(timeStats).sort();
         const allAZPairs = new Set();
         
@@ -665,34 +807,32 @@ class NetworkBenchmarkDashboard {
 
         const sortedAZPairs = Array.from(allAZPairs).sort();
 
-        // Generate colors for each AZ pair
         const colors = [
-            'rgba(255, 99, 132, 1)',   // Red
-            'rgba(54, 162, 235, 1)',   // Blue
-            'rgba(255, 206, 86, 1)',   // Yellow
-            'rgba(75, 192, 192, 1)',   // Teal
-            'rgba(153, 102, 255, 1)',  // Purple
-            'rgba(255, 159, 64, 1)',   // Orange
-            'rgba(199, 199, 199, 1)',  // Grey
-            'rgba(83, 102, 255, 1)',   // Indigo
-            'rgba(255, 99, 255, 1)',   // Magenta
-            'rgba(99, 255, 132, 1)',   // Green
-            'rgba(255, 206, 132, 1)',  // Light Orange
-            'rgba(132, 99, 255, 1)'    // Violet
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)',
+            'rgba(83, 102, 255, 1)',
+            'rgba(255, 99, 255, 1)',
+            'rgba(99, 255, 132, 1)',
+            'rgba(255, 206, 132, 1)',
+            'rgba(132, 99, 255, 1)'
         ];
 
         const datasets = sortedAZPairs.map((azPair, index) => {
             const azPairData = allTimePeriods.map(timePeriod => {
                 const timeData = timeStats[timePeriod];
-                if (timeData && timeData[azPair] && timeData[azPair].latencies.length > 0) {
-                    // Calculate average latency for this time period and AZ pair
-                    const avgLatency = timeData[azPair].latencies.reduce((sum, lat) => sum + lat, 0) / timeData[azPair].latencies.length;
+                if (timeData && timeData[azPair] && timeData[azPair].values.length > 0) {
+                    const avgVal = timeData[azPair].values.reduce((sum, val) => sum + val, 0) / timeData[azPair].values.length;
                     return {
                         x: new Date(timePeriod),
-                        y: Math.round(avgLatency)
+                        y: Number(avgVal.toFixed(meta.decimals))
                     };
                 }
-                return null; // No data for this time period
+                return null;
             }).filter(point => point !== null);
 
             return {
@@ -702,7 +842,7 @@ class NetworkBenchmarkDashboard {
                 backgroundColor: colors[index % colors.length].replace('1)', '0.1)'),
                 fill: false,
                 tension: 0.1,
-                spanGaps: true, // Connect points even if some data is missing
+                spanGaps: true,
                 pointRadius: 2,
                 pointHoverRadius: 4
             };
@@ -776,6 +916,13 @@ class NetworkBenchmarkDashboard {
         };
     }
 
+    formatThroughputCell(item) {
+        if (item.throughputGbps !== null && item.throughputMbps !== null) {
+            return `${item.throughputGbps.toFixed(2)} Gbps <small class="text-muted">(${Math.round(item.throughputMbps).toLocaleString()} Mbps)</small>`;
+        }
+        return '<span class="text-muted" title="Legacy latency-only record">—</span>';
+    }
+
     updateSummaryCards() {
         const data = this.filteredData;
         
@@ -791,6 +938,26 @@ class NetworkBenchmarkDashboard {
             ? Math.round(data.reduce((sum, item) => sum + item.latency, 0) / data.length)
             : 0;
         document.getElementById('avgLatency').textContent = `${avgLatency} μs`;
+
+        // Average throughput (computed only over rows with throughput data)
+        const throughputRows = data.filter(item => item.throughputGbps !== null && item.throughputMbps !== null);
+        const avgThroughputEl = document.getElementById('avgThroughput');
+        const avgThroughputSubEl = document.getElementById('avgThroughputSub');
+        if (avgThroughputEl) {
+            if (throughputRows.length > 0) {
+                const avgGbps = throughputRows.reduce((sum, item) => sum + item.throughputGbps, 0) / throughputRows.length;
+                const avgMbps = throughputRows.reduce((sum, item) => sum + item.throughputMbps, 0) / throughputRows.length;
+                avgThroughputEl.textContent = `${avgGbps.toFixed(2)} Gbps`;
+                if (avgThroughputSubEl) {
+                    avgThroughputSubEl.textContent = `${Math.round(avgMbps).toLocaleString()} Mbps avg`;
+                }
+            } else {
+                avgThroughputEl.textContent = 'N/A';
+                if (avgThroughputSubEl) {
+                    avgThroughputSubEl.textContent = 'Latency-only rows';
+                }
+            }
+        }
         
         // Abnormal results count for TCP one-way tests (intra-zone > 500 μs, inter-zone > 1000 μs)
         const abnormalCount = data.filter(item => {
@@ -805,7 +972,7 @@ class NetworkBenchmarkDashboard {
         tbody.innerHTML = '';
         
         // Show latest 100 results
-        const latestData = this.filteredData
+        const latestData = [...this.filteredData]
             .sort((a, b) => b.timestamp - a.timestamp)
             .slice(0, 100);
         
@@ -816,7 +983,7 @@ class NetworkBenchmarkDashboard {
                 <td>${this.formatRegionName(item.region)}</td>
                 <td>${item.source}</td>
                 <td>${item.destination}</td>
-                <td>${item.bandwidth.toFixed(2)} Gb/s</td>
+                <td>${this.formatThroughputCell(item)}</td>
                 <td>${Math.round(item.latency)} μs</td>
             `;
         });
@@ -829,23 +996,18 @@ class NetworkBenchmarkDashboard {
         
         tbody.innerHTML = '';
         
-        // Filter for abnormal results (TCP one-way tests):
-        // - Intra-zone (same source/destination): latency > 500 μs
-        // - Inter-zone (different source/destination): latency > 1000 μs
         const abnormalResults = this.filteredData
             .filter(item => {
                 const isIntraZone = item.source === item.destination;
                 return isIntraZone ? item.latency > 500 : item.latency > 1000;
             })
             .sort((a, b) => b.timestamp - a.timestamp)
-            .slice(0, 50); // Show up to 50 abnormal results
+            .slice(0, 50);
         
         if (abnormalResults.length === 0) {
-            // Show "no abnormal results" message and hide table
             noResultsAlert.style.display = 'block';
             tableContainer.style.display = 'none';
         } else {
-            // Hide message and show table with results
             noResultsAlert.style.display = 'none';
             tableContainer.style.display = 'block';
             
@@ -858,11 +1020,10 @@ class NetworkBenchmarkDashboard {
                     <td>${this.formatRegionName(item.region)}</td>
                     <td>${item.source}</td>
                     <td>${item.destination}</td>
-                    <td>${item.bandwidth.toFixed(2)} Gb/s</td>
+                    <td>${this.formatThroughputCell(item)}</td>
                     <td class="${latencyClass}">${Math.round(item.latency)} μs</td>
                 `;
                 
-                // Add row highlighting for very high latency
                 if (item.latency > 5000) {
                     row.classList.add('table-danger');
                 } else {
@@ -938,13 +1099,17 @@ class NetworkBenchmarkDashboard {
             'chinanorth3': 'China North 3',
             'germanywestcentral': 'Germany West Central',
             'germanynorth': 'Germany North',
+            'centralindia': 'Central India',
             'indiacentral': 'India Central',
+            'indonesiacentral': 'Indonesia Central',
             'indiawest': 'India West',
             'indiasouth': 'India South',
             'japaneast': 'Japan East',
             'japanwest': 'Japan West',
             'koreacentral': 'Korea Central',
             'koreasouth': 'Korea South',
+            'malaysiawest': 'Malaysia West',
+            'newzealandnorth': 'New Zealand North',
             'norwayeast': 'Norway East',
             'norwaywest': 'Norway West',
             'southafricanorth': 'South Africa North',
@@ -1076,19 +1241,18 @@ class NetworkBenchmarkDashboard {
 
     sortLatencyChart(order) {
         this.latencySortOrder = order;
-        // Re-render only the latency chart with the new sort order
+        // Re-render only the region bar chart with the new sort order
         this.renderLatencyChart();
         
-        // Visual feedback: highlight the active sort button
-        document.querySelectorAll('.btn-group button').forEach(btn => {
+        // Visual feedback: highlight only sort buttons inside #regionSortGroup
+        document.querySelectorAll('#regionSortGroup button').forEach(btn => {
             btn.classList.remove('active');
         });
         
-        // Highlight the appropriate button based on sort order
         const buttonSelectors = {
-            'asc': 'button[onclick*="sortLatencyChart(\'asc\')"]',
-            'desc': 'button[onclick*="sortLatencyChart(\'desc\')"]',
-            'alphabetical': 'button[onclick*="sortLatencyChart(\'alphabetical\')"]'
+            'asc': '#regionSortGroup button[onclick*="sortLatencyChart(\'asc\')"]',
+            'desc': '#regionSortGroup button[onclick*="sortLatencyChart(\'desc\')"]',
+            'alphabetical': '#regionSortGroup button[onclick*="sortLatencyChart(\'alphabetical\')"]'
         };
         
         const activeButton = document.querySelector(buttonSelectors[order]);
@@ -1109,14 +1273,15 @@ class NetworkBenchmarkDashboard {
     }
 
     convertToCSV(data) {
-        const headers = ['Timestamp', 'Region', 'Source', 'Destination', 'Bandwidth (Gb/s)', 'Latency (μs)'];
+        const headers = ['Timestamp', 'Region', 'Source', 'Destination', 'Latency (us)', 'Throughput (Mbps)', 'Throughput (Gbps)'];
         const rows = data.map(item => [
             item.timestamp.toISOString(),
             item.region,
             item.source,
             item.destination,
-            item.bandwidth.toFixed(2),
-            Math.round(item.latency)
+            Math.round(item.latency),
+            item.throughputMbps !== null ? item.throughputMbps.toFixed(2) : '',
+            item.throughputGbps !== null ? item.throughputGbps.toFixed(3) : ''
         ]);
 
         return [headers, ...rows].map(row => row.join(',')).join('\n');

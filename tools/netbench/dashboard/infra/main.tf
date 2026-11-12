@@ -65,8 +65,8 @@ resource "azurerm_resource_group" "main" {
 
 # Data source to reference existing storage account
 data "azurerm_storage_account" "netbench" {
-  name                = "sanetprdfrc001"
-  resource_group_name = "rg-net-prd-frc-001"
+  name                = var.storage_account_name
+  resource_group_name = var.storage_account_resource_group
 }
 
 # Static Web App - Minimal version
@@ -128,7 +128,7 @@ resource "azurerm_linux_function_app" "main" {
     "FUNCTIONS_WORKER_RUNTIME"                 = "node"
     "WEBSITE_NODE_DEFAULT_VERSION"             = "~18"
     "AZURE_STORAGE_ACCOUNT_NAME"               = data.azurerm_storage_account.netbench.name
-    "AZURE_STORAGE_TABLE_NAME"                 = "perf"
+    "AZURE_STORAGE_TABLE_NAME"                 = var.storage_table_name
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.function.name};AccountKey=${azurerm_storage_account.function.primary_access_key};EndpointSuffix=core.windows.net"
     "AzureWebJobsStorage"                      = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.function.name};AccountKey=${azurerm_storage_account.function.primary_access_key};EndpointSuffix=core.windows.net"
     "WEBSITE_CONTENTSHARE"                     = "${azurecaf_name.function_app.result}-content"

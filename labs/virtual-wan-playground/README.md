@@ -1,19 +1,13 @@
-> **Consolidation note:** This lab is a pinned snapshot. The badges and Deploy to
-> Azure button below target the upstream project, not this repository. Source
-> workflows are preserved under `reference/Azure-VirtualWAN-Playground/workflows/`
-> and are not active here. No Azure resources are deployed by the root checks.
+# Azure Hub-and-Spoke & Virtual WAN Playground
 
-[![LabBuilder - Deploy VNET Scenarios](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/vnet.yml/badge.svg)](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/vnet.yml)
+Repeatable single-region and multi-region Bicep lab builder for **Hub-and-Spoke**, **Azure Virtual WAN (vWAN)**, **Azure Firewall** (with Routing Intent), **Azure Virtual Network Manager (AVNM)**, and simulated **On-Premises S2S VPN** topologies.
 
-[![LabBuilder - Deploy VWAN Scenarios](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/vwan.yml/badge.svg)](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/vwan.yml)
-
-[![LabBuilder - Deploy AVNM Scenarios](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/avnm.yml/badge.svg)](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/avnm.yml)
-
-[![LabBuilder - Bicep ARM Build](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/armbuild.yml/badge.svg?event=pull_request)](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder/actions/workflows/armbuild.yml)
+> **Field Architect Handbook:** Pair deployments from this playground with **[Core Topologies](../../src/content/docs/02-core-topologies/)**, **[Hybrid Connectivity](../../src/content/docs/03-hybrid-connectivity/)**, and **[Day-2 Operations & Architecture Reviews](../../src/content/docs/06-operations-reviews/)**.
+>
+> **Provenance & Attribution:** Originally authored by Pieterbas Nagengast in [`PieterbasNagengast/Azure-HubSpoke-LabBuilder`](https://github.com/PieterbasNagengast/Azure-HubSpoke-LabBuilder) (MIT License) and maintained here as an integrated lab module. See [`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) for full attribution details.
 
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
 - [Deploy to Azure](#deploy-to-azure)
 - [Description](#description)
 - [Scenario's](#scenarios)
@@ -32,24 +26,12 @@
   - [Multi-Region Topology](#multi-region-topology)
 - [Parameters overview](#parameters-overview)
 - [Updates](#updates)
-- [April 2026 updates](#april-2026-updates)
-  - [July 2025 updates](#july-2025-updates)
-  - [April 2025 updates](#april-2025-updates)
-  - [March 2025 updates](#march-2025-updates)
-  - [July 2024 updates](#july-2024-updates)
-  - [Februari 2024 updates](#februari-2024-updates)
-  - [June 2023 updates](#june-2023-updates)
-  - [May 2023 updates](#may-2023-updates)
-  - [September 2022 updates](#september-2022-updates)
-  - [July 2022 updates](#july-2022-updates)
-  - [June 2022 updates](#june-2022-updates)
-  - [May 2022 updates](#may-2022-updates)
 
 ## Deploy to Azure
 
-| Description                  | Template                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Deploy to Azure Subscription | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FPieterbasNagengast%2FAzure-HubSpoke-LabBuilder%2Fmain%2FARM%2Fmain.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FPieterbasNagengast%2FAzure-HubSpoke-LabBuilder%2Fmain%2FuiDefinition.json) |
+| Description                  | Template                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deploy to Azure Subscription | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathan-vella%2Fazure-networking%2Fmain%2Flabs%2Fvirtual-wan-playground%2FARM%2Fmain.json/uiFormDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathan-vella%2Fazure-networking%2Fmain%2Flabs%2Fvirtual-wan-playground%2FuiDefinition.json) |
 
 > :warning: **Warning:**
 > **This deployment is meant for Demo, Test, Learning, Training, Practice or Reproduction purposes ONLY!!**
