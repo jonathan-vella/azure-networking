@@ -6,6 +6,7 @@ from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
+import re
 import sys
 from urllib.parse import unquote, urlsplit
 
@@ -60,7 +61,7 @@ def check_links(root):
     documents = {}
     angular_sources = []
     candidates = list(root.glob("*.md"))
-    for folder in ("docs", "labs", "tools"):
+    for folder in ("docs", "labs", "tools", "diagrams", "samples", "workshops", "reference"):
         for directory, children, files in os.walk(root / folder):
             children[:] = [name for name in children
                            if name not in ("node_modules", ".terraform", ".git", ".angular", "dist", "bin", "obj")]
@@ -104,6 +105,62 @@ def check_links(root):
     return errors
 
 
+def check_gallery(root):
+    root = root.resolve()
+    gallery = root / "docs" / "azure-net" / "gallery.html"
+    index = root / "docs" / "azure-net" / "index.json"
+    errors = []
+    if not exact_path(gallery):
+        return ["Missing diagram gallery page"]
+    if not exact_path(index):
+        return ["Missing diagram gallery index"]
+
+    html = gallery.read_text(encoding="utf-8-sig")
+    if not re.search(r"""fetch\(\s*(['"])index\.json\1\s*\)""", html):
+        errors.append("Diagram gallery does not load its sibling index.json")
+    try:
+        catalog = json.loads(index.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        return errors + [f"Invalid diagram gallery index: {error}"]
+    diagrams = catalog.get("diagrams") if isinstance(catalog, dict) else None
+    if not isinstance(diagrams, list):
+        return errors + ["Diagram gallery index must contain a diagrams list"]
+    if not isinstance(catalog.get("categories"), list):
+        errors.append("Diagram gallery index must contain a categories list")
+    for diagram in diagrams:
+        filename = diagram.get("filename") if isinstance(diagram, dict) else None
+        if not isinstance(filename, str) or not filename:
+            errors.append("Diagram gallery entry is missing its filename")
+            continue
+        if any(not isinstance(diagram.get(field), str) for field in ("title", "description", "category")):
+            errors.append(f"Diagram gallery entry has incomplete text metadata: {filename}")
+        if not isinstance(diagram.get("tags"), list):
+            errors.append(f"Diagram gallery entry has no tags list: {filename}")
+        target = root / "diagrams" / "azure-net" / filename
+        if not target.resolve().is_relative_to(root):
+            errors.append(f"Diagram gallery path escapes repository: {filename}")
+        elif not target.is_file() or not exact_path(target):
+            errors.append(f"Diagram gallery target is missing or incorrectly cased: {filename}")
+            continue
+        expected_paths = {
+            "github_url": f"/jonathan-vella/azure-networking/blob/main/diagrams/azure-net/{filename}",
+            "raw_url": f"/jonathan-vella/azure-networking/main/diagrams/azure-net/{filename}",
+        }
+        expected_hosts = {
+            "github_url": "github.com",
+            "raw_url": "raw.githubusercontent.com",
+        }
+        for field, expected_path in expected_paths.items():
+            value = diagram.get(field)
+            if not isinstance(value, str):
+                errors.append(f"Diagram gallery entry is missing {field}: {filename}")
+                continue
+            url = urlsplit(value)
+            if url.scheme != "https" or url.netloc != expected_hosts[field] or url.path != expected_path:
+                errors.append(f"Diagram gallery {field} does not target the consolidated file: {filename}")
+    return errors
+
+
 def check_manifest(root):
     root = root.resolve()
     manifest = json.loads((root / "sources.json").read_text(encoding="utf-8"))
@@ -123,10 +180,10 @@ def check_manifest(root):
             blocked.append(source["repository"])
         for entry in source["files"]:
             disposition = entry["disposition"]
-            if disposition == "excluded-generated-macos-metadata":
+            if disposition.startswith("excluded-"):
                 continue
-            if disposition not in ("imported", "reference-only", "deduplicated-symlink-alias",
-                                   "deduplicated-directory-alias"):
+            if disposition not in ("imported", "reference-only", "deduplicated-identical",
+                                   "deduplicated-symlink-alias", "deduplicated-directory-alias"):
                 errors.append(f"{source['repository']}: unknown disposition {disposition}")
                 continue
             target = root / entry["destination"]
@@ -139,6 +196,13 @@ def check_manifest(root):
                 continue
             if not target.is_file() or target.is_symlink() or not exact_path(target):
                 errors.append(f"{source['repository']}: absent or non-portable destination {entry['destination']}")
+                continue
+            if disposition == "deduplicated-identical":
+                expected = entry.get("prepared_sha256")
+                if not expected:
+                    errors.append(f"{entry['destination']}: missing prepared digest")
+                elif hashlib.sha256(target.read_bytes()).hexdigest() != expected:
+                    errors.append(f"{entry['destination']}: prepared content differs from manifest")
                 continue
             expected = entry.get("prepared_sha256")
             if not expected and disposition in ("imported", "reference-only"):
@@ -196,6 +260,7 @@ def main():
     args = parser.parse_args()
     errors, blocked = check_manifest(ROOT)
     errors += check_links(ROOT)
+    errors += check_gallery(ROOT)
     errors += check_workflows(ROOT)
     if blocked:
         print("Blocked sources: " + ", ".join(blocked))

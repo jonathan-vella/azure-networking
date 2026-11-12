@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "destination": "jonathan-vella/azure-networking",
-  "publication": "local preparation only; no push or visibility changes authorized",
+  "publication": "All 11 snapshots are included in open draft PR #1 (DO NOT MERGE). The three sources without upstream license evidence are covered by destination-owner authority attestations. Local Gitleaks and detect-secrets scans found no findings in the selected publication tree or destination history; all 11 private source backup histories also scanned clean with Gitleaks. Reports remain in private session storage. Azure-net's bundled calicoctl is intentionally omitted. No source repositories or visibility settings changed.",
   "sources": [
     {
       "repository": "jonathan-vella/expressroute-segregation-options",
@@ -10,7 +10,7 @@
       "commit": "87b566d5e80203aca4467f57a1d5c44b3dadbfc4",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 15,
       "tree_bytes": 1053068,
       "license_evidence": "https://github.com/jonathan-vella/expressroute-segregation-options/tree/87b566d5e80203aca4467f57a1d5c44b3dadbfc4",
@@ -162,7 +162,7 @@
       "commit": "82e4f2975c7bc6e7298587473c7be63a20ec2093",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 2,
       "tree_bytes": 13783,
       "license_evidence": "https://github.com/jonathan-vella/avs-hub-spoke-patterns/tree/82e4f2975c7bc6e7298587473c7be63a20ec2093",
@@ -194,7 +194,7 @@
       "commit": "06c2bd45271722cac975cc418834855d9c3907fb",
       "default_branch": "main",
       "license": null,
-      "status": "blocked-license",
+      "status": "published-draft",
       "file_count": 9,
       "tree_bytes": 2347546,
       "license_evidence": null,
@@ -205,7 +205,8 @@
           "mode": "100644",
           "bytes": 53101,
           "destination": "docs/private-link/topologies/README.md",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "4f303784bef4ac5d90afb7708a342abcab684de09b172360ec32b56722df78f7"
         },
         {
           "source": "media/Image8.png",
@@ -213,7 +214,8 @@
           "mode": "100644",
           "bytes": 338533,
           "destination": "docs/private-link/topologies/media/Image8.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "4f124981426d5a48132cad8ff84b7dd6da1c556ee5641c7a7ed82634041fa659"
         },
         {
           "source": "media/image1.png",
@@ -221,7 +223,8 @@
           "mode": "100644",
           "bytes": 128550,
           "destination": "docs/private-link/topologies/media/image1.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "07d9cd4fa8951c5ebbdb2ce78ec8a99a0131e63f0f5e87104e408a9648afdbe1"
         },
         {
           "source": "media/image2.png",
@@ -229,7 +232,8 @@
           "mode": "100644",
           "bytes": 617827,
           "destination": "docs/private-link/topologies/media/image2.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "37705a7fb3966ac44782b972903044fd264dc332fd00f8a47f70fcc41e1c9ece"
         },
         {
           "source": "media/image3.png",
@@ -237,7 +241,8 @@
           "mode": "100644",
           "bytes": 298807,
           "destination": "docs/private-link/topologies/media/image3.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "042201fdbd32cafe623a9b9d10328f7a364085eb54795517dbaef227425c5696"
         },
         {
           "source": "media/image4.png",
@@ -245,7 +250,8 @@
           "mode": "100644",
           "bytes": 185404,
           "destination": "docs/private-link/topologies/media/image4.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "3a1671f0e06bb70273b42844e08306e1004239bd55b3b35ef0f6ab6da73f7b89"
         },
         {
           "source": "media/image5.png",
@@ -253,7 +259,8 @@
           "mode": "100644",
           "bytes": 429479,
           "destination": "docs/private-link/topologies/media/image5.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "5215a8138ad37a8071a472f8bc7d7fb8129593d8953a99afeafdb2f6c7c077f4"
         },
         {
           "source": "media/image6.png",
@@ -261,7 +268,8 @@
           "mode": "100644",
           "bytes": 103723,
           "destination": "docs/private-link/topologies/media/image6.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "df95b9f77fa3df90e3b6faccc7fa0afebb3a28878ad6e1a50e2af2490d130a55"
         },
         {
           "source": "media/image7.png",
@@ -269,9 +277,13 @@
           "mode": "100644",
           "bytes": 192122,
           "destination": "docs/private-link/topologies/media/image7.png",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "cf1635ce8bf1099659d2b2859c2461121d5ec87e265b19fda3e32eba0523a19f"
         }
-      ]
+      ],
+      "permission_request": "https://github.com/paolosalvatori/private-endpoints-topologies/issues/11",
+      "permission_status": "authorized-by-destination-owner-attestation-2026-11-12",
+      "permission_evidence": "The destination owner attested in the 2026-11-12 consolidation conversation that they have authority to permit copying, editing, relocation, and public redistribution of the pinned files and included third-party assets for all three unlicensed source snapshots."
     },
     {
       "repository": "jonathan-vella/expressroute-bowtie",
@@ -280,7 +292,7 @@
       "commit": "fef55a08195e0fc608249d4bcbe2a8bd2e937b46",
       "default_branch": "main",
       "license": null,
-      "status": "blocked-license",
+      "status": "published-draft",
       "file_count": 20,
       "tree_bytes": 3088645,
       "license_evidence": null,
@@ -291,7 +303,8 @@
           "mode": "100644",
           "bytes": 213819,
           "destination": "docs/expressroute/bowtie/Pics/H&S - bowtie - circuitfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "95744dfcb82a229b61ed4eae8925b06769fe436df76ee22eff92990c1900a599"
         },
         {
           "source": "Pics/H&S - bowtie - circuitfail2.jpg",
@@ -299,7 +312,8 @@
           "mode": "100644",
           "bytes": 94913,
           "destination": "docs/expressroute/bowtie/Pics/H&S - bowtie - circuitfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "4bd6ddeecacbb9addc96e651739d702158aa49454c8622dd9dadb52d9b72b67f"
         },
         {
           "source": "Pics/H&S - bowtie - general.jpg",
@@ -307,7 +321,8 @@
           "mode": "100644",
           "bytes": 212662,
           "destination": "docs/expressroute/bowtie/Pics/H&S - bowtie - general.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "c2275de780b833bbdc75f500681aa378d9ac6fd99a12eb0c5b26466e3d146a27"
         },
         {
           "source": "Pics/H&S - bowtie - regionfail.jpg",
@@ -315,7 +330,8 @@
           "mode": "100644",
           "bytes": 221123,
           "destination": "docs/expressroute/bowtie/Pics/H&S - bowtie - regionfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "8d4bd9c428fd0c4b96c10c14b724b50efe681814ce43736a50efe893a94ae9c4"
         },
         {
           "source": "Pics/H&S - bowtie - regionfail2.jpg",
@@ -323,7 +339,8 @@
           "mode": "100644",
           "bytes": 76949,
           "destination": "docs/expressroute/bowtie/Pics/H&S - bowtie - regionfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "13235f1a0fb8086fa5f4d8c29b113d3b15800ae88a2d8ddac31d5e166c832004"
         },
         {
           "source": "Pics/H&S - no bowtie - circuitfail.jpg",
@@ -331,7 +348,8 @@
           "mode": "100644",
           "bytes": 168904,
           "destination": "docs/expressroute/bowtie/Pics/H&S - no bowtie - circuitfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "98016f8ee40c2b1dc2b1a732e227c2a88ed28987dcb03e32ca2cb2352756123b"
         },
         {
           "source": "Pics/H&S - no bowtie - circuitfail2.jpg",
@@ -339,7 +357,8 @@
           "mode": "100644",
           "bytes": 107408,
           "destination": "docs/expressroute/bowtie/Pics/H&S - no bowtie - circuitfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "2d10ff3bbb5d467668dd6c5cc33e64027189e5130fb9ddea5896d5376deeb3e6"
         },
         {
           "source": "Pics/H&S - no bowtie - general.jpg",
@@ -347,7 +366,8 @@
           "mode": "100644",
           "bytes": 151958,
           "destination": "docs/expressroute/bowtie/Pics/H&S - no bowtie - general.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "32c7dc443c5875f1c2616473e2ed90ccf1558318da26b44ab2d54aa7d8c84b73"
         },
         {
           "source": "Pics/H&S - no bowtie - regionfail.jpg",
@@ -355,7 +375,8 @@
           "mode": "100644",
           "bytes": 171529,
           "destination": "docs/expressroute/bowtie/Pics/H&S - no bowtie - regionfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "67d0191aea4a078d0bb2d511309f9e10ba9e3f3edbc5e5642dd4246c867941d3"
         },
         {
           "source": "Pics/vWAN - bowtie - circuitfail.jpg",
@@ -363,7 +384,8 @@
           "mode": "100644",
           "bytes": 238945,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - bowtie - circuitfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "c0e175cd72ff00b68ad638b95b61d1839249e389186eb433c1cc2ffdcaafa26e"
         },
         {
           "source": "Pics/vWAN - bowtie - circuitfail2.jpg",
@@ -371,7 +393,8 @@
           "mode": "100644",
           "bytes": 86207,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - bowtie - circuitfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "14f50e01c4d618ca473b959cf2f83325f95e2f6911cfd502a3a3bf8cfc033e51"
         },
         {
           "source": "Pics/vWAN - bowtie - general.jpg",
@@ -379,7 +402,8 @@
           "mode": "100644",
           "bytes": 227534,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - bowtie - general.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "815a425961440ef5c82dcb2963c8630460b7b83e1bfca38fa3e2c597f2268212"
         },
         {
           "source": "Pics/vWAN - bowtie - regionfail.jpg",
@@ -387,7 +411,8 @@
           "mode": "100644",
           "bytes": 235496,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - bowtie - regionfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "bbbd7e9afbd3bbbc6d131a9f88409689361e9cd3c7cbe89529e1eb140189f1af"
         },
         {
           "source": "Pics/vWAN - bowtie - regionfail2.jpg",
@@ -395,7 +420,8 @@
           "mode": "100644",
           "bytes": 98068,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - bowtie - regionfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "0485ae134dd1c83563184990a4ac7eea22f4a2e1c997326cfe0bfa5ceca27ec4"
         },
         {
           "source": "Pics/vWAN - no bowtie - circuitfail.jpg",
@@ -403,7 +429,8 @@
           "mode": "100644",
           "bytes": 219151,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - circuitfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "8cde83ea8c7189bc4121414608d936e84a5cc63cd28339c582be0f06ac47bc8f"
         },
         {
           "source": "Pics/vWAN - no bowtie - circuitfail2.jpg",
@@ -411,7 +438,8 @@
           "mode": "100644",
           "bytes": 70997,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - circuitfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "768571a5327c5d3750bc32f57aad7d04f7ca38379687ded963ba4e2f42307ea7"
         },
         {
           "source": "Pics/vWAN - no bowtie - general.jpg",
@@ -419,7 +447,8 @@
           "mode": "100644",
           "bytes": 198576,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - general.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "78d46aabef864cca752966701cd7c00cdda1a2bafb8a0faf48647296a1b0fc6e"
         },
         {
           "source": "Pics/vWAN - no bowtie - regionfail.jpg",
@@ -427,7 +456,8 @@
           "mode": "100644",
           "bytes": 216409,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - regionfail.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "b44ba4fccf40e5609280b68670ee9e98502dee7e0fb368dad8f1b1064416fcb3"
         },
         {
           "source": "Pics/vWAN - no bowtie - regionfail2.jpg",
@@ -435,7 +465,8 @@
           "mode": "100644",
           "bytes": 66724,
           "destination": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - regionfail2.jpg",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "6cb14c79e832e95dd85dd85609efffcf76e9259b194b76fcb56ac5653bee3636"
         },
         {
           "source": "README.md",
@@ -443,9 +474,13 @@
           "mode": "100644",
           "bytes": 11273,
           "destination": "docs/expressroute/bowtie/README.md",
-          "disposition": "blocked-license"
+          "disposition": "imported",
+          "prepared_sha256": "a1a0d27f518c13581182b7e17b64962b079644924e10fa38ee8938aac6bb5eb1"
         }
-      ]
+      ],
+      "permission_request": "https://github.com/Danieleg82/Exr-Bowtie/issues/2",
+      "permission_status": "authorized-by-destination-owner-attestation-2026-11-12",
+      "permission_evidence": "The destination owner attested in the 2026-11-12 consolidation conversation that they have authority to permit copying, editing, relocation, and public redistribution of the pinned files and included third-party assets for all three unlicensed source snapshots."
     },
     {
       "repository": "jonathan-vella/expressroute-fastpath",
@@ -454,7 +489,7 @@
       "commit": "7cd588c50a1ba68b893c72b77c7686bff6112c28",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 4,
       "tree_bytes": 249821,
       "license_evidence": "https://github.com/jonathan-vella/expressroute-fastpath/tree/7cd588c50a1ba68b893c72b77c7686bff6112c28",
@@ -504,7 +539,7 @@
       "commit": "497f570da536a1a71956f6834da89b7ef2db7f51",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 20,
       "tree_bytes": 2169536,
       "license_evidence": "https://github.com/jonathan-vella/expressroute-resiliency/tree/497f570da536a1a71956f6834da89b7ef2db7f51",
@@ -698,7 +733,7 @@
       "commit": "32b7f619193af9cf90d095d2b09012d5afa997de",
       "default_branch": "main",
       "license": null,
-      "status": "blocked-license",
+      "status": "published-draft",
       "file_count": 116,
       "tree_bytes": 580938979,
       "license_evidence": null,
@@ -708,224 +743,276 @@
           "blob": "d84d6a6526d7fd0f63b23435fba392886ce65154",
           "mode": "100644",
           "bytes": 3005,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "reference/azure-net/.gitignore",
+          "disposition": "reference-only",
+          "prepared_sha256": "cb206889b726b01f2f5996485f7823e98c90bb060be543d83ef84a6eaee50222"
         },
         {
           "source": ".vscode/extensions.json",
           "blob": "a5698b4b490b0af8b23ccaeb003f6ff735e15655",
           "mode": "100644",
           "bytes": 446,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "reference/azure-net/.vscode/extensions.json",
+          "disposition": "reference-only",
+          "prepared_sha256": "13c49af4d3cdd4050f015d91faddb9bad4feba8245db3adf3e28807712a0f3e7"
         },
         {
           "source": "AKS/CNI/build-azure-cni-overlay.sh",
           "blob": "84518efd66a181356d6bb92429afb94eea4b7075",
           "mode": "100644",
           "bytes": 7908,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/CNI/build-azure-cni-overlay.sh",
+          "disposition": "imported",
+          "prepared_sha256": "e2c1bc95ac178a30f3973c6853f5a3da693459b56e09eb69d4425d4d28f04051",
+          "transformations": [
+            "Quoted placeholder assignments and command arguments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/CNI/build-azure-cni-powered-by-cilium.sh",
           "blob": "c72d28df6070432d481242cc063182a966cc340c",
           "mode": "100644",
           "bytes": 6137,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/CNI/build-azure-cni-powered-by-cilium.sh",
+          "disposition": "imported",
+          "prepared_sha256": "fc13809c7e885fcb2445f0fcc98f2cbf7ac04bea3a2a203165b866b1d4e38bf5"
         },
         {
           "source": "AKS/CNI/build-azure-cni.sh",
           "blob": "cdc9a70299f277de42ab0b9d2184bc5b44ad0a6e",
           "mode": "100644",
           "bytes": 6316,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/CNI/build-azure-cni.sh",
+          "disposition": "imported",
+          "prepared_sha256": "49e41e5991bc7941227b892d9fb022dfb98e672dd4ebb7eb803820a2885eb8de",
+          "transformations": [
+            "Quoted placeholder assignments and command arguments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/CNI/build-kubenet-dual-stack.sh",
           "blob": "cf8b2c5f3dfe63077d568375680601fad00298f3",
           "mode": "100644",
           "bytes": 8520,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/CNI/build-kubenet-dual-stack.sh",
+          "disposition": "imported",
+          "prepared_sha256": "16d28f016c6abdfdbbab27606030361b66e44d34c4b0830428958baca499eab6",
+          "transformations": [
+            "Quoted placeholder assignments and command arguments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/CNI/build-kubenet.sh",
           "blob": "4444221467d4a564018c99bfee077b72052a9ad2",
           "mode": "100644",
           "bytes": 7410,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/CNI/build-kubenet.sh",
+          "disposition": "imported",
+          "prepared_sha256": "8282b56af43559da0a04bf70e4c17f425a3d3acc7a125875c0c2a576fec2341c",
+          "transformations": [
+            "Quoted placeholder assignments and command arguments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/Egress/build-aks-egress.azcli",
           "blob": "634f1bc4bb9b9da8d6020a66b92afe4a70bd3486",
           "mode": "100644",
           "bytes": 12718,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/Egress/build-aks-egress.azcli",
+          "disposition": "imported",
+          "prepared_sha256": "a3d963aff945b7aeaf9c8af5b90a32114b0bb0fd7907b95586e837ce3d0fae16"
         },
         {
           "source": "AKS/Ingress/build-azure-cni-overlay-with-nginx.sh",
           "blob": "f1029b7f83edf6dd5a5fbcfbc0ba71f258c033d3",
           "mode": "100644",
           "bytes": 11539,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/Ingress/build-azure-cni-overlay-with-nginx.sh",
+          "disposition": "imported",
+          "prepared_sha256": "7be7242ff57fcd0c53f2b88cc7d6422aa2a34ddab7a86f381868c2da6ea43eba",
+          "transformations": [
+            "Quoted placeholder assignments and command arguments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/Ingress/build-azure-cni-with-app-gw.sh",
           "blob": "8d0359ce5ba149d0e02b50b493459452b61379e3",
           "mode": "100644",
           "bytes": 8099,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/Ingress/build-azure-cni-with-app-gw.sh",
+          "disposition": "imported",
+          "prepared_sha256": "163f63ce4f1bbf13ad0558467481b905fe58b35dc1e8f39762358eaf6b1abec3",
+          "transformations": [
+            "Quoted placeholder assignments so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/README.md",
           "blob": "16e2b94ac613ff5cf0c06935de127e1ca404c924",
           "mode": "100644",
           "bytes": 2557,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/README.md",
+          "disposition": "imported",
+          "prepared_sha256": "fb39057bbde27dec30fe113634266afecf59efa15056a03ad98b4969474ceea5"
         },
         {
           "source": "AKS/docker-networking/build-docker-hosts.sh",
           "blob": "f9d8ffcac853650bd22eaf6b627ed33bf521573c",
           "mode": "100644",
           "bytes": 2945,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/docker-networking/build-docker-hosts.sh",
+          "disposition": "imported",
+          "prepared_sha256": "3ca62f819b6a5f23e1e442d2d8ec37d29ba867b70ad1585a1797a7e757afe03b"
         },
         {
           "source": "AKS/docker-networking/build-docker-swarm-cluster.sh",
           "blob": "1ee7a125e043768af8852c9971908970d77b3980",
           "mode": "100644",
           "bytes": 2053,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/docker-networking/build-docker-swarm-cluster.sh",
+          "disposition": "imported",
+          "prepared_sha256": "212136a76a439dbc12d71bc78c31ea6dea3d61155f94a23845651485dd05e164",
+          "transformations": [
+            "Quoted placeholder URLs so the illustrative shell script parses"
+          ]
         },
         {
           "source": "AKS/docker-networking/cloud-init.txt",
           "blob": "9e765d86c10008fff53280ee83166e74f66f6d31",
           "mode": "100644",
           "bytes": 119,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/docker-networking/cloud-init.txt",
+          "disposition": "imported",
+          "prepared_sha256": "064d4b10156a2bb599b89ade295108d3e6f580e443844bdae997cf2252a5d6bb"
         },
         {
           "source": "AKS/docker-networking/docker-networking-basics.sh",
           "blob": "2542242b833c840b6bca1d7a5cfdf4d374a26f13",
           "mode": "100644",
           "bytes": 4803,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/docker-networking/docker-networking-basics.sh",
+          "disposition": "imported",
+          "prepared_sha256": "b187b4676fab0555521ce20199c923d7f1a9e6a5f478fe304e14994191aa9594",
+          "transformations": [
+            "Marked explanatory ping annotations as shell comments"
+          ]
         },
         {
           "source": "AKS/yaml/colors-ns/blue-cluster-ip.yaml",
           "blob": "8adcaa257dac1d39bb6d130e2bb0384e752a1c77",
           "mode": "100644",
           "bytes": 596,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/blue-cluster-ip.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "0211bc0ca2bb33f924c7f07046e1aaf6a8ffa82f4a4e178b291ad716463640ca"
         },
         {
           "source": "AKS/yaml/colors-ns/blue-external-lb.yaml",
           "blob": "7787aaaa8b6fb008c4e000f1cc33fd7176a59c33",
           "mode": "100644",
           "bytes": 616,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/blue-external-lb.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "fec3355bd46d2d74afb93436c773779530a9bae0e9680d089a2d370e30845267"
         },
         {
           "source": "AKS/yaml/colors-ns/fanout-appgw.yaml",
           "blob": "e545dee8003081ffb788aa34e12a643dd6716968",
           "mode": "100644",
           "bytes": 1054,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/fanout-appgw.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "03569a91af7e6640902167bb9ae4240070b768954edbf497654ac9687dc2b4f9"
         },
         {
           "source": "AKS/yaml/colors-ns/fanout-nginx.yaml",
           "blob": "36d4d4ebb2c52def31280e8e971024ecaf99aafd",
           "mode": "100644",
           "bytes": 1069,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/fanout-nginx.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "6bac5c55f35da22a833c3fde5f1821e4b69232f3a2cabeccf3be9855a419915c"
         },
         {
           "source": "AKS/yaml/colors-ns/fanout.yaml",
           "blob": "a108e0cf4fd96da4a4f1b195243e887ea8d6176d",
           "mode": "100644",
           "bytes": 853,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/fanout.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "eac03329634fd5945684824f295797c6b5bab99e6fea55b220d7d38c1ab4f049"
         },
         {
           "source": "AKS/yaml/colors-ns/green-cluster-ip.yaml",
           "blob": "15b151f287a2bd1fee49e732bdfea2c3e656b9d5",
           "mode": "100644",
           "bytes": 604,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/green-cluster-ip.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "967fd2a5e96ca6daaaa737ffe8bf17a52730fb99b20a474c36bbe37c6d6fb1e3"
         },
         {
           "source": "AKS/yaml/colors-ns/green-external-lb.yaml",
           "blob": "fd3ed521f81c1bb39aab5976e79fb0a9d8d74b5f",
           "mode": "100644",
           "bytes": 624,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/green-external-lb.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "7d2753efe06cd5e83bca3ec8e43c0493cdac87d20014a39ca9e3079358c71cb2"
         },
         {
           "source": "AKS/yaml/colors-ns/red-cluster-ip.yaml",
           "blob": "e26fcc51c55c7c4cd71cfce30a0c3cde68ff8894",
           "mode": "100644",
           "bytes": 612,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/red-cluster-ip.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "154facd33fefba88463d5fa422b5330c1e400028edfa14ba25cd86093da55082"
         },
         {
           "source": "AKS/yaml/colors-ns/red-external-lb.yaml",
           "blob": "6bfd0a06c725974b02234881b32f6c94106cdaf2",
           "mode": "100644",
           "bytes": 608,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/red-external-lb.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "d8e7f2445e5f86c2b551e459616d78d2f5a4deee1ae6ecf107feca42aa3ad2cd"
         },
         {
           "source": "AKS/yaml/colors-ns/red-internal-service.yaml",
           "blob": "92eaa0955319a7ba81367cf9df84b65dcd473bef",
           "mode": "100644",
           "bytes": 308,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/red-internal-service.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "504fffc65af0c820fbd52ce5a123a81ff3567e23ba029456bdbc3e07aa4c4faa"
         },
         {
           "source": "AKS/yaml/colors-ns/virtualhost-appgw.yaml",
           "blob": "94f7e3e48ae0e803ea1579aad85ed5ddb0353d67",
           "mode": "100644",
           "bytes": 990,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/virtualhost-appgw.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "ef5c6f82634bcc38eb86481fec5b5ab05523c7440f73fece4ffc70a7610ed912"
         },
         {
           "source": "AKS/yaml/colors-ns/virtualhost-nginx.yaml",
           "blob": "5e8d979f0cba0ffc52de0fa20af03c033bb5eec3",
           "mode": "100644",
           "bytes": 999,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/virtualhost-nginx.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "f98dbc306ee09dc5610d10e1a3becda69e26abcb732cafd47de28867c5c450b5"
         },
         {
           "source": "AKS/yaml/colors-ns/virtualhost.yaml",
           "blob": "ce6faff2d8154a37ef49b0e327dbb43d65559fd5",
           "mode": "100644",
           "bytes": 917,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/colors-ns/virtualhost.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "020802ec8ab44363b0b88cdba61a1705d0ba516803a96696c61c95f2be1892c4"
         },
         {
           "source": "AKS/yaml/demo-ns/calicoctl",
@@ -933,223 +1020,254 @@
           "mode": "100644",
           "bytes": 48517120,
           "destination": null,
-          "disposition": "blocked-license"
+          "disposition": "excluded-unverified-binary",
+          "reason": "The bundled version is unverified and no cluster-matched Calico release was established; see docs/azure-net/calicoctl.md."
         },
         {
           "source": "AKS/yaml/demo-ns/deployment-mynodepool.yaml",
           "blob": "af3297053fcfef1ba64ad96dae3853a0b23900f6",
           "mode": "100644",
           "bytes": 461,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/deployment-mynodepool.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "6fe6c4e9e0e28b16a28dbc3fb2c349730b548543a68e4db0494e1949debddbd6"
         },
         {
           "source": "AKS/yaml/demo-ns/deployment.yaml",
           "blob": "86ffa6e2ee1c64f9ca93d61aec758186ac2e84f9",
           "mode": "100644",
           "bytes": 388,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/deployment.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "e12b2b10a05f7e2f6d3fbf8889af6c5b9ace9985fff13e44b9714e09d2851f16"
         },
         {
           "source": "AKS/yaml/demo-ns/hello-web-app-ingress.yaml",
           "blob": "145702410cff4106ee407abac42594a78ae2a94e",
           "mode": "100644",
           "bytes": 393,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/hello-web-app-ingress.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "f1ea47b7cbe80a3dd9989331062c1b2454e027fbab785bca2f3fc250f541b849"
         },
         {
           "source": "AKS/yaml/demo-ns/hello-web-app-service.yaml",
           "blob": "80e0e33ad7db5ae3c973ed59d1238126d97d039a",
           "mode": "100644",
           "bytes": 179,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/hello-web-app-service.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "7aa19463b3374776270f905e3e3e2bfbdcedd5e2e7e8f138316be172aa47a212"
         },
         {
           "source": "AKS/yaml/demo-ns/hello-web-app.yaml",
           "blob": "5204a98b703507753682ad92219be69674ebf7aa",
           "mode": "100644",
           "bytes": 507,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/hello-web-app.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "b14d9e8f0b021e858b77aa9307da00c648be41b90627eb7c3ed47de269960323"
         },
         {
           "source": "AKS/yaml/demo-ns/service-external-lb-dualstack.yaml",
           "blob": "383126e50fe0361fe6d197dc9aac3095df23b0bc",
           "mode": "100644",
           "bytes": 298,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/service-external-lb-dualstack.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "3810d21a9ffde5d6392468f28b256156ef0b254b6192c571c5b1ad24af529e7f"
         },
         {
           "source": "AKS/yaml/demo-ns/service-external-lb-multinodepool.yaml",
           "blob": "043c93e6e24b6db68c2cc516937bc5638ce213fe",
           "mode": "100644",
           "bytes": 238,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/service-external-lb-multinodepool.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "1ca982ce542658e813a17da4377c7a21b003001688224dee9b3e0efdd3a84edf"
         },
         {
           "source": "AKS/yaml/demo-ns/service-external-lb.yaml",
           "blob": "d1662623dadee8bbfb765fdf9a57e3aa011c719c",
           "mode": "100644",
           "bytes": 225,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/service-external-lb.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "dfc3e8ecea58f1e66aaba86b1206b2428406a3a29bfac296d2249448ee378c72"
         },
         {
           "source": "AKS/yaml/demo-ns/service-internal-lb-dualstack.yaml",
           "blob": "239ca6edf952d1615d54694e7c46f9f179392ebb",
           "mode": "100644",
           "bytes": 385,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/service-internal-lb-dualstack.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "a9f9c8ae793549ce209d9e672743c329d1ab40b63c80f490bee7eb20a8d466f1"
         },
         {
           "source": "AKS/yaml/demo-ns/service-internal-lb.yaml",
           "blob": "527dd187f9cb0f0c4916648232998f3c71227e33",
           "mode": "100644",
           "bytes": 310,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/demo-ns/service-internal-lb.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "2ed299dc45ba8d55082219fec5f08c38ae5f7fe2b0608fa32cddca14cacdc869"
         },
         {
           "source": "AKS/yaml/network-tools-pod.yaml",
           "blob": "24c61508021d2e217e5e0e509869568d44391f02",
           "mode": "100644",
           "bytes": 167,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/network-tools-pod.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "9436ad6a102d69952bf1e1bb19fa85ed943627fde5cb8719723da2ce2e8771bc"
         },
         {
           "source": "AKS/yaml/sample-app/deployment.yaml",
           "blob": "1664f9d80de152cd79917dd2087e9960f9299e88",
           "mode": "100644",
           "bytes": 381,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/sample-app/deployment.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "460f1f6610becbb95fa85eebf55a3fe1dddb1621381a9402bc7aeffe1f5e1027"
         },
         {
           "source": "AKS/yaml/sample-app/ingress.yaml",
           "blob": "d7486ff2e341eaa29757793e8d70c1168b7bb5e9",
           "mode": "100644",
           "bytes": 394,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/sample-app/ingress.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "5648ac1f4a03e6e33168d4d699c1a8c42cbfabaf135466364a166610eed8054d"
         },
         {
           "source": "AKS/yaml/sample-app/service.yaml",
           "blob": "9a75b0073b366204188bfc476a2217e42ce09972",
           "mode": "100644",
           "bytes": 178,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/yaml/sample-app/service.yaml",
+          "disposition": "imported",
+          "prepared_sha256": "4da07f26aeb6c4830b6227e7d841bcb48772188cc11f48916767f5cfb0d73b12"
         },
         {
           "source": "Agenda/ai-studio-session.md",
           "blob": "3ad710876de07c341d81731b5b5fd6a558650309",
           "mode": "100644",
           "bytes": 2218,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/ai-studio-session.md",
+          "disposition": "imported",
+          "prepared_sha256": "357510e4c5daa2523d311d98c963ed8935e8ef9c17ed082858e59394a76ec8b0"
         },
         {
           "source": "Agenda/avs-session.md",
           "blob": "4f1250e9a304d764a34fd7770cdae6c1cf4b6419",
           "mode": "100644",
           "bytes": 3193,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/avs-session.md",
+          "disposition": "imported",
+          "prepared_sha256": "20c0aad1c4f139b2f50471507718e9420062bb79ca38ffc9dcf74eafbded09e2"
         },
         {
           "source": "Agenda/session1.md",
           "blob": "e0676a09c6787d4b2051d06926a128195fd34da7",
           "mode": "100644",
           "bytes": 1484,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session1.md",
+          "disposition": "imported",
+          "prepared_sha256": "a0ec11b71a01ecbb095f2c5e1cf0125540b60920b1f3e467404d7c73f873084b"
         },
         {
           "source": "Agenda/session2.md",
           "blob": "38c3bd766121d8cbc172c50bb221753019418022",
           "mode": "100644",
           "bytes": 1215,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session2.md",
+          "disposition": "imported",
+          "prepared_sha256": "6f7b942c6c09a78f85b507bb377e3db59593bddb9b5f18ac6e2e368a8f9facb7"
         },
         {
           "source": "Agenda/session3.md",
           "blob": "8adc29fad392b30042aa0c142311c5875a4f5818",
           "mode": "100644",
           "bytes": 2469,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session3.md",
+          "disposition": "imported",
+          "prepared_sha256": "2f65e45ac03dd3074dcf7101ae8f1241ad93eaaed529db506be1666e670848e5"
         },
         {
           "source": "Agenda/session4.md",
           "blob": "238298f015c42f6182eddaee70577514389c5245",
           "mode": "100644",
           "bytes": 1534,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session4.md",
+          "disposition": "imported",
+          "prepared_sha256": "62fb467a7969d371b6b57841dcdc7ab2a2e8d33cddbb4cbe84e53bca6c90aaa3"
         },
         {
           "source": "Agenda/session5.md",
           "blob": "6d21bc30b9346edcf69c4e8538e2d748a2528e4e",
           "mode": "100644",
           "bytes": 1414,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session5.md",
+          "disposition": "imported",
+          "prepared_sha256": "28ba000bacf89eb05490e8995ee7d9e5d8bc352ee52383e7fc16ba6eaf802135"
         },
         {
           "source": "Agenda/session6.md",
           "blob": "4b68941244a337be7a3f5a5be95f3f549dc304e5",
           "mode": "100644",
           "bytes": 1721,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "workshops/azure-net/session6.md",
+          "disposition": "imported",
+          "prepared_sha256": "7fa8336c521b243ababfc6c9cee70d5e1b6b3bd9ced0cd594d69d3b99821b053"
         },
         {
           "source": "Azure-AI/Azure-AI-Studio/build-workspace.sh",
           "blob": "4a37a4830f84feed22861186c41db2cb2bb086ea",
           "mode": "100644",
           "bytes": 1971,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-ai/Azure-AI-Studio/build-workspace.sh",
+          "disposition": "imported",
+          "prepared_sha256": "0636079030a16f9035d86556bda92b571d82827cb6c646d385337cfe833b786e",
+          "transformations": [
+            "Replaced embedded API-key example with the previously validated required AZURE_OPENAI_API_KEY environment-variable version."
+          ]
         },
         {
           "source": "Azure-AI/Azure-ML-Studio/build-workspace.sh",
           "blob": "6657e3196c95454fabced6e9258107e4dd2318c0",
           "mode": "100644",
           "bytes": 9644,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-ai/Azure-ML-Studio/build-workspace.sh",
+          "disposition": "imported",
+          "prepared_sha256": "3cd244a3fcf33a633f21ad118a583483130cc2ddb3fc9cb52ef1eca50afe8b2c"
         },
         {
           "source": "Azure-AI/Azure-ML-Studio/cloud-init.txt",
           "blob": "602c6bd175c682a7c5e88ee1de6925ef6516b9c0",
           "mode": "100644",
           "bytes": 105,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-ai/Azure-ML-Studio/cloud-init.txt",
+          "disposition": "imported",
+          "prepared_sha256": "4ddc8353c61df6cf44749a2c48d9e6688fad31ba9ad6eb6fc103a99872a3464e"
         },
         {
           "source": "Azure-AI/build-cust-vnet.sh",
           "blob": "16d91c686bd076ed427fb8aa64b86f3697725630",
           "mode": "100644",
           "bytes": 9367,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-ai/build-cust-vnet.sh",
+          "disposition": "imported",
+          "prepared_sha256": "7e0ffa7cd02c6f929e722ea06fbe8f5a05f7ca2acc02c8da29004b99d6ad55bb"
         },
         {
           "source": "Azure-AI/cloud-init.txt",
           "blob": "602c6bd175c682a7c5e88ee1de6925ef6516b9c0",
           "mode": "100644",
           "bytes": 105,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-ai/cloud-init.txt",
+          "disposition": "imported",
+          "prepared_sha256": "4ddc8353c61df6cf44749a2c48d9e6688fad31ba9ad6eb6fc103a99872a3464e"
         },
         {
           "source": "CNAME",
@@ -1157,481 +1275,571 @@
           "mode": "100644",
           "bytes": 26,
           "destination": null,
-          "disposition": "blocked-license"
+          "disposition": "excluded-custom-domain",
+          "reason": "The source custom domain is not adopted by the consolidated repository."
         },
         {
           "source": "README.md",
           "blob": "d6aff8f1dc4c6b535178650d6376da24ccf6f879",
           "mode": "100644",
           "bytes": 9772,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/README.md",
+          "disposition": "imported",
+          "prepared_sha256": "43b1296611b4881a5b5cd93d92ab771169222904215cbc44eefa11cd13841366",
+          "transformations": [
+            "Replaced missing aca.mp4 embed with an explicit unavailable note.",
+            "Replaced missing adf.mp4 embed with an explicit unavailable note.",
+            "Rebased local links to consolidated paths."
+          ]
         },
         {
           "source": "cloud-init.txt",
           "blob": "602c6bd175c682a7c5e88ee1de6925ef6516b9c0",
           "mode": "100644",
           "bytes": 105,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "labs/aks/cloud-init.txt",
+          "disposition": "imported",
+          "prepared_sha256": "4ddc8353c61df6cf44749a2c48d9e6688fad31ba9ad6eb6fc103a99872a3464e"
         },
         {
           "source": "code/OpenAPI-spec/ToolFuncAPIHeaders",
           "blob": "ff8428436a555fa1701f35d97a2384b81044ea1c",
           "mode": "100644",
           "bytes": 1602,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/OpenAPI-spec/ToolFuncAPIHeaders",
+          "disposition": "imported",
+          "prepared_sha256": "f132538a9551a1ea1afb31099da561467f952a8c0094c580b5c404983b8745fe"
         },
         {
           "source": "code/OpenAPI-spec/ToolFuncPing",
           "blob": "a3ca810e78fc1b552d9b9239cb31b6f1a7ad441a",
           "mode": "100644",
           "bytes": 744,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/OpenAPI-spec/ToolFuncPing",
+          "disposition": "imported",
+          "prepared_sha256": "77aaa385cd9ee84003c720bd9a6d914d37f0d076e0fad38a1964905747deab8b"
         },
         {
           "source": "code/fabric/Connect-to-SQL-Notebook.ipynb",
           "blob": "6e91c7ae24037326d94616c0faef4fc0c675c850",
           "mode": "100644",
           "bytes": 4511,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/fabric/Connect-to-SQL-Notebook.ipynb",
+          "disposition": "imported",
+          "prepared_sha256": "955426dd8c3610201bb87328155cd47eeda3050997daf931d49f19cc17d72e0b"
         },
         {
           "source": "code/func-demo/NetworkAgent/__init__.py",
           "blob": "453fe7fd8832c984ddee4014bb2f2736f8c75956",
           "mode": "100644",
           "bytes": 1406,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/NetworkAgent/__init__.py",
+          "disposition": "imported",
+          "prepared_sha256": "ae8d048488cc6d5041046cd09c6ed15f20be9ef7a264db4b6dc5e681ef1682fe"
         },
         {
           "source": "code/func-demo/NetworkAgent/function.json",
           "blob": "0636a851abb7cfb8fb50a458196d25aadeade21c",
           "mode": "100644",
           "bytes": 254,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/NetworkAgent/function.json",
+          "disposition": "imported",
+          "prepared_sha256": "900505b1038b8d064a738e0edd6b3ec72ddf9d625eb742c6614c0790069d01fa"
         },
         {
           "source": "code/func-demo/NetworkAgent/host.json",
           "blob": "3369578643d082b6ebd91c49cd7ffa2c2c2dcc57",
           "mode": "100644",
           "bytes": 166,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/NetworkAgent/host.json",
+          "disposition": "imported",
+          "prepared_sha256": "bed39ce327ea421b377e41505ea7569bef1144f25c4b424e78558a60c0ded136"
         },
         {
           "source": "code/func-demo/PingAgent/__init__.py",
           "blob": "e4212b796d70edc5575af4bdb281da2bb42fe55a",
           "mode": "100644",
           "bytes": 140,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/PingAgent/__init__.py",
+          "disposition": "imported",
+          "prepared_sha256": "578d5708a70be712a299cd685e528ce1efc4557cebfca303ac7c4ee2ef1e45d9"
         },
         {
           "source": "code/func-demo/PingAgent/function.json",
           "blob": "950212fb4f6abe86940ef21e5bdb5c13525e9ffb",
           "mode": "100644",
           "bytes": 253,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/PingAgent/function.json",
+          "disposition": "imported",
+          "prepared_sha256": "3cc0cbbcedc6ace25350d32c6fdaa7ef10eb8ce1c02dc49c4d7a1e9ebac7ca68"
         },
         {
           "source": "code/func-demo/host.json",
           "blob": "d2059a46b515b80dd8c49a9ad4c3bf21097f4800",
           "mode": "100644",
           "bytes": 23,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/host.json",
+          "disposition": "imported",
+          "prepared_sha256": "72e7cced040dfe2f556abc05834550497afb1ca62d06cc744d17a58350ad1ef9"
         },
         {
           "source": "code/func-demo/requirements.txt",
           "blob": "75db2c4f60f8adc74e6fc0511e46e3430916470c",
           "mode": "100644",
           "bytes": 16,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/func-demo/requirements.txt",
+          "disposition": "imported",
+          "prepared_sha256": "6ad68cfa9e7f49d89dded9c0caa4281ac95a1d31409f2b8154467b52f8f9771b"
         },
         {
           "source": "code/mcp-demo/network-http.py",
           "blob": "fabafe1d87ecbe1b746e6412953fb65205b4806c",
           "mode": "100644",
           "bytes": 1482,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/mcp-demo/network-http.py",
+          "disposition": "imported",
+          "prepared_sha256": "9e2b41ca72fdb7aaebba2e04704818c448cc4f4519974d58e6eb4a7ef914bd3b"
         },
         {
           "source": "design-gifs/aistudio-design.gif",
           "blob": "5e7ef1fac93d7e24a2f82cb8e4bdd34e9ea70fad",
           "mode": "100644",
           "bytes": 20237474,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/aistudio-design.gif",
+          "disposition": "imported",
+          "prepared_sha256": "7b7d20ed93368a7bf4fc2fec8849c27739f784f67666014bd72c065f38848613"
         },
         {
           "source": "design-gifs/aks-cni.gif",
           "blob": "c1101c02d9eadff4caa090c0956d4ffed04a5c03",
           "mode": "100644",
           "bytes": 64764448,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/aks-cni.gif",
+          "disposition": "imported",
+          "prepared_sha256": "4ed594f3c9b82922a5e0ab8d9c417c43e31e79562b59aee3cd5d1ede9ba4c6c6"
         },
         {
           "source": "design-gifs/aks-design.gif",
           "blob": "43791a92a59322b6f7d41fcd7f732ba188b1a08b",
           "mode": "100644",
           "bytes": 30805893,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/aks-design.gif",
+          "disposition": "imported",
+          "prepared_sha256": "dab974fe642542fa426d5cff80b8db18d136a8624ba4831bffb04f57485a568d"
         },
         {
           "source": "design-gifs/aks-egress.gif",
           "blob": "eea478619e971ac49d371db48638cf84b8089f22",
           "mode": "100644",
           "bytes": 38720820,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/aks-egress.gif",
+          "disposition": "imported",
+          "prepared_sha256": "073fa4be61766efb7af99a257c69927e409c58adc80adb0af98a5668f49631d7"
         },
         {
           "source": "design-gifs/aks-ingress.gif",
           "blob": "a7c56ba4706113e6c5732fff36dadfbc4a408eb0",
           "mode": "100644",
           "bytes": 27422676,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/aks-ingress.gif",
+          "disposition": "imported",
+          "prepared_sha256": "32ef578aa8a41aceb86b5457a494265e5cc15eae475cba9ff39ad8b30f05adaf"
         },
         {
           "source": "design-gifs/avs-design.gif",
           "blob": "edbc9bc1210743016e9e56f47d50a594e53bc784",
           "mode": "100644",
           "bytes": 19717512,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/avs-design.gif",
+          "disposition": "imported",
+          "prepared_sha256": "7285fae7bebe3f382b85d08d1254a8bec47b1dc2fff9e8243991b615f6762a90"
         },
         {
           "source": "design-gifs/dns-design.GIF",
           "blob": "1a294703a3779ae8b5c3c413e4d533d1dae528a9",
           "mode": "100644",
           "bytes": 8046089,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/dns-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "ebcb444ca365989b2909f26d9b880ec2692f6c1eeb0aee758e8c5c3e8053bacf"
         },
         {
           "source": "design-gifs/gwlb-design.gif",
           "blob": "9fedb0385ead0dd9162d08654891c7a0924f60d3",
           "mode": "100644",
           "bytes": 8522471,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/gwlb-design.gif",
+          "disposition": "imported",
+          "prepared_sha256": "1e81c06e7ed74836dedfcdfc029de5f472f3df67ab801e1e0c1aaf1e54045343"
         },
         {
           "source": "design-gifs/hub-spoke-design.GIF",
           "blob": "da029fec3b0ba4fb44d7b4f6491b65efb6c73858",
           "mode": "100644",
           "bytes": 5920164,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/hub-spoke-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "dc5bbd889f2e263325544be43ef79fb56659a48c9a0f9bf7db3214b8ce667e1b"
         },
         {
           "source": "design-gifs/isv-1.png",
           "blob": "832f64b75355048d690f16f9701f6cd23d84e51e",
           "mode": "100755",
           "bytes": 586238,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/isv-1.png",
+          "disposition": "imported",
+          "prepared_sha256": "049ed8faef909c91848d73fd0bc5feef62d7f5da7934129723aec0734c5eb03c"
         },
         {
           "source": "design-gifs/isv-2.png",
           "blob": "08ceb32c7b85c37496743065c69a245ca31855f5",
           "mode": "100755",
           "bytes": 557499,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/isv-2.png",
+          "disposition": "imported",
+          "prepared_sha256": "1125714905c14cd855b1df1e32fc60e7111820e59f0b4f542c2a5dda0b8456ae"
         },
         {
           "source": "design-gifs/layers-demo.gif",
           "blob": "c615904ae6e0ee6fe67e6de8079860139394a9ee",
           "mode": "100644",
           "bytes": 19373805,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/layers-demo.gif",
+          "disposition": "imported",
+          "prepared_sha256": "72a991d5a71449dc70c805df5aa22abe79809832cd54223fe7381e3a7d846f26"
         },
         {
           "source": "design-gifs/lb-design.GIF",
           "blob": "b5310291dcca54c4470af80a1111098aa35a6bb4",
           "mode": "100644",
           "bytes": 42676377,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/lb-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "d8db570b7a8d489b62f438b39db36df443bc68fb53a52094e89d8af5108da9eb"
         },
         {
           "source": "design-gifs/lb-design.GIF.gif",
           "blob": "b5310291dcca54c4470af80a1111098aa35a6bb4",
           "mode": "100644",
           "bytes": 42676377,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/lb-design.GIF",
+          "disposition": "deduplicated-identical",
+          "deduplicated_to": "docs/azure-net/assets/design-gifs/lb-design.GIF",
+          "reason": "Byte-identical to design-gifs/lb-design.GIF; one canonical copy is retained.",
+          "prepared_sha256": "d8db570b7a8d489b62f438b39db36df443bc68fb53a52094e89d8af5108da9eb"
         },
         {
           "source": "design-gifs/ml-studio-design.gif",
           "blob": "62d17ec1aac441340997fb1892467fbe61f9d53b",
           "mode": "100644",
           "bytes": 49367758,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/ml-studio-design.gif",
+          "disposition": "imported",
+          "prepared_sha256": "1f88a09a0961bf7b25dbc9d7794e103073bae4189abb34064716139469c5459f"
         },
         {
           "source": "design-gifs/nva-ha-design.GIF",
           "blob": "d3efb939461fb9198b5e8109183693608764f87e",
           "mode": "100644",
           "bytes": 2943924,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/nva-ha-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "31c7692bd4aca584f21c20256c3f5fa9aef955f4819f2f94e09106b809935d51"
         },
         {
           "source": "design-gifs/private-ep-design.GIF",
           "blob": "0351b25d97ca6b366fdceba15ab79613c02c4025",
           "mode": "100644",
           "bytes": 22921909,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/private-ep-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "9e6fd68e83fb4b0659e8d1a9b293138717c8ea29369999c572f4dcd96bf4cc24"
         },
         {
           "source": "design-gifs/vwan-design.GIF",
           "blob": "2241b3f3e0099e8e96983c5591862da3151a5e35",
           "mode": "100644",
           "bytes": 11288990,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/design-gifs/vwan-design.GIF",
+          "disposition": "imported",
+          "prepared_sha256": "9bff11f4fe270388a7fbbcb13d22d014bc7289aedc020fced5ddeeae79ec2a3d"
         },
         {
           "source": "diagrams/AVS.bootcamp.drawio",
           "blob": "f5ac67d955f313af8261dcc6ab08a0edb0029612",
           "mode": "100644",
           "bytes": 2479645,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/AVS.bootcamp.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "ee361ab612234ba68ebc898b544d588ff537174528ca86bb5cfec30e0532b467"
         },
         {
           "source": "diagrams/AVS.drawio",
           "blob": "2bf245516fdae607693008a1e8aa0a92bc0e72fa",
           "mode": "100644",
           "bytes": 19984677,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/AVS.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "9d647745c20a47b2b65e7f81bf08a2587167705bb0137dd854f6862f4a960924"
         },
         {
           "source": "diagrams/NVA-ha.drawio",
           "blob": "cd604a5eac5e77fab21b29f34c971cadf07333fb",
           "mode": "100644",
           "bytes": 945165,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/NVA-ha.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "8147793c2592101697483f133c4fe960c9c6463ced86820a462080fa0486d25e"
         },
         {
           "source": "diagrams/ai-foundry-agent-drawio.drawio",
           "blob": "91ba597802d5e8ddc4e523610602b22fd17890bf",
           "mode": "100644",
           "bytes": 1507399,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/ai-foundry-agent-drawio.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "81d097255c26bb40606607575c4d69abe1b1e2dbd1ee61ddd4f5c61497bbcf1f"
         },
         {
           "source": "diagrams/ai-foundry-agent-product-evolution-excalidraw.excalidraw",
           "blob": "adfb7df90497bb522de653096eb752eb2f440805",
           "mode": "100644",
           "bytes": 1585527,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/ai-foundry-agent-product-evolution-excalidraw.excalidraw",
+          "disposition": "imported",
+          "prepared_sha256": "2b02f9345275f40314a5d22022d9b1ef0e0992f06169ff678effe0aeb488b670"
         },
         {
           "source": "diagrams/aks.drawio",
           "blob": "13a383a37f61a5387db067b2157515660bb7a7ba",
           "mode": "100644",
           "bytes": 14288982,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/aks.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "dffe0246ae72b675c06683fe4f8f88a0a0304110de5526e76fc07ca144d784eb"
         },
         {
           "source": "diagrams/azure-ai.drawio",
           "blob": "e4b496222d48235d1bff8f80bb6b316b90cc37d9",
           "mode": "100644",
           "bytes": 42014055,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/azure-ai.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "db34275ba8a8bb26d305b8d69f049a6eab4c9df17ac2818a9c7eb0a590b7901d"
         },
         {
           "source": "diagrams/data-architectures.drawio",
           "blob": "35b22da73e4864880c0232d469eef0c802c7f6f8",
           "mode": "100755",
           "bytes": 7498191,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/data-architectures.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "ccfb5295647ca73f9d371b5035fd164958952b40d5288b205207761bf874ba72"
         },
         {
           "source": "diagrams/demo.drawio",
           "blob": "4c098365c7b09296703653d6448b6d6d5749902b",
           "mode": "100644",
           "bytes": 31857,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/demo.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "856ec9baae944c95c270afe375ce2d2cd7f0a15ba45a673cceaa1c53020535e2"
         },
         {
           "source": "diagrams/dns-in-azure.drawio",
           "blob": "9be488d269d408d2c7ab9d86996a3ad460efebf3",
           "mode": "100644",
           "bytes": 2049243,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/dns-in-azure.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "fa096dff43bdd5a3addd3f351cb494f26251995c7b6b5c446d47ee9bd73537e6"
         },
         {
           "source": "diagrams/fabric-big-picture.excalidraw",
           "blob": "f51dec7d16299de84511db02603d64c79107ad2e",
           "mode": "100644",
           "bytes": 603830,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/fabric-big-picture.excalidraw",
+          "disposition": "imported",
+          "prepared_sha256": "dc2b1e8f3b1cb80b947a96c3603ee64a4b12cd5a3365f05681466b16b8236d28"
         },
         {
           "source": "diagrams/fabric.drawio",
           "blob": "8f76c01a0102d4e499a338707bb30522bbdb3054",
           "mode": "100644",
           "bytes": 5419486,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/fabric.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "8b045c796e39078b77e641788a812433f5c494b39fa29b0ba6f561b0d0fa30dd"
         },
         {
           "source": "diagrams/hub-spoke.drawio",
           "blob": "3ab66f8c5a617cdb447f893551fd6f5697c15330",
           "mode": "100644",
           "bytes": 8548938,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/hub-spoke.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "30aba01a87917d57318286d631cb2b0fc31bd4fa30957a31072d7764496961b2"
         },
         {
           "source": "diagrams/load-balancing.drawio",
           "blob": "69cf7a85193c6bbc17f5a20380a9718d970bc22c",
           "mode": "100644",
           "bytes": 2840096,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/load-balancing.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "3a1e8375e3ce494a03259b4000c22dd00eb41b15fe342d47332dd249c2c2f044"
         },
         {
           "source": "diagrams/private-EP.drawio",
           "blob": "254d4b07601f350d328692e21029492f1a59eb0d",
           "mode": "100644",
           "bytes": 1239271,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/private-EP.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "3076db2fd2b8508b3cb9ebdcb7e5045bc38b857aebea0858491b3eb4019e97de"
         },
         {
           "source": "diagrams/vwan.drawio",
           "blob": "527b09affdeeb80e4a28ad2681d360bf206bf6b7",
           "mode": "100755",
           "bytes": 4010693,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "diagrams/azure-net/vwan.drawio",
+          "disposition": "imported",
+          "prepared_sha256": "07ad366b1191610238464472ff5f7bc2a16f6e3afaeb8104b0b85c5036d33f2f"
         },
         {
           "source": "extras/configs/bird/bird-east.conf",
           "blob": "e4e27c76a6b6a13e3ce65059608e9567d30425ac",
           "mode": "100644",
           "bytes": 2351,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/configs/bird/bird-east.conf",
+          "disposition": "imported",
+          "prepared_sha256": "3ee159bc18aed0855d96d020e1526776d53b9e5dc6a9064b965ecd523c6c9414"
         },
         {
           "source": "extras/configs/bird/bird-notes",
           "blob": "0e195c582ac2d46b30c7c9a1b2a7decd69eaecb7",
           "mode": "100644",
           "bytes": 522,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/configs/bird/bird-notes",
+          "disposition": "imported",
+          "prepared_sha256": "568f946f4d3f85e43e3d23a7e6a850d24329e831e38de68298beaf7c41cc5f56"
         },
         {
           "source": "extras/configs/bird/masq.sh",
           "blob": "871027bf3859e8bd41e29d0d8c9f5bdf38dbb792",
           "mode": "100644",
           "bytes": 494,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/configs/bird/masq.sh",
+          "disposition": "imported",
+          "prepared_sha256": "6e86e1c164b66cbf787b3b8373f69aa135624966473e7b7df49ed969b0ecc7f8"
         },
         {
           "source": "extras/configs/bird/vxlan-notes",
           "blob": "de17d84d12609d7da6bde90077ba0ec728144296",
           "mode": "100644",
           "bytes": 2476,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/configs/bird/vxlan-notes",
+          "disposition": "imported",
+          "prepared_sha256": "c2f0238414eb7546370eaa22cd8f558cb098069361fa99e7c2cc680b18964547"
         },
         {
           "source": "extras/drawio-app.png",
           "blob": "b0f00013057be4cf2f2f21a91753ed49ab4bc0d1",
           "mode": "100644",
           "bytes": 110125,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/extras/drawio-app.png",
+          "disposition": "imported",
+          "prepared_sha256": "b45767c6293439a9d86d0f7067dca6e409062953689462dac75de9e70acbeede"
         },
         {
           "source": "extras/samples/increment-sample_data.csv",
           "blob": "8c391b9081bf09da0a537b2787c7ccc9d26a32ff",
           "mode": "100755",
           "bytes": 207,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/samples/increment-sample_data.csv",
+          "disposition": "imported",
+          "prepared_sha256": "fa15707b62b32f2bb38cc359c9f12cfcd828b01dd340c6d2246be944a939d580"
         },
         {
           "source": "extras/samples/sample_data.csv",
           "blob": "ab0a8c0d263cf097ec341d6919b6a1bba97d1fb2",
           "mode": "100755",
           "bytes": 200,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "samples/azure-net/extras/samples/sample_data.csv",
+          "disposition": "imported",
+          "prepared_sha256": "0fc2c9c52bcad38abe3a309254236c6cb876152a878530384537bd8e15b9e758"
         },
         {
           "source": "extras/save-drawio.png",
           "blob": "0f49ec4fdb211cb2bc606f0d8efdc931e2da3271",
           "mode": "100644",
           "bytes": 412763,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/extras/save-drawio.png",
+          "disposition": "imported",
+          "prepared_sha256": "2ecf36cc920a11ad9ca48deee817a975265df4488a52eb7856335dbb2a7ac1c6"
         },
         {
           "source": "extras/vscode-extension.png",
           "blob": "0c3db2bdc7489237b117e614fe2f3ccc8357f137",
           "mode": "100644",
           "bytes": 106690,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/assets/extras/vscode-extension.png",
+          "disposition": "imported",
+          "prepared_sha256": "857cab1fbd8e9a23430e00613d5d30a61033d6382446242c9050af716e995b9a"
         },
         {
           "source": "gallery.html",
           "blob": "3ce798dfdc8902569772e19b337c0babe8b4d155",
           "mode": "100644",
           "bytes": 10533,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/gallery.html",
+          "disposition": "imported",
+          "prepared_sha256": "93688f873f25cfb51d413a858de4225607f518c677226333fe2f29c4b9f25118",
+          "transformations": [
+            "Rebased local links to consolidated paths."
+          ]
         },
         {
           "source": "index.html",
           "blob": "6a1588b787385c0f66cc0c803dfbc12fe0fa4c40",
           "mode": "100644",
           "bytes": 6010,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/home.html",
+          "disposition": "imported",
+          "prepared_sha256": "cc4e8efbf84dd1767cc19ee4610824c1f6ff8ab0dcf97c0ec9a36a65f4d93344"
         },
         {
           "source": "index.json",
           "blob": "de0061edbefbec3cb7aaee12d3a04229a05cb677",
           "mode": "100644",
           "bytes": 16140,
-          "destination": null,
-          "disposition": "blocked-license"
+          "destination": "docs/azure-net/index.json",
+          "disposition": "imported",
+          "prepared_sha256": "13365b175b52e5319593146a63831710cad5a29f7263560da35e9376b68110d4",
+          "transformations": [
+            "Repointed the gallery catalog and all diagram URLs to the consolidated repository paths."
+          ]
         }
-      ]
+      ],
+      "baseline": "The pinned byte-for-byte source snapshot is retained in private session storage; its Git ancestry is not part of this destination.",
+      "generated_files": [
+        {
+          "path": "docs/azure-net/calicoctl.md",
+          "purpose": "Documents why the unverified bundled binary is omitted and how to select a cluster-matched release."
+        }
+      ],
+      "preparation_notes": [
+        "CNAME excluded; the source custom domain is not adopted.",
+        "Bundled calicoctl intentionally omitted as an unverified binary; AKS-managed examples use kubectl, and docs/azure-net/calicoctl.md explains version matching for self-managed Calico clusters.",
+        "Byte-identical duplicate GIF mapped to the retained canonical copy.",
+        "Three identical cloud-init.txt files are retained at their separate example paths.",
+        "The AI Studio build script uses the previously validated required AZURE_OPENAI_API_KEY environment variable."
+      ],
+      "permission_request": "https://github.com/nehalineogi/azure-networking/issues/8",
+      "permission_status": "authorized-by-destination-owner-attestation-2026-11-12",
+      "permission_evidence": "The destination owner attested in the 2026-11-12 consolidation conversation that they have authority to permit copying, editing, relocation, and public redistribution of the pinned files and included third-party assets for all three unlicensed source snapshots."
     },
     {
       "repository": "jonathan-vella/Azure-VirtualWAN-Playground",
@@ -1640,7 +1848,7 @@
       "commit": "6fc3fc6d1e4563379d8965d8b47a4292460b22ce",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 73,
       "tree_bytes": 1127057,
       "license_evidence": "https://github.com/jonathan-vella/Azure-VirtualWAN-Playground/tree/6fc3fc6d1e4563379d8965d8b47a4292460b22ce",
@@ -2377,7 +2585,7 @@
       "commit": "2f81859ba9d3839d9140cb8344cbe581ce92b832",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 110,
       "tree_bytes": 1690719,
       "license_evidence": "https://github.com/jonathan-vella/azure-netbench/tree/2f81859ba9d3839d9140cb8344cbe581ce92b832",
@@ -3390,7 +3598,7 @@
       "commit": "8c2d1e2b14122477ec3adfc5c2f38ed275210004",
       "default_branch": "main",
       "license": "MIT",
-      "status": "blocked-credential-confirmation",
+      "status": "published-draft",
       "file_count": 87,
       "tree_bytes": 5016855,
       "license_evidence": "https://github.com/jonathan-vella/azure-firewall-monitor/tree/8c2d1e2b14122477ec3adfc5c2f38ed275210004",
@@ -3409,7 +3617,8 @@
           "mode": "100644",
           "bytes": 24,
           "destination": "tools/firewall-monitor/.gitignore",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "372cc794fabb12215ba8ca1fabe7c03e78457bdd4b3b3db6e952c3b8312bbb59"
         },
         {
           "source": "INSTALL.md",
@@ -3417,7 +3626,8 @@
           "mode": "100644",
           "bytes": 5042,
           "destination": "tools/firewall-monitor/INSTALL.md",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "f45412b8547bcd382f989ff7a49783238b687c9290be08a582cb52275b1747ba"
         },
         {
           "source": "LICENSE",
@@ -3425,7 +3635,8 @@
           "mode": "100644",
           "bytes": 1063,
           "destination": "tools/firewall-monitor/LICENSE",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "49125165f3aac036240990d7078aa95b33bc633ca572e38621fe34ce7e6bf4c4"
         },
         {
           "source": "README.md",
@@ -3433,7 +3644,11 @@
           "mode": "100644",
           "bytes": 8374,
           "destination": "tools/firewall-monitor/README.md",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "0924ecfce85a304071fe06fcf105835d48c9e77840e113eb6ad4d3ad03c91e83",
+          "transformations": [
+            "Relocated fork-local URLs, portable HTML paths and inactive/upstream security notice"
+          ]
         },
         {
           "source": "bicep/firewall-mon-azure-stuff.bicep",
@@ -3441,7 +3656,8 @@
           "mode": "100644",
           "bytes": 869,
           "destination": "tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "37e49547fcaa0a942ebd2000429a2bf170b481d0dd9c61e3ae807b95e57006bb"
         },
         {
           "source": "bicep/firewall-mon-azure-stuff.json",
@@ -3449,7 +3665,8 @@
           "mode": "100644",
           "bytes": 2014,
           "destination": "tools/firewall-monitor/bicep/firewall-mon-azure-stuff.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "2e550bee10dd7fd491facea88643b89e43cc18f840baa0d56698f41838a287da"
         },
         {
           "source": "bicep/setup.bicep",
@@ -3457,7 +3674,8 @@
           "mode": "100644",
           "bytes": 4703,
           "destination": "tools/firewall-monitor/bicep/setup.bicep",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "0db274f6d17167bfb6c63868d0ca22781151770f53dc51da58861068da41dce0"
         },
         {
           "source": "bicep/setup.json",
@@ -3465,7 +3683,8 @@
           "mode": "100644",
           "bytes": 7883,
           "destination": "tools/firewall-monitor/bicep/setup.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "b08e80ccaa9489e589412f88b022d227dee5e418d1d5cccdf4eb4b5f11fdcb4e"
         },
         {
           "source": "firewall-mon-api/.gitignore",
@@ -3473,7 +3692,8 @@
           "mode": "100644",
           "bytes": 4368,
           "destination": "tools/firewall-monitor/firewall-mon-api/.gitignore",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d02166bb716dac17ead8e5a43677756ec9dd945fd7180345c2181c595b30c089"
         },
         {
           "source": "firewall-mon-api/.vscode/extensions.json",
@@ -3481,7 +3701,8 @@
           "mode": "100644",
           "bytes": 101,
           "destination": "tools/firewall-monitor/firewall-mon-api/.vscode/extensions.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "158dfd82c0f3050d6f56a8eba9624920f8d925b38f6856b39adcf4278183667d"
         },
         {
           "source": "firewall-mon-api/.vscode/launch.json",
@@ -3489,7 +3710,8 @@
           "mode": "100644",
           "bytes": 254,
           "destination": "tools/firewall-monitor/firewall-mon-api/.vscode/launch.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "64d90e6b7cb46e8e3bf34e6c4040025265dcf175e3db2900ab5c0fa7d6a35c99"
         },
         {
           "source": "firewall-mon-api/.vscode/settings.json",
@@ -3497,7 +3719,8 @@
           "mode": "100644",
           "bytes": 263,
           "destination": "tools/firewall-monitor/firewall-mon-api/.vscode/settings.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "f78512a040db0c937caf222725f1d882529c10c7644b439c33e526af12f2b3d0"
         },
         {
           "source": "firewall-mon-api/.vscode/tasks.json",
@@ -3505,7 +3728,8 @@
           "mode": "100644",
           "bytes": 1442,
           "destination": "tools/firewall-monitor/firewall-mon-api/.vscode/tasks.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "38d355eed791fdf9ccd8eece96cd0fdb5b8e3ee562b947009288e37bae35e3c2"
         },
         {
           "source": "firewall-mon-api/Program.cs",
@@ -3513,7 +3737,8 @@
           "mode": "100644",
           "bytes": 414,
           "destination": "tools/firewall-monitor/firewall-mon-api/Program.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "95367ba3d05bd5b7fa7ab30d6bac53aef7b623c0722da4cfc4d773a187120128"
         },
         {
           "source": "firewall-mon-api/Properties/launchSettings.json",
@@ -3521,7 +3746,8 @@
           "mode": "100644",
           "bytes": 143,
           "destination": "tools/firewall-monitor/firewall-mon-api/Properties/launchSettings.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "fe72a024b0f487e08c8009dd5f9c5b77b1d028870039772bb6ea831f3adb4d39"
         },
         {
           "source": "firewall-mon-api/api.csproj",
@@ -3529,7 +3755,8 @@
           "mode": "100644",
           "bytes": 934,
           "destination": "tools/firewall-monitor/firewall-mon-api/api.csproj",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "6accc0a683a7b6efcec73b453ffe1ffc9883ec5f072e0cdc482d1f59d07cb51a"
         },
         {
           "source": "firewall-mon-api/backend.cs",
@@ -3537,7 +3764,8 @@
           "mode": "100644",
           "bytes": 10530,
           "destination": "tools/firewall-monitor/firewall-mon-api/backend.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "135150597b96f54904c98bb9563455bd25b8d696850c635573de3ee025881f32"
         },
         {
           "source": "firewall-mon-api/host.json",
@@ -3545,7 +3773,8 @@
           "mode": "100644",
           "bytes": 268,
           "destination": "tools/firewall-monitor/firewall-mon-api/host.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "1594cf8e77844110ec3ebb3b05ae82a7eac741c91248123198e486da614b4bc7"
         },
         {
           "source": "firewall-mon-api/local.settings.json.sample",
@@ -3553,7 +3782,8 @@
           "mode": "100644",
           "bytes": 676,
           "destination": "tools/firewall-monitor/firewall-mon-api/local.settings.json.sample",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "60f944ad8e2b234a835c4411df0dd70f280ce04c1dc7f3c69383f7988124a94e"
         },
         {
           "source": "firewall-mon-api/models/AzureApiResponse.cs",
@@ -3561,7 +3791,8 @@
           "mode": "100644",
           "bytes": 282,
           "destination": "tools/firewall-monitor/firewall-mon-api/models/AzureApiResponse.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "1ef98c53fca1d8a5d8940afcaf5f59d88fa787a14f5ea992ec10595bd29db577"
         },
         {
           "source": "firewall-mon-api/models/FirewallSearchParams.cs",
@@ -3569,7 +3800,8 @@
           "mode": "100644",
           "bytes": 1455,
           "destination": "tools/firewall-monitor/firewall-mon-api/models/FirewallSearchParams.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "7962bd3a4b0977cc87e87036a7770f5786cc84ff3dd1d9dd663966550af40b0d"
         },
         {
           "source": "firewall-mon-api/utilities/SearchParamsUtility.cs",
@@ -3577,7 +3809,8 @@
           "mode": "100644",
           "bytes": 1841,
           "destination": "tools/firewall-monitor/firewall-mon-api/utilities/SearchParamsUtility.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "acfd48b961bd9fab0c0e9d0d015a4d31306c4b8a03d075fa4a8d99c892014582"
         },
         {
           "source": "firewall-mon-api/utilities/ThrottlingManager.cs",
@@ -3585,7 +3818,8 @@
           "mode": "100644",
           "bytes": 1500,
           "destination": "tools/firewall-monitor/firewall-mon-api/utilities/ThrottlingManager.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "277b7442c3d06b83c8dd54afcb81a7047d0bd98e5bf8e9a98b142e39ffa2bfb6"
         },
         {
           "source": "firewall-mon-api/utilities/UserAuthValidator.cs",
@@ -3593,7 +3827,8 @@
           "mode": "100644",
           "bytes": 0,
           "destination": "tools/firewall-monitor/firewall-mon-api/utilities/UserAuthValidator.cs",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "source": "firewall-mon-app/.editorconfig",
@@ -3601,7 +3836,8 @@
           "mode": "100644",
           "bytes": 274,
           "destination": "tools/firewall-monitor/firewall-mon-app/.editorconfig",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "08fe692cae5731d5ff601317e427ce338b9879472552ad1c9e41e8146a99d9d8"
         },
         {
           "source": "firewall-mon-app/.gitignore",
@@ -3609,7 +3845,8 @@
           "mode": "100644",
           "bytes": 656,
           "destination": "tools/firewall-monitor/firewall-mon-app/.gitignore",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "9098cce2a551baec53bbf260c84afec7e9f0c7cb8789cdab2d3e756dea73f8d7"
         },
         {
           "source": "firewall-mon-app/README.md",
@@ -3617,7 +3854,8 @@
           "mode": "100644",
           "bytes": 1060,
           "destination": "tools/firewall-monitor/firewall-mon-app/README.md",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "71447347527c86370f3ce951af03fca6847f2b95a369414513c44be64e51ed7a"
         },
         {
           "source": "firewall-mon-app/angular.json",
@@ -3625,7 +3863,8 @@
           "mode": "100644",
           "bytes": 4758,
           "destination": "tools/firewall-monitor/firewall-mon-app/angular.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "c09159ecc9792bd8edb5a5ecc6d5bea370b4c7f773e8e91fb0f043714e68343f"
         },
         {
           "source": "firewall-mon-app/extra-webpack.config.js",
@@ -3633,7 +3872,8 @@
           "mode": "100644",
           "bytes": 416,
           "destination": "tools/firewall-monitor/firewall-mon-app/extra-webpack.config.js",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "e646ab03ca9a1db94beadfb7604df9d90cf8dde5119bb56a5646050bec41510e"
         },
         {
           "source": "firewall-mon-app/karma.conf.js",
@@ -3641,7 +3881,8 @@
           "mode": "100644",
           "bytes": 1379,
           "destination": "tools/firewall-monitor/firewall-mon-app/karma.conf.js",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d02dea9c2f27c984d61fcfced66d67556cef1e3da83049837868a9baed42b2af"
         },
         {
           "source": "firewall-mon-app/package-lock.json",
@@ -3649,7 +3890,8 @@
           "mode": "100644",
           "bytes": 550871,
           "destination": "tools/firewall-monitor/firewall-mon-app/package-lock.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "2b3937088414780b25eff686b7bc37c00e8ee1d1e85755f508e3f55602c53ca8"
         },
         {
           "source": "firewall-mon-app/package.json",
@@ -3657,7 +3899,8 @@
           "mode": "100644",
           "bytes": 1842,
           "destination": "tools/firewall-monitor/firewall-mon-app/package.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "0f87b89fc48a4e6873457f3f11247ae32cabc8d335f8c3970d8ab900f8db81b6"
         },
         {
           "source": "firewall-mon-app/src/app/app-routing.module.ts",
@@ -3665,7 +3908,8 @@
           "mode": "100644",
           "bytes": 525,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app-routing.module.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "505db290c10d6fff1976f80b2616acf27ba42667184b11129670ebe51f8d23b0"
         },
         {
           "source": "firewall-mon-app/src/app/app.component.html",
@@ -3673,7 +3917,8 @@
           "mode": "100644",
           "bytes": 32,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app.component.html",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "4faaedd0fde080d5d3a1bcc475d80ca04d59c9724e9f642273a57576b45ad65c"
         },
         {
           "source": "firewall-mon-app/src/app/app.component.scss",
@@ -3681,7 +3926,8 @@
           "mode": "100644",
           "bytes": 1,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app.component.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
         },
         {
           "source": "firewall-mon-app/src/app/app.component.spec.ts",
@@ -3689,7 +3935,8 @@
           "mode": "100644",
           "bytes": 1103,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app.component.spec.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "b259cfbe1b4347346c9b0bf8ba0ddf083dc2d96ac2d39547184d7521c7d73b55"
         },
         {
           "source": "firewall-mon-app/src/app/app.component.ts",
@@ -3697,7 +3944,8 @@
           "mode": "100644",
           "bytes": 433,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app.component.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "88484730341c55ecb3b6398fb92b6b2c81f3a2bd0e72d431521233b8728ebb43"
         },
         {
           "source": "firewall-mon-app/src/app/app.module.ts",
@@ -3705,7 +3953,8 @@
           "mode": "100644",
           "bytes": 2645,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/app.module.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "aef8592bbea5925cae104cae7e76303bc5c54146d1e240f16c5196e1401a805e"
         },
         {
           "source": "firewall-mon-app/src/app/directives/resize-column.directive.ts",
@@ -3713,7 +3962,8 @@
           "mode": "100644",
           "bytes": 2343,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/directives/resize-column.directive.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "c92cd94c9b28e494cb002b44b1b18231122344399185b440d8eea40e8fe1b7a0"
         },
         {
           "source": "firewall-mon-app/src/app/login/login.component.html",
@@ -3721,7 +3971,8 @@
           "mode": "100644",
           "bytes": 2605,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/login/login.component.html",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "28a6833535735855334b9f6cd66829199da1db16224e949d26781e22959fa020"
         },
         {
           "source": "firewall-mon-app/src/app/login/login.component.scss",
@@ -3729,7 +3980,8 @@
           "mode": "100644",
           "bytes": 275,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/login/login.component.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "1c21cedc1b934d9c28f6862549cef8567a4edbdf6d05176f2b4721ed912afa9d"
         },
         {
           "source": "firewall-mon-app/src/app/login/login.component.ts",
@@ -3737,7 +3989,8 @@
           "mode": "100644",
           "bytes": 2812,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/login/login.component.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "e288a9585dc9f726cc3c84396fbafb5954548934e5adbbbb01e36405c8ee0e04"
         },
         {
           "source": "firewall-mon-app/src/app/main-page/main-page.component.html",
@@ -3745,7 +3998,8 @@
           "mode": "100644",
           "bytes": 14878,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/main-page/main-page.component.html",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "e82ff320974fcf270521150d1093e733b6851e8159a92915b9957c713ca6497f"
         },
         {
           "source": "firewall-mon-app/src/app/main-page/main-page.component.scss",
@@ -3753,7 +4007,8 @@
           "mode": "100644",
           "bytes": 3555,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/main-page/main-page.component.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "a1c9928fcf1ac01e2a3dcbb21e103d30d303db81d28cf1815dedbf5a408177ad"
         },
         {
           "source": "firewall-mon-app/src/app/main-page/main-page.component.spec.ts",
@@ -3761,7 +4016,8 @@
           "mode": "100644",
           "bytes": 641,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/main-page/main-page.component.spec.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "3aabe72b602d2fcae4f17224262afbf3a38ddcdfc2387edfb9e54e18f50fd764"
         },
         {
           "source": "firewall-mon-app/src/app/main-page/main-page.component.ts",
@@ -3769,7 +4025,8 @@
           "mode": "100644",
           "bytes": 21182,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/main-page/main-page.component.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "c76d62bd023fc1eab7aab588774c373f2926aac61db948bc46de816124f93c33"
         },
         {
           "source": "firewall-mon-app/src/app/services/demo-source.service.ts",
@@ -3777,7 +4034,8 @@
           "mode": "100644",
           "bytes": 20102,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/demo-source.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "4934f8bba89df3528dfe42c8a24eadf62ff5e4574d99b1db3cafd6f613dad6f8"
         },
         {
           "source": "firewall-mon-app/src/app/services/encryption.service.ts",
@@ -3785,7 +4043,8 @@
           "mode": "100644",
           "bytes": 558,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/encryption.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "a3d239858b97f76f9709b6edb68d70b752064551fe4d97e15ca17c8e9f69df0e"
         },
         {
           "source": "firewall-mon-app/src/app/services/event-hub-source.service.ts",
@@ -3793,7 +4052,8 @@
           "mode": "100644",
           "bytes": 25996,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/event-hub-source.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "48217a831a93d8c512b1186b9d1ffa0f51bcc168051cd9f6f76d86963cefc2d2"
         },
         {
           "source": "firewall-mon-app/src/app/services/flags-all-countries.json",
@@ -3801,7 +4061,8 @@
           "mode": "100644",
           "bytes": 56662,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/flags-all-countries.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "f9d5101937d5837f0fca2baab6b65357921f1fed2c9fa63ce8088712edf062c0"
         },
         {
           "source": "firewall-mon-app/src/app/services/flags.service.ts",
@@ -3809,7 +4070,11 @@
           "mode": "100644",
           "bytes": 4167,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/flags.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d63548eb5802e886fe206aa6f9aa6f8e81ba8204d5551475a03fa2b51d7f93c0",
+          "transformations": [
+            "Removed credential-bearing example comment from the destination copy"
+          ]
         },
         {
           "source": "firewall-mon-app/src/app/services/logging.service.ts",
@@ -3817,7 +4082,8 @@
           "mode": "100644",
           "bytes": 3061,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/logging.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "1592d02b2188a6e91a17bf3d9fbfe5107972d4f132b743d5136e79892cb89aff"
         },
         {
           "source": "firewall-mon-app/src/app/services/model.service.ts",
@@ -3825,7 +4091,8 @@
           "mode": "100644",
           "bytes": 5789,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/model.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "8d96760913b1f272b81212e61899c3cf234927be0b4aa8a59a0454e147d1633b"
         },
         {
           "source": "firewall-mon-app/src/app/services/search-field.service.ts",
@@ -3833,7 +4100,8 @@
           "mode": "100644",
           "bytes": 6428,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/services/search-field.service.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "df384b260c3cd7227f33fe667ca2dac728cead6c3c37b879f65655e85c667e7d"
         },
         {
           "source": "firewall-mon-app/src/app/shared.scss",
@@ -3841,7 +4109,8 @@
           "mode": "100644",
           "bytes": 4,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/shared.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "545c38b0922de19734fbffde62792c37c2aef6a3216cfa472449173165220f7d"
         },
         {
           "source": "firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.html",
@@ -3849,7 +4118,8 @@
           "mode": "100644",
           "bytes": 308,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.html",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "8bc4ce38b008bd99da48615d20931e3ef5b3ca31deead30170008b1ff7e9b398"
         },
         {
           "source": "firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.scss",
@@ -3857,7 +4127,8 @@
           "mode": "100644",
           "bytes": 0,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         },
         {
           "source": "firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.spec.ts",
@@ -3865,7 +4136,8 @@
           "mode": "100644",
           "bytes": 635,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.spec.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "edf3dc4df0428f426e5c2fc0dfb583c3c80325bc9cf7ff234417dc89208de37d"
         },
         {
           "source": "firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.ts",
@@ -3873,7 +4145,8 @@
           "mode": "100644",
           "bytes": 659,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/app/yesno-dialog/yesno-dialog.component.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "05b594c96b064e27f40ae9e9b5852c579b31dc329276c336886871af6b73a015"
         },
         {
           "source": "firewall-mon-app/src/assets/logo.png",
@@ -3881,7 +4154,8 @@
           "mode": "100644",
           "bytes": 218147,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/assets/logo.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "f8a04df4da31a8403ee3dff12d2950e211d777cb370b89a4f93acb4e49597f85"
         },
         {
           "source": "firewall-mon-app/src/assets/lottie/90342-security.json",
@@ -3889,7 +4163,8 @@
           "mode": "100644",
           "bytes": 97678,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/assets/lottie/90342-security.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d4e8f2918cb4d991f17c2936479e0397a929de5c1f5108b51ae60981174edf76"
         },
         {
           "source": "firewall-mon-app/src/assets/lottie/lf20_giodppcr.json",
@@ -3897,7 +4172,8 @@
           "mode": "100644",
           "bytes": 38706,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/assets/lottie/lf20_giodppcr.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "4d9b94c82a8bcfb4eab396abe8b411482ed4d78085d7280d0896b4d7ccf697de"
         },
         {
           "source": "firewall-mon-app/src/assets/lottie/rubik.json",
@@ -3905,7 +4181,8 @@
           "mode": "100644",
           "bytes": 455736,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/assets/lottie/rubik.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "81327aa9631a329e6ae52ae957cfef2faa4e0517fa1613180b6cca153fa769a9"
         },
         {
           "source": "firewall-mon-app/src/assets/staticwebapp.config.json",
@@ -3913,7 +4190,8 @@
           "mode": "100644",
           "bytes": 397,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/assets/staticwebapp.config.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "9921e0b93dac27edfa95e539e758c36e94d5c9e62dcea7881bb627ef8df1b183"
         },
         {
           "source": "firewall-mon-app/src/environments/environment.prod.ts",
@@ -3921,7 +4199,8 @@
           "mode": "100644",
           "bytes": 52,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/environments/environment.prod.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "8849c3a0d8fb1c2418184242899a41382f759169fe9e8c3b73118c1fa844de41"
         },
         {
           "source": "firewall-mon-app/src/environments/environment.ts",
@@ -3929,7 +4208,8 @@
           "mode": "100644",
           "bytes": 269,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/environments/environment.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d08bd7844a54c1d775c84750488b5a42f873bf106490d43fccb75c8fe9c963f6"
         },
         {
           "source": "firewall-mon-app/src/favicon.ico",
@@ -3937,7 +4217,8 @@
           "mode": "100644",
           "bytes": 90554,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/favicon.ico",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "22b1835505281940801a46d58298ed141b2bc8816fd8f757ffe862fd50cf7526"
         },
         {
           "source": "firewall-mon-app/src/index.html",
@@ -3945,7 +4226,8 @@
           "mode": "100644",
           "bytes": 967,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/index.html",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "b9453f797f7c7023d124ddf548e8919608e50eabb7a0191a188e735ff182121d"
         },
         {
           "source": "firewall-mon-app/src/main.ts",
@@ -3953,7 +4235,8 @@
           "mode": "100644",
           "bytes": 372,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/main.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "44bab8ced43078310e1affbf44ca0682f42151082fe1d59a653699697ecabd7d"
         },
         {
           "source": "firewall-mon-app/src/polyfills.ts",
@@ -3961,7 +4244,8 @@
           "mode": "100644",
           "bytes": 2820,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/polyfills.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "019255f2dbb5e92b500f188c25fd07506515f233b82db568a1dc293c9ae07b2a"
         },
         {
           "source": "firewall-mon-app/src/styles.scss",
@@ -3969,7 +4253,8 @@
           "mode": "100644",
           "bytes": 804,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/styles.scss",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "71a1a39a1128a57f7a150830c419a09cc1ce5bd9b152dbeb57364c9add737d77"
         },
         {
           "source": "firewall-mon-app/src/test.ts",
@@ -3977,7 +4262,8 @@
           "mode": "100644",
           "bytes": 503,
           "destination": "tools/firewall-monitor/firewall-mon-app/src/test.ts",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "87348b79d08e0e2e9d9d0b425ab71d3e02f4da8195873e0188a306ea4d1b5947"
         },
         {
           "source": "firewall-mon-app/tsconfig.app.json",
@@ -3985,7 +4271,8 @@
           "mode": "100644",
           "bytes": 287,
           "destination": "tools/firewall-monitor/firewall-mon-app/tsconfig.app.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "4565e3536a07fd9da5ce4292f5a2ae0cef541a394408011ce690383311e12df7"
         },
         {
           "source": "firewall-mon-app/tsconfig.json",
@@ -3993,7 +4280,8 @@
           "mode": "100644",
           "bytes": 852,
           "destination": "tools/firewall-monitor/firewall-mon-app/tsconfig.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "3e7a698f4a393f1995adec7b211a0a218703c9552cf801981bd03c33a15f3a92"
         },
         {
           "source": "firewall-mon-app/tsconfig.spec.json",
@@ -4001,7 +4289,8 @@
           "mode": "100644",
           "bytes": 333,
           "destination": "tools/firewall-monitor/firewall-mon-app/tsconfig.spec.json",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "675a808e1665edc8de37d994740e7aaeb8869957e61b44b0a4fdff566f1e504c"
         },
         {
           "source": "images/01-text-filtering.png",
@@ -4009,7 +4298,8 @@
           "mode": "100644",
           "bytes": 79404,
           "destination": "tools/firewall-monitor/images/01-text-filtering.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "8072da6cbf13c68db843a2414c6b18504b7410b8748a2cb135b30161e9527f4e"
         },
         {
           "source": "images/02-time-filtering.png",
@@ -4017,7 +4307,8 @@
           "mode": "100644",
           "bytes": 13760,
           "destination": "tools/firewall-monitor/images/02-time-filtering.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "d77c9d66797e8da8693da4756bb1f15f4edc023aaefbfd69e305ac05b6144e71"
         },
         {
           "source": "images/03-chatgpt.gif",
@@ -4025,7 +4316,8 @@
           "mode": "100644",
           "bytes": 951168,
           "destination": "tools/firewall-monitor/images/03-chatgpt.gif",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "f275c0a150858433c725a7f27434584c595118c497ef3476d1d32af8b6eaa6d7"
         },
         {
           "source": "images/architecture.drawio",
@@ -4033,7 +4325,8 @@
           "mode": "100644",
           "bytes": 13551,
           "destination": "tools/firewall-monitor/images/architecture.drawio",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "1f1ea29fabb042485497ae75dc73266430e775184b7f70664cce3da3b8d06226"
         },
         {
           "source": "images/architecture.png",
@@ -4041,7 +4334,8 @@
           "mode": "100644",
           "bytes": 46321,
           "destination": "tools/firewall-monitor/images/architecture.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "029a77cb5db6d79f71af3cf14edea90ea2ebe9a89c1b10119b87d7932e94b2ab"
         },
         {
           "source": "images/checkpoint-smartview.png",
@@ -4049,7 +4343,8 @@
           "mode": "100644",
           "bytes": 229627,
           "destination": "tools/firewall-monitor/images/checkpoint-smartview.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "b647594e716bb1711d7b67c14311632218a06c921626306c3afb774620b3f050"
         },
         {
           "source": "images/deployment.png",
@@ -4057,7 +4352,8 @@
           "mode": "100644",
           "bytes": 26946,
           "destination": "tools/firewall-monitor/images/deployment.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "6e0a6cf601ff616e7f8870d5217ca4f0d5a87d40ed5d582dfe5d3a0f1ebba015"
         },
         {
           "source": "images/firewall-mon-app.png",
@@ -4065,7 +4361,8 @@
           "mode": "100644",
           "bytes": 147873,
           "destination": "tools/firewall-monitor/images/firewall-mon-app.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "bef641da20dfb8bca0d56db76417904acba037c709ec5c67f16ce4aa9e3189a3"
         },
         {
           "source": "images/logo.png",
@@ -4073,7 +4370,8 @@
           "mode": "100644",
           "bytes": 218352,
           "destination": "tools/firewall-monitor/images/logo.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "3524c39b5ca7bab53bf7bcfaa05d859e501dec77481615912667c4633bf15314"
         },
         {
           "source": "images/logo.psd",
@@ -4081,7 +4379,8 @@
           "mode": "100644",
           "bytes": 1224426,
           "destination": "tools/firewall-monitor/images/logo.psd",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "a252e6c52dcb0f459d66acef791bf46d393f9c899aedbfa0216cf76d0fc98052"
         },
         {
           "source": "images/sysinternals-process-monitor.png",
@@ -4089,12 +4388,11 @@
           "mode": "100644",
           "bytes": 357704,
           "destination": "tools/firewall-monitor/images/sysinternals-process-monitor.png",
-          "disposition": "withheld-publication"
+          "disposition": "imported",
+          "prepared_sha256": "dde0747efcd9bcd4ee3215358ffb4aa74169d2a202baa86f19310e33c7684c4d"
         }
       ],
-      "publication_blocks": [
-        "source-credential-revocation-unconfirmed"
-      ]
+      "security_scan_status": "Local scans of the selected publication tree, destination history, and all 11 private source backup histories found no secrets; reports remain in private session storage."
     },
     {
       "repository": "jonathan-vella/azure-vwan-review",
@@ -4103,7 +4401,7 @@
       "commit": "a7af698acd9eaefd6b90e5fc5f29a66403aa071b",
       "default_branch": "main",
       "license": "MIT",
-      "status": "prepared-local",
+      "status": "published-draft",
       "file_count": 35,
       "tree_bytes": 169429,
       "license_evidence": "https://github.com/jonathan-vella/azure-vwan-review/tree/a7af698acd9eaefd6b90e5fc5f29a66403aa071b",
@@ -4280,7 +4578,7 @@
           "bytes": 1898,
           "destination": "reference/azure-vwan-review/CONTRIBUTING.md",
           "disposition": "reference-only",
-          "prepared_sha256": "a245b6642b57eeb6645f35139d68ec8e7fa381d02e91eb7b1c8def52013b49d7"
+          "prepared_sha256": "eb5176a1a312893f9c2628e6e58e6a3b840f4d640e6bb0e57563add219b347b7"
         },
         {
           "source": "LICENSE",

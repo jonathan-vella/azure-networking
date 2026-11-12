@@ -10,12 +10,12 @@ mid-PR.
 ## The five-line flow
 
 1. **Open an issue** using the matching template — pick
-   [Control gap or addition proposal](.github/ISSUE_TEMPLATE/control-proposal.yml)
-   or [Source URL rot](.github/ISSUE_TEMPLATE/source-url-rot.yml).
+   [Control gap or addition proposal](ISSUE_TEMPLATE/control-proposal.yml)
+   or [Source URL rot](ISSUE_TEMPLATE/source-url-rot.yml).
 2. **Wait for the issue to be triaged** (label + acknowledgement).
 3. **Fork + branch + edit** the three primary files together using the
    recipe in
-   [`prompts/add-or-update-control.prompt.md`](prompts/add-or-update-control.prompt.md).
+   [`prompts/add-or-update-control.prompt.md`](../../docs/virtual-wan/review/prompts/add-or-update-control.prompt.md).
 4. **Run the local gate**: `node scripts/verify.mjs && npx markdownlint-cli2 '*.md' 'prompts/*.md' && mkdocs build --strict`.
 5. **Open a PR** that references the issue (`Closes #N`); CI re-runs the
    same three gates.
@@ -24,7 +24,7 @@ mid-PR.
 
 - Control IDs are **immutable**. Add new IDs at the next available
   number; never reuse a deprecated ID. See
-  [`prompts/00-blueprint.prompt.md`](prompts/00-blueprint.prompt.md) for
+  [`prompts/00-blueprint.prompt.md`](../../docs/virtual-wan/review/prompts/00-blueprint.prompt.md) for
   prefix → section mapping.
 - **No code fences inside table cells.** Multi-line content lives in the
   addendum so the checklist tables paste cleanly into Word and Excel.

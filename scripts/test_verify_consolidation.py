@@ -1,9 +1,10 @@
+import hashlib
 import json
 from pathlib import Path
 import tempfile
 import unittest
 
-from verify_consolidation import check_links, check_manifest, check_workflows
+from verify_consolidation import check_gallery, check_links, check_manifest, check_workflows
 
 
 class ConsolidationChecksTests(unittest.TestCase):
@@ -17,6 +18,62 @@ class ConsolidationChecksTests(unittest.TestCase):
             self.assertEqual(check_links(root), [])
             (root / "README.md").write_text("[Next](docs/next.md#missing)\n![Image](docs/missing.svg)")
             self.assertEqual(len(check_links(root)), 2)
+
+    def test_links_cover_workshops_and_samples(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for directory in ("workshops", "samples"):
+                target = root / directory / "guide.md"
+                target.parent.mkdir()
+                target.write_text("[Missing](not-here.md)")
+            self.assertEqual(len(check_links(root)), 2)
+
+    def test_gallery_targets_resolve_with_exact_case(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            gallery = root / "docs" / "azure-net"
+            gallery.mkdir(parents=True)
+            diagrams = root / "diagrams" / "azure-net"
+            diagrams.mkdir(parents=True)
+            (gallery / "gallery.html").write_text("<script>fetch('index.json')</script>")
+            index = gallery / "index.json"
+            diagram = {
+                "filename": "Hub-Spoke.drawio",
+                "title": "Hub and spoke",
+                "description": "A test diagram",
+                "category": "Network topology",
+                "tags": [],
+                "github_url": "https://github.com/jonathan-vella/azure-networking/blob/main/diagrams/azure-net/Hub-Spoke.drawio",
+                "raw_url": "https://raw.githubusercontent.com/jonathan-vella/azure-networking/main/diagrams/azure-net/Hub-Spoke.drawio",
+            }
+            index.write_text(json.dumps({"categories": [], "diagrams": [diagram]}))
+            (diagrams / "Hub-Spoke.drawio").write_text("diagram")
+            self.assertEqual(check_gallery(root), [])
+            diagram["filename"] = "hub-spoke.drawio"
+            index.write_text(json.dumps({"categories": [], "diagrams": [diagram]}))
+            self.assertTrue(any("target is missing or incorrectly cased" in error
+                                for error in check_gallery(root)))
+
+    def test_gallery_rejects_urls_to_the_wrong_repository(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            gallery = root / "docs" / "azure-net"
+            gallery.mkdir(parents=True)
+            (gallery / "gallery.html").write_text("<script>fetch('index.json')</script>")
+            diagrams = root / "diagrams" / "azure-net"
+            diagrams.mkdir(parents=True)
+            (diagrams / "Hub-Spoke.drawio").write_text("diagram")
+            index = gallery / "index.json"
+            index.write_text(json.dumps({"categories": [], "diagrams": [{
+                "filename": "Hub-Spoke.drawio",
+                "title": "Hub and spoke",
+                "description": "A test diagram",
+                "category": "Network topology",
+                "tags": [],
+                "github_url": "https://github.com/old/repo/blob/main/diagrams/azure-net/Hub-Spoke.drawio",
+                "raw_url": "https://raw.githubusercontent.com/old/repo/main/diagrams/azure-net/Hub-Spoke.drawio",
+            }]}))
+            self.assertEqual(len(check_gallery(root)), 2)
 
     def test_checks_case_even_on_windows(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -87,6 +144,22 @@ class ConsolidationChecksTests(unittest.TestCase):
             errors, blocked = check_manifest(root)
             self.assertIn("withheld destination is present", errors[0])
             self.assertEqual(blocked, ["example/blocked"])
+
+    def test_manifest_accepts_documented_exclusions_and_identical_duplicates(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            target = root / "canonical.txt"
+            target.write_text("same bytes")
+            data = {"sources": [{"repository": "example/ready", "status": "prepared-local",
+                                 "file_count": 2, "files": [
+                                     {"disposition": "excluded-unverified-binary", "destination": None},
+                                     {"disposition": "deduplicated-identical",
+                                      "destination": "canonical.txt",
+                                      "prepared_sha256": hashlib.sha256(b"same bytes").hexdigest()},
+                                 ]}]}
+            (root / "sources.json").write_text(json.dumps(data))
+            errors, _ = check_manifest(root)
+            self.assertEqual(errors, [])
 
     def test_publication_block_does_not_skip_prepared_file_validation(self):
         with tempfile.TemporaryDirectory() as folder:

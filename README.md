@@ -17,13 +17,13 @@ Azure networking architectures, patterns, labs, and tools.
 
 ## Consolidation status
 
-This is a **partial consolidation**, not a completed migration.
-Seven cleared source snapshots are included. Private Endpoints Topologies, ExpressRoute
-Bowtie, and azure-net are blocked pending redistribution permission.
-Firewall Monitor is withheld pending credential-owner confirmation of revocation
-or that the flagged value was never valid. Its sanitized candidate remains private.
-The private azure-net candidate also requires credential-owner review.
-No source repository has been detached, privatized, or otherwise changed.
+This is a **partial consolidation** pending review and source cutover.
+All 11 pinned source snapshots are included in the open draft PR #1, which remains
+marked **DO NOT MERGE**. The three sources without upstream license evidence are
+covered by the destination owner's authority attestation. Local secret scans of
+the selected publication tree, destination history, and all 11 private source
+backup histories found no findings. No source repository has been detached,
+privatized, or otherwise changed.
 
 [sources.json](sources.json) records every pinned source file and its disposition.
 [Third-party notices](THIRD_PARTY_NOTICES.md) preserve attribution and license scope.

@@ -23,6 +23,9 @@ original attribution and scoped licenses.
 These target paths are part of the partial consolidation and require a merged PR
 before they are available on the default branch.
 Deployment automation is not enabled. The original source repositories remain
-unchanged and public. Three imports require redistribution permission.
-Firewall Monitor is withheld pending credential-owner confirmation.
+unchanged and public. All 11 pinned source snapshots are included in open draft
+PR #1, marked **DO NOT MERGE**. The three imports without upstream license
+evidence are covered by a destination-owner authority attestation. Local secret
+scans of the selected publication tree, destination history, and all 11 private
+source backup histories found no findings; reports remain private.
 See the repository README and source manifest.

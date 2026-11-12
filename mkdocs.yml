@@ -48,10 +48,17 @@ nav:
   - Home: index.md
   - ExpressRoute:
       - Traffic segregation: expressroute/segregation/README.md
+      - Bowtie: expressroute/bowtie/README.md
       - FastPath: expressroute/fastpath/README.md
       - Resiliency: expressroute/resiliency/README.md
+  - Private Link:
+      - Topologies: private-link/topologies/README.md
+  - Azure network diagrams:
+      - Overview: azure-net/README.md
+      - Calico tooling: azure-net/calicoctl.md
   - AVS:
       - Hub-and-spoke patterns: avs/hub-spoke/README.md
+      - License: avs/hub-spoke/LICENSE.md
   - Virtual WAN:
       - Review overview: virtual-wan/review/README.md
       - Checklist: virtual-wan/review/01-vwan-review-checklist.md

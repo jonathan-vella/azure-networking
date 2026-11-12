@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+@include mat.elevation-classes();
+@include mat.app-background();
+
+html, body { height: 100%; }
+body { margin: 0; }
+
+#globalfooter {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+// hot to use icon fonts: https://fonts.google.com/icons 
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 300,
+  'GRAD' 200,
+  'opsz' 24
+}
+
+$my-custom-typography-config: mat.m2-define-typography-config(
+  $font-family: 'Sofia Sans',
+);
+
+$my-theme: mat.m2-define-light-theme((
+ density: -2,
+ typography: $my-custom-typography-config,
+));
+
+@include mat.all-component-themes($my-theme);
+@include mat.typography-hierarchy($my-custom-typography-config);

@@ -1,0 +1,23 @@
+lottie-player {
+    width: 250px;
+    height: 250px;
+}
+
+$spacing: 12px;
+
+.centered-container > * {
+    width: 100%;
+    margin: $spacing;
+}
+
+.login-field {
+    width: 100%;
+}
+
+.container-lottie-row {
+    margin: 0 auto !important;
+}
+
+.logon-footer {
+    text-align: center;
+}
