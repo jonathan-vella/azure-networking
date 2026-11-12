@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test --watch=false"
   },
   "private": true,
   "engines": {
@@ -46,18 +46,13 @@
     "@angular/cli": "^20.0.4",
     "@angular/compiler-cli": "~20.0.5",
     "@types/crypto-js": "^4.2.2",
-    "@types/jasmine": "~5.1.8",
     "@types/node": "^22.15.18",
     "buffer": "^6.0.3",
-    "jasmine-core": "^5.7.1",
-    "karma": "^6.4.4",
-    "karma-chrome-launcher": "^3.2.0",
-    "karma-coverage": "^2.2.1",
-    "karma-jasmine": "^5.1.0",
-    "karma-jasmine-html-reporter": "^2.1.0",
+    "jsdom": "^26.1.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1"
   }
 }

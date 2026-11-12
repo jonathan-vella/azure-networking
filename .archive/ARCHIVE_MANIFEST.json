@@ -1,0 +1,2113 @@
+{
+  "schema_version": 1,
+  "archive_file": ".archive/legacy-archive.tar.gz",
+  "gitignored_tarball": true,
+  "source_commit": "9cd4419044719ab004251112a48c7e592f292e55",
+  "summary": {
+    "total_archived_files": 298,
+    "total_uncompressed_bytes": 500682860,
+    "tarball_compressed_bytes": 459292178,
+    "by_category": {
+      "duplicate": {
+        "files": 165,
+        "bytes": 381870952
+      },
+      "obsolete": {
+        "files": 17,
+        "bytes": 46434
+      },
+      "not-needed": {
+        "files": 116,
+        "bytes": 118765474
+      }
+    }
+  },
+  "entries": [
+    {
+      "path": "diagrams/azure-net/AVS.bootcamp.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 2479645,
+      "sha256": "ee361ab612234ba68ebc898b544d588ff537174528ca86bb5cfec30e0532b467"
+    },
+    {
+      "path": "diagrams/azure-net/AVS.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 19984677,
+      "sha256": "9d647745c20a47b2b65e7f81bf08a2587167705bb0137dd854f6862f4a960924"
+    },
+    {
+      "path": "diagrams/azure-net/NVA-ha.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 945165,
+      "sha256": "8147793c2592101697483f133c4fe960c9c6463ced86820a462080fa0486d25e"
+    },
+    {
+      "path": "diagrams/azure-net/ai-foundry-agent-drawio.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 1507399,
+      "sha256": "81d097255c26bb40606607575c4d69abe1b1e2dbd1ee61ddd4f5c61497bbcf1f"
+    },
+    {
+      "path": "diagrams/azure-net/ai-foundry-agent-product-evolution-excalidraw.excalidraw",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 1585527,
+      "sha256": "2b02f9345275f40314a5d22022d9b1ef0e0992f06169ff678effe0aeb488b670"
+    },
+    {
+      "path": "diagrams/azure-net/aks.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 14288982,
+      "sha256": "dffe0246ae72b675c06683fe4f8f88a0a0304110de5526e76fc07ca144d784eb"
+    },
+    {
+      "path": "diagrams/azure-net/azure-ai.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 42014055,
+      "sha256": "db34275ba8a8bb26d305b8d69f049a6eab4c9df17ac2818a9c7eb0a590b7901d"
+    },
+    {
+      "path": "diagrams/azure-net/data-architectures.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 7498191,
+      "sha256": "ccfb5295647ca73f9d371b5035fd164958952b40d5288b205207761bf874ba72"
+    },
+    {
+      "path": "diagrams/azure-net/demo.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 31857,
+      "sha256": "856ec9baae944c95c270afe375ce2d2cd7f0a15ba45a673cceaa1c53020535e2"
+    },
+    {
+      "path": "diagrams/azure-net/dns-in-azure.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 2049243,
+      "sha256": "fa096dff43bdd5a3addd3f351cb494f26251995c7b6b5c446d47ee9bd73537e6"
+    },
+    {
+      "path": "diagrams/azure-net/fabric-big-picture.excalidraw",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 603830,
+      "sha256": "dc2b1e8f3b1cb80b947a96c3603ee64a4b12cd5a3365f05681466b16b8236d28"
+    },
+    {
+      "path": "diagrams/azure-net/fabric.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 5419486,
+      "sha256": "8b045c796e39078b77e641788a812433f5c494b39fa29b0ba6f561b0d0fa30dd"
+    },
+    {
+      "path": "diagrams/azure-net/hub-spoke.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 8548938,
+      "sha256": "30aba01a87917d57318286d631cb2b0fc31bd4fa30957a31072d7764496961b2"
+    },
+    {
+      "path": "diagrams/azure-net/load-balancing.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 2840096,
+      "sha256": "3a1e8375e3ce494a03259b4000c22dd00eb41b15fe342d47332dd249c2c2f044"
+    },
+    {
+      "path": "diagrams/azure-net/private-EP.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 1239271,
+      "sha256": "3076db2fd2b8508b3cb9ebdcb7e5045bc38b857aebea0858491b3eb4019e97de"
+    },
+    {
+      "path": "diagrams/azure-net/vwan.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 4010693,
+      "sha256": "07ad366b1191610238464472ff5f7bc2a16f6e3afaeb8104b0b85c5036d33f2f"
+    },
+    {
+      "path": "docs/avs/hub-spoke/LICENSE.md",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1071,
+      "sha256": "58c76b1783bd73c4e9b7fe2615e6c47ad58cf4f6e46c9e968fb8949cd4b16ee0"
+    },
+    {
+      "path": "docs/avs/hub-spoke/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 12712,
+      "sha256": "a7fa2384b67117fd1bce18a9bbd6d22ca046388deb2dbad831ec10525724e6ac"
+    },
+    {
+      "path": "docs/azure-net/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 11610,
+      "sha256": "43b1296611b4881a5b5cd93d92ab771169222904215cbc44eefa11cd13841366"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/aistudio-design.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 20237474,
+      "sha256": "7b7d20ed93368a7bf4fc2fec8849c27739f784f67666014bd72c065f38848613"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/aks-cni.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 64764448,
+      "sha256": "4ed594f3c9b82922a5e0ab8d9c417c43e31e79562b59aee3cd5d1ede9ba4c6c6"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/aks-design.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 30805893,
+      "sha256": "dab974fe642542fa426d5cff80b8db18d136a8624ba4831bffb04f57485a568d"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/aks-egress.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 38720820,
+      "sha256": "073fa4be61766efb7af99a257c69927e409c58adc80adb0af98a5668f49631d7"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/aks-ingress.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 27422676,
+      "sha256": "32ef578aa8a41aceb86b5457a494265e5cc15eae475cba9ff39ad8b30f05adaf"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/avs-design.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 19717512,
+      "sha256": "7285fae7bebe3f382b85d08d1254a8bec47b1dc2fff9e8243991b615f6762a90"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/dns-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 8046089,
+      "sha256": "ebcb444ca365989b2909f26d9b880ec2692f6c1eeb0aee758e8c5c3e8053bacf"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/gwlb-design.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 8522471,
+      "sha256": "1e81c06e7ed74836dedfcdfc029de5f472f3df67ab801e1e0c1aaf1e54045343"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/hub-spoke-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 5920164,
+      "sha256": "dc5bbd889f2e263325544be43ef79fb56659a48c9a0f9bf7db3214b8ce667e1b"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/isv-1.png",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 586238,
+      "sha256": "049ed8faef909c91848d73fd0bc5feef62d7f5da7934129723aec0734c5eb03c"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/isv-2.png",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 557499,
+      "sha256": "1125714905c14cd855b1df1e32fc60e7111820e59f0b4f542c2a5dda0b8456ae"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/layers-demo.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 19373805,
+      "sha256": "72a991d5a71449dc70c805df5aa22abe79809832cd54223fe7381e3a7d846f26"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/lb-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 42676377,
+      "sha256": "d8db570b7a8d489b62f438b39db36df443bc68fb53a52094e89d8af5108da9eb"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/ml-studio-design.gif",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 49367758,
+      "sha256": "1f88a09a0961bf7b25dbc9d7794e103073bae4189abb34064716139469c5459f"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/nva-ha-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 2943924,
+      "sha256": "31c7692bd4aca584f21c20256c3f5fa9aef955f4819f2f94e09106b809935d51"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/private-ep-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 22921909,
+      "sha256": "9e6fd68e83fb4b0659e8d1a9b293138717c8ea29369999c572f4dcd96bf4cc24"
+    },
+    {
+      "path": "docs/azure-net/assets/design-gifs/vwan-design.GIF",
+      "category": "duplicate",
+      "reason": "Animated GIF screen-recording export duplicating architecture diagrams",
+      "size_bytes": 11288990,
+      "sha256": "9bff11f4fe270388a7fbbcb13d22d014bc7289aedc020fced5ddeeae79ec2a3d"
+    },
+    {
+      "path": "docs/azure-net/assets/extras/drawio-app.png",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 110125,
+      "sha256": "b45767c6293439a9d86d0f7067dca6e409062953689462dac75de9e70acbeede"
+    },
+    {
+      "path": "docs/azure-net/assets/extras/save-drawio.png",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 412763,
+      "sha256": "2ecf36cc920a11ad9ca48deee817a975265df4488a52eb7856335dbb2a7ac1c6"
+    },
+    {
+      "path": "docs/azure-net/assets/extras/vscode-extension.png",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 106690,
+      "sha256": "857cab1fbd8e9a23430e00613d5d30a61033d6382446242c9050af716e995b9a"
+    },
+    {
+      "path": "docs/azure-net/calicoctl.md",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 503,
+      "sha256": "ca23b35f5ef29a3d0f32845f79f5fcc47b67c952dbb3e6d04c46bf6d6e05cac1"
+    },
+    {
+      "path": "docs/azure-net/gallery.html",
+      "category": "duplicate",
+      "reason": "Standalone HTML/JSON gallery duplicating the unified documentation site",
+      "size_bytes": 10535,
+      "sha256": "93688f873f25cfb51d413a858de4225607f518c677226333fe2f29c4b9f25118"
+    },
+    {
+      "path": "docs/azure-net/home.html",
+      "category": "duplicate",
+      "reason": "Standalone HTML/JSON gallery duplicating the unified documentation site",
+      "size_bytes": 6019,
+      "sha256": "cc4e8efbf84dd1767cc19ee4610824c1f6ff8ab0dcf97c0ec9a36a65f4d93344"
+    },
+    {
+      "path": "docs/azure-net/index.json",
+      "category": "duplicate",
+      "reason": "Standalone HTML/JSON gallery duplicating the unified documentation site",
+      "size_bytes": 18377,
+      "sha256": "13365b175b52e5319593146a63831710cad5a29f7263560da35e9376b68110d4"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - bowtie - circuitfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-bowtie-circuitfail.jpg",
+      "size_bytes": 213819,
+      "sha256": "95744dfcb82a229b61ed4eae8925b06769fe436df76ee22eff92990c1900a599"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - bowtie - circuitfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-bowtie-circuitfail2.jpg",
+      "size_bytes": 94913,
+      "sha256": "4bd6ddeecacbb9addc96e651739d702158aa49454c8622dd9dadb52d9b72b67f"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - bowtie - general.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-bowtie-general.jpg",
+      "size_bytes": 212662,
+      "sha256": "c2275de780b833bbdc75f500681aa378d9ac6fd99a12eb0c5b26466e3d146a27"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - bowtie - regionfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-bowtie-regionfail.jpg",
+      "size_bytes": 221123,
+      "sha256": "8d4bd9c428fd0c4b96c10c14b724b50efe681814ce43736a50efe893a94ae9c4"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - bowtie - regionfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-bowtie-regionfail2.jpg",
+      "size_bytes": 76949,
+      "sha256": "13235f1a0fb8086fa5f4d8c29b113d3b15800ae88a2d8ddac31d5e166c832004"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - no bowtie - circuitfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-no-bowtie-circuitfail.jpg",
+      "size_bytes": 168904,
+      "sha256": "98016f8ee40c2b1dc2b1a732e227c2a88ed28987dcb03e32ca2cb2352756123b"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - no bowtie - circuitfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-no-bowtie-circuitfail2.jpg",
+      "size_bytes": 107408,
+      "sha256": "2d10ff3bbb5d467668dd6c5cc33e64027189e5130fb9ddea5896d5376deeb3e6"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - no bowtie - general.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-no-bowtie-general.jpg",
+      "size_bytes": 151958,
+      "sha256": "32c7dc443c5875f1c2616473e2ed90ccf1558318da26b44ab2d54aa7d8c84b73"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/H&S - no bowtie - regionfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/hub-spoke-no-bowtie-regionfail.jpg",
+      "size_bytes": 171529,
+      "sha256": "67d0191aea4a078d0bb2d511309f9e10ba9e3f3edbc5e5642dd4246c867941d3"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - bowtie - circuitfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-bowtie-circuitfail.jpg",
+      "size_bytes": 238945,
+      "sha256": "c0e175cd72ff00b68ad638b95b61d1839249e389186eb433c1cc2ffdcaafa26e"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - bowtie - circuitfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-bowtie-circuitfail2.jpg",
+      "size_bytes": 86207,
+      "sha256": "14f50e01c4d618ca473b959cf2f83325f95e2f6911cfd502a3a3bf8cfc033e51"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - bowtie - general.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-bowtie-general.jpg",
+      "size_bytes": 227534,
+      "sha256": "815a425961440ef5c82dcb2963c8630460b7b83e1bfca38fa3e2c597f2268212"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - bowtie - regionfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-bowtie-regionfail.jpg",
+      "size_bytes": 235496,
+      "sha256": "bbbd7e9afbd3bbbc6d131a9f88409689361e9cd3c7cbe89529e1eb140189f1af"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - bowtie - regionfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-bowtie-regionfail2.jpg",
+      "size_bytes": 98068,
+      "sha256": "0485ae134dd1c83563184990a4ac7eea22f4a2e1c997326cfe0bfa5ceca27ec4"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - circuitfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-no-bowtie-circuitfail.jpg",
+      "size_bytes": 219151,
+      "sha256": "8cde83ea8c7189bc4121414608d936e84a5cc63cd28339c582be0f06ac47bc8f"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - circuitfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-no-bowtie-circuitfail2.jpg",
+      "size_bytes": 70997,
+      "sha256": "768571a5327c5d3750bc32f57aad7d04f7ca38379687ded963ba4e2f42307ea7"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - general.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-no-bowtie-general.jpg",
+      "size_bytes": 198576,
+      "sha256": "78d46aabef864cca752966701cd7c00cdda1a2bafb8a0faf48647296a1b0fc6e"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - regionfail.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-no-bowtie-regionfail.jpg",
+      "size_bytes": 216409,
+      "sha256": "b44ba4fccf40e5609280b68670ee9e98502dee7e0fb368dad8f1b1064416fcb3"
+    },
+    {
+      "path": "docs/expressroute/bowtie/Pics/vWAN - no bowtie - regionfail2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/bowtie/vwan-no-bowtie-regionfail2.jpg",
+      "size_bytes": 66724,
+      "sha256": "6cb14c79e832e95dd85dd85609efffcf76e9259b194b76fcb56ac5653bee3636"
+    },
+    {
+      "path": "docs/expressroute/bowtie/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 11273,
+      "sha256": "a1a0d27f518c13581182b7e17b64962b079644924e10fa38ee8938aac6bb5eb1"
+    },
+    {
+      "path": "docs/expressroute/fastpath/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1071,
+      "sha256": "58c76b1783bd73c4e9b7fe2615e6c47ad58cf4f6e46c9e968fb8949cd4b16ee0"
+    },
+    {
+      "path": "docs/expressroute/fastpath/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 3698,
+      "sha256": "ccbdbdf231d53d5a684f3b618968143e5ed59a87a4bd7e813e40ebd026d99a92"
+    },
+    {
+      "path": "docs/expressroute/fastpath/images/ExRGwDataPath.gif",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/fastpath/exrgwdatapath.gif",
+      "size_bytes": 122993,
+      "sha256": "fb47c1b6a26d485889ef4fe52aaf8e3b6cfc2f2a2c32cd52e2d10ae6db2d7d10"
+    },
+    {
+      "path": "docs/expressroute/fastpath/images/ExRGwDataPathFastPath.gif",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/fastpath/exrgwdatapathfastpath.gif",
+      "size_bytes": 122059,
+      "sha256": "6f4f68bae2136aa4b777d54b4befa2216ee42f7357444ceca94fa8d86d4a0eb1"
+    },
+    {
+      "path": "docs/expressroute/resiliency/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1070,
+      "sha256": "da3e6f79347aa86b8001f56d2f4f7d62566993a0acf08783db70e326094fa7fe"
+    },
+    {
+      "path": "docs/expressroute/resiliency/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 10291,
+      "sha256": "eee33e62f4da1eca368d2b233df72264b0e5792b48daef965d01e6c7e614c1a5"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/ErResiliencySocial2.gif",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 204349,
+      "sha256": "860200770488c70a81fa367074dfd6b80938746bbc0a3e0791d5d3c31f9a699c"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/active-active.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/active-active.png",
+      "size_bytes": 92532,
+      "sha256": "789ab9f34a073f8ee5bb27c905c81393ce0a5f05e2c15b1dcf48cc20c4c77810"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/active-passive-circuit.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/active-passive-circuit.png",
+      "size_bytes": 328665,
+      "sha256": "155b0f636147d751fbe01c6b1334bd5775e17274cac627fbf491bb88ec713a59"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/any2any.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/any2any.png",
+      "size_bytes": 76400,
+      "sha256": "aad3162479106cb21b55f5322902d64ca302c2c45b97ca2b9f8319e762622e47"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/az-redundant-ergw.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/az-redundant-ergw.png",
+      "size_bytes": 128290,
+      "sha256": "be50de27f33c883cf822002df3727aa04a12061ef29ba343a5b3f29d6f44a41d"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/cloud-exch-colo.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/cloud-exch-colo.png",
+      "size_bytes": 73404,
+      "sha256": "ee404f2b5eeff73100b4fbff641a47e26b06ef452f08de54e0f846ead1c93b86"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-architecture.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-architecture.png",
+      "size_bytes": 86723,
+      "sha256": "5c12c044e233ed97552d539f7a39477017f5b8ad0d14adde7f1d4c1b4359e675"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-az-failure.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-az-failure.png",
+      "size_bytes": 75460,
+      "sha256": "7f778f002446c931d31aa9fcce60cfed58561196f2b46489bcb546837bd8380a"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-bowtie.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-bowtie.png",
+      "size_bytes": 164521,
+      "sha256": "a506a12adc6ff56faee9d492f1352f0d7876e541affa3ed675bd62b0e1a30e1d"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-circuit-resiliency.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-circuit-resiliency.png",
+      "size_bytes": 133285,
+      "sha256": "5b7e796b8e40778e4245cd5ee1f9a7d271ae22b07459714b6309db5e72881619"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-circuit-skus.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-circuit-skus.png",
+      "size_bytes": 177964,
+      "sha256": "500ee319b308de15de379d07769309f708649a849cd8cd3291812f77fd474775"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-components.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-components.png",
+      "size_bytes": 107537,
+      "sha256": "aed8219f0e99c30f5392f5ce91a3a810e523694ec31df52af2a570545cc647c1"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-msee-maintenance.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-msee-maintenance.png",
+      "size_bytes": 94784,
+      "sha256": "e42d09d19f5a190f7515de0737d4429582cc865a8259555b504a6d805da2313a"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/er-peering-location-failure.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/er-peering-location-failure.png",
+      "size_bytes": 85870,
+      "sha256": "b9db390b0403d19f6e8df8ec4021f1bad6c684542a28a43920348d9f45bfdeba"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/erd.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/erd.png",
+      "size_bytes": 88695,
+      "sha256": "d08c853c567df7ea82eb3942bba99f4806d70441236d3eb5de860cbaa3f93104"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/eth-p2p.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/eth-p2p.png",
+      "size_bytes": 74591,
+      "sha256": "bc7d1b6a862e02445779a309be96f8df40884ce254bcb384ac224f625ad7beb3"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/route-advertisement-limits.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/route-advertisement-limits.png",
+      "size_bytes": 79247,
+      "sha256": "b5b58188de101b6b4e2e7f27b42e01be1e0004ec2810fc86f946fc3483ac75ab"
+    },
+    {
+      "path": "docs/expressroute/resiliency/images/s2svpn-backup.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/resiliency/s2svpn-backup.png",
+      "size_bytes": 85858,
+      "sha256": "f5af9e8a785f8f9a067756a02dcb0bb0a583fca6a7fde000ec4ad1f2f59d5e80"
+    },
+    {
+      "path": "docs/expressroute/segregation/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1072,
+      "sha256": "37b5e31b52fb58c6f17b3abc1ce4f203c1b34e4427fd86ffc5d30802e3ff9fab"
+    },
+    {
+      "path": "docs/expressroute/segregation/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 31784,
+      "sha256": "a5b1f0b708926e1ef4e383ed9d5f00421346a39a7ec6fba482f3b602909ed76e"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/1A.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/1a.jpg",
+      "size_bytes": 76454,
+      "sha256": "3f30bcb9b286408fa3a5db46a1ab9df5d8fedf6017a2fe732ccec4740308ddbb"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/1B.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/1b.jpg",
+      "size_bytes": 83740,
+      "sha256": "31d17a8afcf235b85d13b2712843a46ccca5a87f060840654a3f3515415ef303"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/1C.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/1c.jpg",
+      "size_bytes": 96319,
+      "sha256": "1b7c568f98efcc5ae1879b01aded829f0082672dfa26fafafcca403bdab60bd9"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/1D.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/1d.jpg",
+      "size_bytes": 78274,
+      "sha256": "3cef62d6c6bb0e7813209fa9f20e5325329bc6a5ea4d718f5ba217ab22f2acf6"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/2A.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/2a.jpg",
+      "size_bytes": 92979,
+      "sha256": "bdd8e9af6ffd7a195dfca50a69d2c5c659f57856b1c53a3600493003ed630790"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/2B.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/2b.jpg",
+      "size_bytes": 90794,
+      "sha256": "ab78b745932bc09426678bb58abca636e156bcac57f5d071ff70cf6efc6d6e85"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/3A.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/3a.jpg",
+      "size_bytes": 92597,
+      "sha256": "c050f7902978dc40adf3a7e4580eb81b4beeae01642e15beb45513b864e740e5"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/3B.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/3b.jpg",
+      "size_bytes": 106850,
+      "sha256": "fd373919db1d2766004f2cbd49c3aeac3ee2a0c5e8256e77111e70eecf57763e"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/Picture1.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/picture1.jpg",
+      "size_bytes": 72712,
+      "sha256": "dfc4203e0990c878c5836f341d7f8f8c889e86ee9e61031be550eafd40c8b974"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/weight1.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/weight1.jpg",
+      "size_bytes": 78014,
+      "sha256": "396f45dae181352c0a79be7e0f6fe41d3daf72e5055f42767d4522b2be91495a"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/weight2.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/weight2.jpg",
+      "size_bytes": 85642,
+      "sha256": "5b217df046d5b2c9a526872ace505deb63734c019518a084cd50c158ebd152da"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/weight3.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/weight3.jpg",
+      "size_bytes": 19917,
+      "sha256": "7d110dc0062c5e378ae3632b13548c147378c05090db745fa50be3b5a1e51682"
+    },
+    {
+      "path": "docs/expressroute/segregation/pics/weight4.jpg",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/expressroute/segregation/weight4.jpg",
+      "size_bytes": 46553,
+      "sha256": "5380fa58050fc2fec165024a20421ef8014a72d47add00b67115923132dc88ed"
+    },
+    {
+      "path": "docs/index.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 1408,
+      "sha256": "80f9fdc3e7ad911d612154f61689d04b91148f696397309a66001497f7c4e602"
+    },
+    {
+      "path": "docs/private-link/topologies/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 53101,
+      "sha256": "4f303784bef4ac5d90afb7708a342abcab684de09b172360ec32b56722df78f7"
+    },
+    {
+      "path": "docs/private-link/topologies/media/Image8.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image8.png",
+      "size_bytes": 338533,
+      "sha256": "4f124981426d5a48132cad8ff84b7dd6da1c556ee5641c7a7ed82634041fa659"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image1.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image1.png",
+      "size_bytes": 128550,
+      "sha256": "07d9cd4fa8951c5ebbdb2ce78ec8a99a0131e63f0f5e87104e408a9648afdbe1"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image2.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image2.png",
+      "size_bytes": 617827,
+      "sha256": "37705a7fb3966ac44782b972903044fd264dc332fd00f8a47f70fcc41e1c9ece"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image3.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image3.png",
+      "size_bytes": 298807,
+      "sha256": "042201fdbd32cafe623a9b9d10328f7a364085eb54795517dbaef227425c5696"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image4.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image4.png",
+      "size_bytes": 185404,
+      "sha256": "3a1671f0e06bb70273b42844e08306e1004239bd55b3b35ef0f6ab6da73f7b89"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image5.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image5.png",
+      "size_bytes": 429479,
+      "sha256": "5215a8138ad37a8071a472f8bc7d7fb8129593d8953a99afeafdb2f6c7c077f4"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image6.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image6.png",
+      "size_bytes": 103723,
+      "sha256": "df95b9f77fa3df90e3b6faccc7fa0afebb3a28878ad6e1a50e2af2490d130a55"
+    },
+    {
+      "path": "docs/private-link/topologies/media/image7.png",
+      "category": "duplicate",
+      "reason": "Original image path relocated and normalized to src/assets/diagrams/private-link/image7.png",
+      "size_bytes": 192122,
+      "sha256": "cf1635ce8bf1099659d2b2859c2461121d5ec87e265b19fda3e32eba0523a19f"
+    },
+    {
+      "path": "docs/virtual-wan/review/01-vwan-review-checklist.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 38445,
+      "sha256": "803ff61d734c646d5d8da67c4324999c9d08cae4dcf5f901a16182f9913600c4"
+    },
+    {
+      "path": "docs/virtual-wan/review/02-vwan-review-addendum.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 28924,
+      "sha256": "ef0e1caf1a746447ce919ce4d01acc36ab68e27ad917cac810288c232480bc07"
+    },
+    {
+      "path": "docs/virtual-wan/review/03-vwan-waf-cheatsheet.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 6571,
+      "sha256": "1d131edd322e9607241d533414312aa35daf0876b41ee99a151afec741ab4f92"
+    },
+    {
+      "path": "docs/virtual-wan/review/04-vwan-architecture-faq.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 38728,
+      "sha256": "eaf850be73d659d95e5cbc134b52801e75074907abd1dcaf90679d5e85978fa3"
+    },
+    {
+      "path": "docs/virtual-wan/review/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1071,
+      "sha256": "79c3ddb3c82f4e90682fe92b3287cffc136bfe83e7dc0891289ee7d5bec45502"
+    },
+    {
+      "path": "docs/virtual-wan/review/README.md",
+      "category": "duplicate",
+      "reason": "Legacy multi-source snapshot prose synthesized into unified Astro Starlight Field Architect Handbook",
+      "size_bytes": 12461,
+      "sha256": "09e85419c3b882d272758446aa2cb4951859d3e8dea9147d306a5cf1c68ddbc0"
+    },
+    {
+      "path": "docs/virtual-wan/review/assets/favicon.svg",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 1052,
+      "sha256": "7907a4d669b6f30328211833a51962fecacb4751295039f7f2e701ed083baf9f"
+    },
+    {
+      "path": "docs/virtual-wan/review/evidence/.gitkeep",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/virtual-wan/review/prompts/00-blueprint.prompt.md",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 6765,
+      "sha256": "2efaee705f4d3eb9abe6bc4084643f9c30402674da5f22b5fa00437176248b7f"
+    },
+    {
+      "path": "docs/virtual-wan/review/prompts/README.md",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 2458,
+      "sha256": "38c8eb70d13c5a9e1beec3a3ecb221606919cf38701cafa0c675860dbe03ec76"
+    },
+    {
+      "path": "docs/virtual-wan/review/prompts/add-or-update-control.prompt.md",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 4492,
+      "sha256": "2176a20ff8068ecdf5f0c6ae22cf042609791555786c110fbd4e9ab4abb1273c"
+    },
+    {
+      "path": "docs/virtual-wan/review/prompts/refresh-sources.prompt.md",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 3945,
+      "sha256": "7088ff3c5e3698969123d726d7b4524373656bf1697662ea1361ae4bc9fa439c"
+    },
+    {
+      "path": "docs/virtual-wan/review/prompts/verify-pack.prompt.md",
+      "category": "not-needed",
+      "reason": "Upstream AI prompt maintenance scaffolding and empty evidence placeholder",
+      "size_bytes": 2101,
+      "sha256": "d2581e515b341a98296dac5ff9cbcb7cb56bb5dbc4ab1995f8c36b271b7869db"
+    },
+    {
+      "path": "labs/aks/CNI/build-kubenet-dual-stack.sh",
+      "category": "obsolete",
+      "reason": "AKS Kubenet CNI is deprecated and retiring in Azure Kubernetes Service",
+      "size_bytes": 8550,
+      "sha256": "16d28f016c6abdfdbbab27606030361b66e44d34c4b0830428958baca499eab6"
+    },
+    {
+      "path": "labs/aks/CNI/build-kubenet.sh",
+      "category": "obsolete",
+      "reason": "AKS Kubenet CNI is deprecated and retiring in Azure Kubernetes Service",
+      "size_bytes": 7432,
+      "sha256": "8282b56af43559da0a04bf70e4c17f425a3d3acc7a125875c0c2a576fec2341c"
+    },
+    {
+      "path": "labs/aks/Ingress/build-azure-cni-overlay-with-nginx.sh",
+      "category": "obsolete",
+      "reason": "Legacy Ingress-NGINX and AGIC scripts superseded by Application Gateway for Containers (Gateway API)",
+      "size_bytes": 11569,
+      "sha256": "7be7242ff57fcd0c53f2b88cc7d6422aa2a34ddab7a86f381868c2da6ea43eba"
+    },
+    {
+      "path": "labs/aks/Ingress/build-azure-cni-with-app-gw.sh",
+      "category": "obsolete",
+      "reason": "Legacy Ingress-NGINX and AGIC scripts superseded by Application Gateway for Containers (Gateway API)",
+      "size_bytes": 8117,
+      "sha256": "163f63ce4f1bbf13ad0558467481b905fe58b35dc1e8f39762358eaf6b1abec3"
+    },
+    {
+      "path": "labs/aks/docker-networking/build-docker-swarm-cluster.sh",
+      "category": "obsolete",
+      "reason": "Docker Swarm lab is obsolete for modern Azure container networking",
+      "size_bytes": 2057,
+      "sha256": "212136a76a439dbc12d71bc78c31ea6dea3d61155f94a23845651485dd05e164"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/blue-cluster-ip.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 596,
+      "sha256": "0211bc0ca2bb33f924c7f07046e1aaf6a8ffa82f4a4e178b291ad716463640ca"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/blue-external-lb.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 616,
+      "sha256": "fec3355bd46d2d74afb93436c773779530a9bae0e9680d089a2d370e30845267"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/fanout-appgw.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 1054,
+      "sha256": "03569a91af7e6640902167bb9ae4240070b768954edbf497654ac9687dc2b4f9"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/fanout-nginx.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 1069,
+      "sha256": "6bac5c55f35da22a833c3fde5f1821e4b69232f3a2cabeccf3be9855a419915c"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/fanout.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 853,
+      "sha256": "eac03329634fd5945684824f295797c6b5bab99e6fea55b220d7d38c1ab4f049"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/green-cluster-ip.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 604,
+      "sha256": "967fd2a5e96ca6daaaa737ffe8bf17a52730fb99b20a474c36bbe37c6d6fb1e3"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/green-external-lb.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 624,
+      "sha256": "7d2753efe06cd5e83bca3ec8e43c0493cdac87d20014a39ca9e3079358c71cb2"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/red-cluster-ip.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 612,
+      "sha256": "154facd33fefba88463d5fa422b5330c1e400028edfa14ba25cd86093da55082"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/red-external-lb.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 608,
+      "sha256": "d8e7f2445e5f86c2b551e459616d78d2f5a4deee1ae6ecf107feca42aa3ad2cd"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/red-internal-service.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 308,
+      "sha256": "504fffc65af0c820fbd52ce5a123a81ff3567e23ba029456bdbc3e07aa4c4faa"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/virtualhost-appgw.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 990,
+      "sha256": "ef5c6f82634bcc38eb86481fec5b5ab05523c7440f73fece4ffc70a7610ed912"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/virtualhost-nginx.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 999,
+      "sha256": "f98dbc306ee09dc5610d10e1a3becda69e26abcb732cafd47de28867c5c450b5"
+    },
+    {
+      "path": "labs/aks/yaml/colors-ns/virtualhost.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 917,
+      "sha256": "020802ec8ab44363b0b88cdba61a1705d0ba516803a96696c61c95f2be1892c4"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/deployment-mynodepool.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 461,
+      "sha256": "6fe6c4e9e0e28b16a28dbc3fb2c349730b548543a68e4db0494e1949debddbd6"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/deployment.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 388,
+      "sha256": "e12b2b10a05f7e2f6d3fbf8889af6c5b9ace9985fff13e44b9714e09d2851f16"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/hello-web-app-ingress.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 393,
+      "sha256": "f1ea47b7cbe80a3dd9989331062c1b2454e027fbab785bca2f3fc250f541b849"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/hello-web-app-service.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 179,
+      "sha256": "7aa19463b3374776270f905e3e3e2bfbdcedd5e2e7e8f138316be172aa47a212"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/hello-web-app.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 507,
+      "sha256": "b14d9e8f0b021e858b77aa9307da00c648be41b90627eb7c3ed47de269960323"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/service-external-lb-dualstack.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 298,
+      "sha256": "3810d21a9ffde5d6392468f28b256156ef0b254b6192c571c5b1ad24af529e7f"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/service-external-lb-multinodepool.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 238,
+      "sha256": "1ca982ce542658e813a17da4377c7a21b003001688224dee9b3e0efdd3a84edf"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/service-external-lb.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 225,
+      "sha256": "dfc3e8ecea58f1e66aaba86b1206b2428406a3a29bfac296d2249448ee378c72"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/service-internal-lb-dualstack.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 385,
+      "sha256": "a9f9c8ae793549ce209d9e672743c329d1ab40b63c80f490bee7eb20a8d466f1"
+    },
+    {
+      "path": "labs/aks/yaml/demo-ns/service-internal-lb.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 310,
+      "sha256": "2ed299dc45ba8d55082219fec5f08c38ae5f7fe2b0608fa32cddca14cacdc869"
+    },
+    {
+      "path": "labs/aks/yaml/sample-app/deployment.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 381,
+      "sha256": "460f1f6610becbb95fa85eebf55a3fe1dddb1621381a9402bc7aeffe1f5e1027"
+    },
+    {
+      "path": "labs/aks/yaml/sample-app/ingress.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 394,
+      "sha256": "5648ac1f4a03e6e33168d4d699c1a8c42cbfabaf135466364a166610eed8054d"
+    },
+    {
+      "path": "labs/aks/yaml/sample-app/service.yaml",
+      "category": "duplicate",
+      "reason": "Overlapping sample Kubernetes manifests consolidated into canonical labs/aks/manifests/",
+      "size_bytes": 178,
+      "sha256": "4da07f26aeb6c4830b6227e7d841bcb48772188cc11f48916767f5cfb0d73b12"
+    },
+    {
+      "path": "labs/virtual-wan-playground/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1076,
+      "sha256": "dc5f9c348ba7a930ad09c16fdaed5e81f11da687b126f6c97bc61444bd1c1e9e"
+    },
+    {
+      "path": "mkdocs.yml",
+      "category": "obsolete",
+      "reason": "Legacy MkDocs 1.x configuration superseded by Astro Starlight ahead of incompatible MkDocs 2.0",
+      "size_bytes": 2428,
+      "sha256": "c3f730c191ace825d59cdd0c0708b1520368142224cbcaf6ada0d47f079b4c66"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/ISSUE_TEMPLATE/bug_report.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 306,
+      "sha256": "316ab7e6890f9aff5c2d64ce254d3b21f096568f47fd4d3d8c0e1285120ebb45"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/ISSUE_TEMPLATE/feature_request.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 297,
+      "sha256": "eb4c90299eee46d341345c24a8ffd69f98be845bced2efc8de665f8f924f1640"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/PULL_REQUEST_TEMPLATE.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1085,
+      "sha256": "b32169f5e60ebc2758fceef5a52c6586440608dd5fdb4d36f993a76026ad548a"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/armbuild.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4066,
+      "sha256": "8a214888c655c504dc5b52b1ed63022f6e69adae45f67f2fdc86ede42ac51532"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/avnm.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1240,
+      "sha256": "3c6ff038f56900047d6a9a5d6af847bceb87fbc9079df802345afde318a1a826"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/cleanup.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1329,
+      "sha256": "4a15c82d3bc19dabc85be06a36251229829408d27d9616a0e8244993af32e76b"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/deploy.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 7414,
+      "sha256": "cfad82f7294d8b514d00d7196dc028c0d5d42ee91ef0a11d89439d3274f70a36"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/vnet.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1240,
+      "sha256": "c3193c661a56aaada3f0c87505059885a47b311ec8a1eeb7e317ce8e222b1df3"
+    },
+    {
+      "path": "reference/Azure-VirtualWAN-Playground/workflows/vwan.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1240,
+      "sha256": "d523645fa9532afe0b6ebe5044af16c19149fb910bf3ab88938104b6b6bbbab4"
+    },
+    {
+      "path": "reference/README.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 851,
+      "sha256": "598b6860fcf2b64f4f67fd5b7c81e9f9e412afd00cb739990072a7d0b765b9f6"
+    },
+    {
+      "path": "reference/azure-net/.gitignore",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 3005,
+      "sha256": "cb206889b726b01f2f5996485f7823e98c90bb060be543d83ef84a6eaee50222"
+    },
+    {
+      "path": "reference/azure-net/.vscode/extensions.json",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 446,
+      "sha256": "13c49af4d3cdd4050f015d91faddb9bad4feba8245db3adf3e28807712a0f3e7"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/all-regions.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 10664,
+      "sha256": "b1d1cba76e907465a2a91867afaa1fa03e4279635eee00a76f7cb499ed0e1dcb"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/australiaeast.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "fed38455a87a4dadca52246ee0cb975a1c19cf743ec2aab14d1844f28d13a994"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/belgiumcentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4621,
+      "sha256": "b727486cc350c3aaaf9b3047c7f029162054566aa73363b1ea9ddaff82e8687d"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/brazilsouth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4601,
+      "sha256": "753a945cee232fab226b54935a29b9ddecc0ae597aa4d51d6711306a5b74dda8"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/canadacentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "ce4cf917e9b0a27553473be12d8ebcf8701f6d23725ef5c562cf8e8ba74e1469"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/centralindia.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4608,
+      "sha256": "d0193480b2a4a13632855ea4214350f35c47529de6f7192eb7bf80f9acfc3da1"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/centralus.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4587,
+      "sha256": "73a25ae0b24959b3f2ada129f867d6d711d7d3caa9710fe46898a2af1a08d7f4"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/chilecentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4608,
+      "sha256": "69123203f5d54982fb31a16ff977b32c954f77cf55fde02f4b450a371eef640e"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/eastasia.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4580,
+      "sha256": "31ea1088770093f8c62f274f752027574907657e4d4d6358dfc64a854053c1c5"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/eastus2.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4576,
+      "sha256": "0f9861ddf1594f64cba5a8cd8259bd200681acf986a706af9f5d3d660024dce6"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/francecentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "f42e2e6c28eef7832b3a5d2783bff4bad8a29432957c5dba4f2872264892d71b"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/germanywestcentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4653,
+      "sha256": "4f39af3d330ceabbd9457a84475ce3b5987e4586275e1367fc3206e4ff156efb"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/indonesiacentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4636,
+      "sha256": "ec14cf1524c9d2e3fad092333d58838b0c10eb6d410e3ff395fffd175f285d20"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/israelcentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "29dd7dcfdd97268b4309ca64289dc8a472b86f0a88a7849e43d256a6b5b29545"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/italynorth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4594,
+      "sha256": "bb763f5a1b12aaa891308609df670546310e8cc08b664d329d9115d3981e644a"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/japaneast.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4587,
+      "sha256": "4d973c94321f6b3d840d681cd27a339ec2b83a6f5681326933cecaac2e2bac12"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/japanwest.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4587,
+      "sha256": "5f250f2e17f794b05387a8edf4b5ba16d0822ec9d1d010530374159037b45143"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/koreacentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4608,
+      "sha256": "95aa53aa90f1d285761095608275063ed1535ddbf53ea0914da91a0d636c6d91"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/malaysiawest.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4608,
+      "sha256": "b31a7de2ff734a7829d8cb1b0c042c63c6f67b3b228bcba3954a0ce75d2c2f2f"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/mexicocentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "f3ec1c9702c85ceab852e8a80d6af5bfc59b7b8c698dea607c32e99995a5c41a"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/newzealandnorth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4632,
+      "sha256": "7f628444c453b876e4b8485557bd628e78e8a57a00075326fa13f62dc87fbd82"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/northeurope.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4601,
+      "sha256": "ccd5bc8f1d538d178ea3ca97c67418e2cf170d200c069675c6eff35e78d671ca"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/norwayeast.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4594,
+      "sha256": "06681846da5c1b94a4e4e0ea6265b71da1ceb057bc50a12c8da2391ae21d9b0a"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/polandcentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "6bfb6ffd2d33ca8f8c8de6916e3f694ce224b677b2a2066656752ccc3c1e5f89"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/southafricanorth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4639,
+      "sha256": "bd68b3d476259660ad941965a4db0c3f3140fdb129aac2323c84fa4a1e0e6f21"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/southcentralus.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4625,
+      "sha256": "6e9c70898fde3aa202527d7a7d4448d6ae8684f66e1f8aaba099ab91b47c151b"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/southeastasia.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "d1ad94136381a6efe6e722ad29904cc06d1b8b37b626827b39b7d53ae3615272"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/spaincentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4608,
+      "sha256": "f92c6625d786aa51dda7ee1968b59f2f3beac9f54507959e82b077aa1bea1218"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/swedencentral.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4615,
+      "sha256": "53c4d71f0bd80f6b5425a99fdc1a07a2b9b4c98a45a23829f1b6deecd062ff47"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/switzerlandnorth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4636,
+      "sha256": "6504623575c9bfd6daf97b40bb6dd15ef23d6d11386b1dc98c7b6992af62aa4a"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/uaenorth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4580,
+      "sha256": "abc4ee965d56378c71e9e380a11987b911abc6c54b09791b7d5108e105f299fe"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/uksouth.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4573,
+      "sha256": "83f0381c585224f21f49c230c0ab9e4eeda75aaeab1c55cfe8c53d6f35b339dc"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/webapp.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 815,
+      "sha256": "71de0f2b6396be5a7522434c1a2a36f73ed056ef7d33afb752cf733a645b0203"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/westeurope.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4594,
+      "sha256": "9bb4f90092a86ec361b3692423ac66d9e663607457a7f7bcd7c57975529d4e1e"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/westus2.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4576,
+      "sha256": "85583639f5816456540d667743a03661137bbc111b8a603c6bcf2ef1462843de"
+    },
+    {
+      "path": "reference/azure-netbench/workflows/westus3.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 4576,
+      "sha256": "4c5d00a5de0ba08f0b2faacc2cb033b3af5c4ae4ea997dfa6c22b877265e9e10"
+    },
+    {
+      "path": "reference/azure-vwan-review/.devcontainer/devcontainer.json",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 802,
+      "sha256": "008c396f3e85f665205a405c962063318e7bef6d6980c24f3684c81269f4e5df"
+    },
+    {
+      "path": "reference/azure-vwan-review/.editorconfig",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 188,
+      "sha256": "136699256306bd7e35607d9dcede6640c7f9589d56a64e029902d83b29385e03"
+    },
+    {
+      "path": "reference/azure-vwan-review/.gitignore",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 129,
+      "sha256": "91d86484974ddb40282686bc4187f50055cebbaa02cf1d08079aec5c60afb105"
+    },
+    {
+      "path": "reference/azure-vwan-review/.markdownlint-cli2.jsonc",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 491,
+      "sha256": "35895e3a4114ca82ec0379da72575b3ce95cf3aa1e16c9f2b5991fe3fceabf68"
+    },
+    {
+      "path": "reference/azure-vwan-review/.pre-commit-config.yaml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1176,
+      "sha256": "757e33a1696d29b6981faf227490737bfd039719fd01e02990ba2de609a3f078"
+    },
+    {
+      "path": "reference/azure-vwan-review/CHANGELOG.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 2186,
+      "sha256": "f7110a9344f7f3270a77e25508cb8f3eaf28e62b5461adef735a9601c3734487"
+    },
+    {
+      "path": "reference/azure-vwan-review/CODEOWNERS",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 192,
+      "sha256": "a352038cf952e79227f53f8d36ef29520c0c9347aff25f50f206ba3a2c440b62"
+    },
+    {
+      "path": "reference/azure-vwan-review/CONTRIBUTING.md",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1942,
+      "sha256": "eb5176a1a312893f9c2628e6e58e6a3b840f4d640e6bb0e57563add219b347b7"
+    },
+    {
+      "path": "reference/azure-vwan-review/ISSUE_TEMPLATE/config.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 220,
+      "sha256": "c4390a5fa8d9de123af5bb6b9866a13df05afa0e09f1c3c070088aa07fd8f4d0"
+    },
+    {
+      "path": "reference/azure-vwan-review/ISSUE_TEMPLATE/control-proposal.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 2889,
+      "sha256": "95c324c30d3c25aef6f8c86e3de2d298fe21bc79cfea403005b58a66749623b6"
+    },
+    {
+      "path": "reference/azure-vwan-review/ISSUE_TEMPLATE/source-url-rot.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1629,
+      "sha256": "b489fac688bdbbf6ff6ca1d64903219ecf41f3839963cf8347c9438b70bf8580"
+    },
+    {
+      "path": "reference/azure-vwan-review/dependabot.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 620,
+      "sha256": "84617644a7bb5337feb87b57eb25b73fcab37df4385183cd2596450102888157"
+    },
+    {
+      "path": "reference/azure-vwan-review/mkdocs.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 3398,
+      "sha256": "5c9ca88c969b16aaea5660752a952fbe9bcb382b4c7538e42df1dce4abd99d3d"
+    },
+    {
+      "path": "reference/azure-vwan-review/requirements.txt",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 74,
+      "sha256": "615975278a666882f8091c8e6cef3f6de90660d9a278e05de8be8a296ef7c72e"
+    },
+    {
+      "path": "reference/azure-vwan-review/scripts/verify.mjs",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 3191,
+      "sha256": "c95abd58ab1989aadf26c6aa24839ef9b30acaf48923689c90bbf1359133075a"
+    },
+    {
+      "path": "reference/azure-vwan-review/workflows/docs.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1878,
+      "sha256": "988104a6140d4e08c2142396f002d9d669e9c176f470dc99937bb82c24b7ca09"
+    },
+    {
+      "path": "reference/azure-vwan-review/workflows/link-check.yml",
+      "category": "not-needed",
+      "reason": "Inert upstream repository CI workflow or configuration snapshot",
+      "size_bytes": 1630,
+      "sha256": "f03b8bd3f258b02d37172700188fc8a008e087aaf699531c551bbd9bcf2061b7"
+    },
+    {
+      "path": "requirements.txt",
+      "category": "obsolete",
+      "reason": "Legacy MkDocs 1.x configuration superseded by Astro Starlight ahead of incompatible MkDocs 2.0",
+      "size_bytes": 68,
+      "sha256": "b6f561da22aaed35cc7243e70a7f340829fc85d21a3d970b331423b296379211"
+    },
+    {
+      "path": "samples/azure-ai/Azure-AI-Studio/build-workspace.sh",
+      "category": "obsolete",
+      "reason": "Legacy Azure AI Studio hub script superseded by Microsoft Foundry Standard Agent BYO-VNet lab",
+      "size_bytes": 2073,
+      "sha256": "0636079030a16f9035d86556bda92b571d82827cb6c646d385337cfe833b786e"
+    },
+    {
+      "path": "samples/azure-ai/Azure-ML-Studio/cloud-init.txt",
+      "category": "duplicate",
+      "reason": "Exact byte-identical duplicate of labs/aks/cloud-init.txt",
+      "size_bytes": 105,
+      "sha256": "4ddc8353c61df6cf44749a2c48d9e6688fad31ba9ad6eb6fc103a99872a3464e"
+    },
+    {
+      "path": "samples/azure-ai/cloud-init.txt",
+      "category": "duplicate",
+      "reason": "Exact byte-identical duplicate of labs/aks/cloud-init.txt",
+      "size_bytes": 105,
+      "sha256": "4ddc8353c61df6cf44749a2c48d9e6688fad31ba9ad6eb6fc103a99872a3464e"
+    },
+    {
+      "path": "samples/azure-net/OpenAPI-spec/ToolFuncAPIHeaders",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 1602,
+      "sha256": "f132538a9551a1ea1afb31099da561467f952a8c0094c580b5c404983b8745fe"
+    },
+    {
+      "path": "samples/azure-net/OpenAPI-spec/ToolFuncPing",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 744,
+      "sha256": "77aaa385cd9ee84003c720bd9a6d914d37f0d076e0fad38a1964905747deab8b"
+    },
+    {
+      "path": "samples/azure-net/extras/samples/increment-sample_data.csv",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 207,
+      "sha256": "fa15707b62b32f2bb38cc359c9f12cfcd828b01dd340c6d2246be944a939d580"
+    },
+    {
+      "path": "samples/azure-net/extras/samples/sample_data.csv",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 200,
+      "sha256": "0fc2c9c52bcad38abe3a309254236c6cb876152a878530384537bd8e15b9e758"
+    },
+    {
+      "path": "samples/azure-net/fabric/Connect-to-SQL-Notebook.ipynb",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 4511,
+      "sha256": "955426dd8c3610201bb87328155cd47eeda3050997daf931d49f19cc17d72e0b"
+    },
+    {
+      "path": "samples/azure-net/func-demo/NetworkAgent/__init__.py",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 1406,
+      "sha256": "ae8d048488cc6d5041046cd09c6ed15f20be9ef7a264db4b6dc5e681ef1682fe"
+    },
+    {
+      "path": "samples/azure-net/func-demo/NetworkAgent/function.json",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 254,
+      "sha256": "900505b1038b8d064a738e0edd6b3ec72ddf9d625eb742c6614c0790069d01fa"
+    },
+    {
+      "path": "samples/azure-net/func-demo/NetworkAgent/host.json",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 166,
+      "sha256": "bed39ce327ea421b377e41505ea7569bef1144f25c4b424e78558a60c0ded136"
+    },
+    {
+      "path": "samples/azure-net/func-demo/PingAgent/__init__.py",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 140,
+      "sha256": "578d5708a70be712a299cd685e528ce1efc4557cebfca303ac7c4ee2ef1e45d9"
+    },
+    {
+      "path": "samples/azure-net/func-demo/PingAgent/function.json",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 253,
+      "sha256": "3cc0cbbcedc6ace25350d32c6fdaa7ef10eb8ce1c02dc49c4d7a1e9ebac7ca68"
+    },
+    {
+      "path": "samples/azure-net/func-demo/host.json",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 23,
+      "sha256": "72e7cced040dfe2f556abc05834550497afb1ca62d06cc744d17a58350ad1ef9"
+    },
+    {
+      "path": "samples/azure-net/func-demo/requirements.txt",
+      "category": "obsolete",
+      "reason": "Legacy Azure Functions Python v1 (function.json) programming model demo",
+      "size_bytes": 16,
+      "sha256": "6ad68cfa9e7f49d89dded9c0caa4281ac95a1d31409f2b8154467b52f8f9771b"
+    },
+    {
+      "path": "samples/azure-net/mcp-demo/network-http.py",
+      "category": "not-needed",
+      "reason": "Non-networking SQL/CSV/OpenAPI/MCP demo snippet outside unified networking scope",
+      "size_bytes": 1482,
+      "sha256": "9e2b41ca72fdb7aaebba2e04704818c448cc4f4519974d58e6eb4a7ef914bd3b"
+    },
+    {
+      "path": "scripts/test_verify_consolidation.py",
+      "category": "not-needed",
+      "reason": "Phase-1 repository consolidation byte-hash lock and legacy review-pack verifier",
+      "size_bytes": 10494,
+      "sha256": "c7a890ef8ae6ff54416292921cfcc8e784043df71619935864e48670c690358a"
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "category": "not-needed",
+      "reason": "Phase-1 repository consolidation byte-hash lock and legacy review-pack verifier",
+      "size_bytes": 2597,
+      "sha256": "c1a2d396e706bd8583b02b63e906ce1bebfe3c2b88ddf857530f7fe20675761a"
+    },
+    {
+      "path": "scripts/verify_consolidation.py",
+      "category": "not-needed",
+      "reason": "Phase-1 repository consolidation byte-hash lock and legacy review-pack verifier",
+      "size_bytes": 13179,
+      "sha256": "5c14f2c62335b9ca70660f8fbad7f20a6c8514ade627912afd65cdbe82a4956e"
+    },
+    {
+      "path": "sources.json",
+      "category": "not-needed",
+      "reason": "Phase-1 repository consolidation byte-hash lock and legacy review-pack verifier",
+      "size_bytes": 218053,
+      "sha256": "1c0519df1f062b8c0441244fcdc758ad61d782167d546aa09fac992f269d3061"
+    },
+    {
+      "path": "tools/firewall-monitor/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1063,
+      "sha256": "49125165f3aac036240990d7078aa95b33bc633ca572e38621fe34ce7e6bf4c4"
+    },
+    {
+      "path": "tools/firewall-monitor/bicep/firewall-mon-azure-stuff.json",
+      "category": "duplicate",
+      "reason": "Compiled ARM JSON duplicating Bicep source in tools/firewall-monitor/bicep/",
+      "size_bytes": 2014,
+      "sha256": "2e550bee10dd7fd491facea88643b89e43cc18f840baa0d56698f41838a287da"
+    },
+    {
+      "path": "tools/firewall-monitor/bicep/setup.json",
+      "category": "duplicate",
+      "reason": "Compiled ARM JSON duplicating Bicep source in tools/firewall-monitor/bicep/",
+      "size_bytes": 7883,
+      "sha256": "b08e80ccaa9489e589412f88b022d227dee5e418d1d5cccdf4eb4b5f11fdcb4e"
+    },
+    {
+      "path": "tools/firewall-monitor/firewall-mon-api/utilities/UserAuthValidator.cs",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tools/firewall-monitor/firewall-mon-app/karma.conf.js",
+      "category": "obsolete",
+      "reason": "Deprecated Karma 6 test runner replaced by modern Vitest Angular unit testing",
+      "size_bytes": 1379,
+      "sha256": "d02dea9c2f27c984d61fcfced66d67556cef1e3da83049837868a9baed42b2af"
+    },
+    {
+      "path": "tools/firewall-monitor/firewall-mon-app/src/test.ts",
+      "category": "obsolete",
+      "reason": "Deprecated Karma 6 test runner replaced by modern Vitest Angular unit testing",
+      "size_bytes": 503,
+      "sha256": "87348b79d08e0e2e9d9d0b425ab71d3e02f4da8195873e0188a306ea4d1b5947"
+    },
+    {
+      "path": "tools/firewall-monitor/images/architecture.drawio",
+      "category": "not-needed",
+      "reason": "Heavy raw Draw.io/Excalidraw diagram source archived in favor of lightweight SVG/PNG and Mermaid diagrams",
+      "size_bytes": 13551,
+      "sha256": "1f1ea29fabb042485497ae75dc73266430e775184b7f70664cce3da3b8d06226"
+    },
+    {
+      "path": "tools/firewall-monitor/images/logo.png",
+      "category": "duplicate",
+      "reason": "Duplicate logo asset matching firewall-mon-app/src/assets/logo.png",
+      "size_bytes": 218352,
+      "sha256": "3524c39b5ca7bab53bf7bcfaa05d859e501dec77481615912667c4633bf15314"
+    },
+    {
+      "path": "tools/firewall-monitor/images/logo.psd",
+      "category": "not-needed",
+      "reason": "Unreferenced asset, UI screenshot, omitted-binary stub, Photoshop source, or zero-byte placeholder",
+      "size_bytes": 1224426,
+      "sha256": "a252e6c52dcb0f459d66acef791bf46d393f9c899aedbfa0216cf76d0fc98052"
+    },
+    {
+      "path": "tools/netbench/LICENSE",
+      "category": "duplicate",
+      "reason": "Per-folder MIT license consolidated into root LICENSE and THIRD_PARTY_NOTICES.md",
+      "size_bytes": 1071,
+      "sha256": "9c552e3e7e882568cebe4ae915c52f17fa9f357838210dab3eff39593d01eb86"
+    },
+    {
+      "path": "tools/netbench/tfvars/australiaeast.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "ed73c8336b31cc9e728137b00fe797a1dc25d96e668f1506d56be3affb2c4a36"
+    },
+    {
+      "path": "tools/netbench/tfvars/belgiumcentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "3f1d8128a3e67459e22dcae6e91c749405b7c20cb5ba573c763f4f543e1ad354"
+    },
+    {
+      "path": "tools/netbench/tfvars/brazilsouth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 54,
+      "sha256": "203b1c271b40a29bec83802e231b3916d3d4885846b9c795da63edfbdab382d3"
+    },
+    {
+      "path": "tools/netbench/tfvars/canadacentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "8cabd646ffbb9caa9a4ee10c8490ba553d001a6c1a6fcc4b627fcd221450e317"
+    },
+    {
+      "path": "tools/netbench/tfvars/centralindia.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "5c172d8c3b8b75f2bba55d9813b297d91b78654c6e62f160c0c936c705a3972b"
+    },
+    {
+      "path": "tools/netbench/tfvars/centralus.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 51,
+      "sha256": "6c890c581121ee5516fff7abda4fffec83e47dd94d593f79b406956e396f7f6b"
+    },
+    {
+      "path": "tools/netbench/tfvars/chilecentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "87f7a024690fc6ad2b315244f1e06c56ce6e304020cf0c2c8db82cc947076966"
+    },
+    {
+      "path": "tools/netbench/tfvars/eastasia.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 51,
+      "sha256": "decbe81a16bcc59e34bfed1f392e970ca0715a54c8038d3bbc9ab550cae7a831"
+    },
+    {
+      "path": "tools/netbench/tfvars/eastus.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 48,
+      "sha256": "a23d1f3018d01a54021a46de6d642de824fd6a1ac4276063aa574153c6d03630"
+    },
+    {
+      "path": "tools/netbench/tfvars/eastus2.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 49,
+      "sha256": "ec9672a11b9940d940669e599cf707d00f03d5096a1ce6e167405d0003da8db8"
+    },
+    {
+      "path": "tools/netbench/tfvars/francecentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "8fc94620bc6c6f37393e50ea91eeac4e5c91df5b27cb801fbad80d9a0fe8b4d4"
+    },
+    {
+      "path": "tools/netbench/tfvars/germanywestcentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 61,
+      "sha256": "2ac14faf01a8abba4ef3239e3aca83d1b7923e8282f81fce9c3fc2a8754427de"
+    },
+    {
+      "path": "tools/netbench/tfvars/indonesiacentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 59,
+      "sha256": "16480bcd7b8f379176b3949cf5918dfc65a45f4f7571301b38236f50273a4917"
+    },
+    {
+      "path": "tools/netbench/tfvars/israelcentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "da271fb459e2c8a787c9aa6b145049b5e7462699af1b93e60704d2d57d1505b9"
+    },
+    {
+      "path": "tools/netbench/tfvars/italynorth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 52,
+      "sha256": "f18951bff2662df676f5e10f2e01ea21b1665035815e7d4ddc7f53f47393eb0f"
+    },
+    {
+      "path": "tools/netbench/tfvars/japaneast.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 52,
+      "sha256": "9713785fdb085f020ccddb91b06699e16e2dd34c039e3be62933b3f6e64da3ed"
+    },
+    {
+      "path": "tools/netbench/tfvars/japanwest.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 52,
+      "sha256": "ca2306b8d1b6b7086d876a97a1310d11505f5e76a8979e6152369c326979da93"
+    },
+    {
+      "path": "tools/netbench/tfvars/koreacentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "f662eb21e5c1f5d8776ab79850fcddf82b2813306b433af0e796342961811429"
+    },
+    {
+      "path": "tools/netbench/tfvars/malaysiawest.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "f0073fc65a927a536eb3d3956ebeea2863974190b46da96beb5512f8632e90e0"
+    },
+    {
+      "path": "tools/netbench/tfvars/mexicocentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "4b93818a8c6775b6114ee912674e1347f2f5a58ce8d52f0892bee5c03e59d8a4"
+    },
+    {
+      "path": "tools/netbench/tfvars/newzealandnorth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 58,
+      "sha256": "ccddf6c9b7f3c009e3dc0ba6b98f4b8522d2ab12cce3745ff3608eaf5d5bbd0c"
+    },
+    {
+      "path": "tools/netbench/tfvars/northeurope.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 54,
+      "sha256": "a821c33ca92c1dbbcba79bd422634ca49ee10168aa1a56994aad646c5684f32f"
+    },
+    {
+      "path": "tools/netbench/tfvars/norwayeast.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 53,
+      "sha256": "b748232d88a5e4e552bf58c131385174e38d4f3032e97441a7229e319a9620fa"
+    },
+    {
+      "path": "tools/netbench/tfvars/polandcentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "e32d3316c51f10e294d89c5b813dd568ad162a7b05365313f1dbe92f9620d594"
+    },
+    {
+      "path": "tools/netbench/tfvars/qatarcentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "b2d11de3a5ca7c0a0896d9d8ddf4cb966cafa4b8e3fb73a60a6377eaba3f1305"
+    },
+    {
+      "path": "tools/netbench/tfvars/southafricanorth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 58,
+      "sha256": "bd8973568cffcfb5eba3ce7cedde8e92ba73572b4036609681c40f98badc097d"
+    },
+    {
+      "path": "tools/netbench/tfvars/southcentralus.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 57,
+      "sha256": "ddc4a1c38bf9c82842823faf330040a3ae011d8f577475b73a8419ba8aab9bc7"
+    },
+    {
+      "path": "tools/netbench/tfvars/southeastasia.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "16ad5cceb614bd3727bc89ed71e4fd5338c20f160dc08b5e65885007341c6f7e"
+    },
+    {
+      "path": "tools/netbench/tfvars/spaincentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 55,
+      "sha256": "6b32b2d271557e0c09ab4fccc2b00fe3eefdc59a89b02fec3cf4d25468662688"
+    },
+    {
+      "path": "tools/netbench/tfvars/swedencentral.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 56,
+      "sha256": "219b34a46793b08124195441c0dbcc88b213e8d6929af54df6071f6c99cf936c"
+    },
+    {
+      "path": "tools/netbench/tfvars/switzerlandnorth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 59,
+      "sha256": "279b08abce7dc1b196101e9141c0990e23ca050887c4f72bd2ba218b2b68d1fd"
+    },
+    {
+      "path": "tools/netbench/tfvars/uaenorth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 51,
+      "sha256": "6871b227933a2be12fc1e0ba06129bc12fed74550f62cf2ff077288f6a140280"
+    },
+    {
+      "path": "tools/netbench/tfvars/uksouth.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 50,
+      "sha256": "eeefbd7920d46b2330a5d668fb56a63b194964b96cbf42c4d5f5b0fb276f1245"
+    },
+    {
+      "path": "tools/netbench/tfvars/westeurope.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 53,
+      "sha256": "4a5033b874e2f69a143aef645f914b3f8d8a2cd2c1a46819ef22b9de9c860634"
+    },
+    {
+      "path": "tools/netbench/tfvars/westus2.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 50,
+      "sha256": "1605f69cc75771bb88227378e976c58affc02d7b7808811587cb978b568ee4f1"
+    },
+    {
+      "path": "tools/netbench/tfvars/westus3.tfvars",
+      "category": "duplicate",
+      "reason": "Repetitive single-region tfvars consolidated into unified region-SKU configuration",
+      "size_bytes": 50,
+      "sha256": "ec1d888c0fcfc663085e20c94d4510a5fd0819c9e508871c5e1c507cb9bdd2de"
+    },
+    {
+      "path": "workshops/azure-net/ai-studio-session.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 2202,
+      "sha256": "357510e4c5daa2523d311d98c963ed8935e8ef9c17ed082858e59394a76ec8b0"
+    },
+    {
+      "path": "workshops/azure-net/avs-session.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 3162,
+      "sha256": "20c0aad1c4f139b2f50471507718e9420062bb79ca38ffc9dcf74eafbded09e2"
+    },
+    {
+      "path": "workshops/azure-net/session1.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 1478,
+      "sha256": "a0ec11b71a01ecbb095f2c5e1cf0125540b60920b1f3e467404d7c73f873084b"
+    },
+    {
+      "path": "workshops/azure-net/session2.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 1214,
+      "sha256": "6f7b942c6c09a78f85b507bb377e3db59593bddb9b5f18ac6e2e368a8f9facb7"
+    },
+    {
+      "path": "workshops/azure-net/session3.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 2427,
+      "sha256": "2f65e45ac03dd3074dcf7101ae8f1241ad93eaaed529db506be1666e670848e5"
+    },
+    {
+      "path": "workshops/azure-net/session4.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 1534,
+      "sha256": "62fb467a7969d371b6b57841dcdc7ab2a2e8d33cddbb4cbe84e53bca6c90aaa3"
+    },
+    {
+      "path": "workshops/azure-net/session5.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 1414,
+      "sha256": "28ba000bacf89eb05490e8995ee7d9e5d8bc352ee52383e7fc16ba6eaf802135"
+    },
+    {
+      "path": "workshops/azure-net/session6.md",
+      "category": "not-needed",
+      "reason": "Cohort-specific historical workshop session agenda and recording notes",
+      "size_bytes": 1721,
+      "sha256": "7fa8336c521b243ababfc6c9cee70d5e1b6b3bd9ced0cd594d69d3b99821b053"
+    }
+  ]
+}

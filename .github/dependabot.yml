@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
@@ -9,10 +9,18 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: npm
-    directory: /tools/netbench/dashboard/api
+    directory: /tools/firewall-monitor/firewall-mon-app
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: /tools/firewall-monitor/firewall-mon-api
     schedule:
       interval: weekly
   - package-ecosystem: npm
-    directory: /tools/netbench/dashboard/web
+    directory: /tools/netbench/dashboard/api
+    schedule:
+      interval: weekly
+  - package-ecosystem: terraform
+    directory: /tools/netbench
     schedule:
       interval: weekly

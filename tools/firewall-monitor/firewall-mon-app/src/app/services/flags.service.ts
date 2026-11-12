@@ -6,7 +6,6 @@ import { LoggingService } from './logging.service';
 import { environment } from './../../environments/environment';
 
 import allCountries from './flags-all-countries.json'; // json from https://raw.githubusercontent.com/lipis/flag-icons/main/country.json
-import { exec } from 'child_process';
 
 export interface CountryRegion {
   isoCode: string;

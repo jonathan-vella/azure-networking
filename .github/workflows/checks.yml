@@ -1,4 +1,4 @@
-name: Consolidation checks
+name: Repository checks
 
 on:
   push:
@@ -10,25 +10,59 @@ permissions:
   contents: read
 
 jobs:
-  documentation:
+  handbook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - run: python -m pip install -r requirements.txt
-      - run: python -m unittest discover -s scripts -p "test_*.py"
-      - run: python scripts/verify_consolidation.py
-      - run: node scripts/verify.mjs
-      - run: python -m mkdocs build --strict
-  playground:
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run build
+
+  iac-and-labs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.x"
       - run: az bicep install --version v0.48.1
       - run: az bicep build --file labs/virtual-wan-playground/main.bicep --outfile "$RUNNER_TEMP/playground.json"
+      - run: az bicep build --file labs/foundry-networking/build-foundry-standard-agent-vnet.bicep --outfile "$RUNNER_TEMP/foundry.json"
+      - run: az bicep build --file tools/firewall-monitor/bicep/setup.bicep --outfile "$RUNNER_TEMP/fwmon-setup.json"
+      - run: az bicep build --file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep --outfile "$RUNNER_TEMP/fwmon-resources.json"
+      - name: Validate Netbench Terraform
+        working-directory: tools/netbench
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+      - name: Validate Netbench Dashboard Terraform
+        working-directory: tools/netbench/dashboard/infra
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+  firewall-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tools/firewall-monitor/firewall-mon-app/package-lock.json
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Build and test Angular app
+        working-directory: tools/firewall-monitor/firewall-mon-app
+        run: |
+          npm ci
+          npm run build
+          npm test
+      - name: Build Azure Functions API
+        run: dotnet build tools/firewall-monitor/firewall-mon-api/api.csproj --configuration Release

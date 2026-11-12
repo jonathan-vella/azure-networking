@@ -21,7 +21,7 @@ resource rgA 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
   name: rgNameA
 }
 
-module peeringAtoB 'modules/vnetpeeering.bicep' = {
+module peeringAtoB 'modules/vnetpeering.bicep' = {
   scope: rgA
   name: 'peeringTo${vnetNameB}'
   params: {
@@ -40,7 +40,7 @@ resource rgB 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
   name: rgNameB
 }
 
-module peeringBtoA 'modules/vnetpeeering.bicep' = {
+module peeringBtoA 'modules/vnetpeering.bicep' = {
   scope: rgB
   name: 'peeringTo${vnetNameA}'
   params: {

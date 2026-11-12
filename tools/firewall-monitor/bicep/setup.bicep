@@ -2,7 +2,7 @@
 param staticWebAppName string = 'my-firewall-mon-web'
 
 @description('GitHub repository URL for the Static Web App')
-param repositoryUrl string
+param repositoryUrl string = 'https://github.com/jonathan-vella/azure-networking'
 
 @description('GitHub repository token for the Static Web App deployment')
 @secure()
@@ -10,6 +10,12 @@ param repositoryToken string
 
 @description('GitHub repository branch for the Static Web App deployment')
 param branch string = 'main'
+
+@description('Repository-relative path to the Angular frontend application')
+param appLocation string = '/tools/firewall-monitor/firewall-mon-app'
+
+@description('Repository-relative path to the Azure Functions backend API')
+param apiLocation string = '/tools/firewall-monitor/firewall-mon-api'
 
 @description('Name of the Application Insights instance')
 param appInsightsName string = 'firewall-mon-insights'
@@ -52,8 +58,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
     repositoryToken: repositoryToken
     branch: branch
     buildProperties: {
-      appLocation: '/firewall-mon-app'
-      apiLocation: '/firewall-mon-api'
+      appLocation: appLocation
+      apiLocation: apiLocation
       outputLocation: 'dist/firewall-mon-app'
     }
   }

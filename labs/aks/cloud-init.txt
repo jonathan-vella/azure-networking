@@ -2,5 +2,10 @@
 package_update: true
 packages:
   - net-tools
+  - dnsutils
+  - iproute2
+  - curl
+  - docker.io
 runcmd:
-  - sudo usermod -aG docker azureuser
+  - usermod -aG docker azureuser
+

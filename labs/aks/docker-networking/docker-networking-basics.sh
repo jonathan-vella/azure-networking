@@ -1,10 +1,14 @@
-#
-# az login basics
-#
+#!/usr/bin/env bash
+# ==============================================================================
+# Interactive Walkthrough: Linux Container Networking Fundamentals
+# Run individual blocks after SSHing into docker-host-1 and docker-host-2
+# provisioned by build-docker-hosts.sh.
+# ==============================================================================
 
-# ssh into the docker hosts
-ssh into the docker-host-1 VM
-ssh into the docker-host-2 VM
+# 1. SSH into the two lab VMs in separate terminals:
+# ssh azureuser@<VM1_PUBLIC_IP>
+# ssh azureuser@<VM2_PUBLIC_IP>
+
 
 
 #
@@ -137,10 +141,10 @@ docker exec -it red2 ifconfig
 # Run a container named blue3 with nginxdemos/hello image
 docker run -dit --name blue3 nginxdemos/hello
 
-# Connect the blue3 container to the red-bridge network
-ping blue3 from red1
+# Connect the blue3 container to the red-bridge network (dual-homed container)
+# docker exec -it red1 ping -c 2 blue3   # fails before connecting
 docker network connect red-bridge blue3
-ping blue3 from red1
+docker exec -it red1 ping -c 2 blue3     # succeeds after connecting
 
 #
 # Docker Hub

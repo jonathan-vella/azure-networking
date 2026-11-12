@@ -6,25 +6,154 @@ packages:
   - jq
   - iperf3
   - qperf
+  - uuid-runtime
+write_files:
+  - path: /usr/local/bin/run-netbench.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      set -uo pipefail
+
+      STORAGE_ACCOUNT="${storage_account_name}"
+      STORAGE_TABLE="${storage_table_name}"
+      MI_CLIENT_ID="${managed_identity_client_id}"
+      TABLE_ENDPOINT="https://$STORAGE_ACCOUNT.table.core.windows.net/$STORAGE_TABLE"
+
+      get_access_token() {
+        local attempt=1
+        local token=""
+        while [ "$attempt" -le 12 ]; do
+          token=$(curl -fsS -H "Metadata: true" \
+            "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fstorage.azure.com%2F&client_id=$MI_CLIENT_ID" \
+            | jq -r '.access_token // empty' 2>/dev/null || true)
+          if [ -n "$token" ]; then
+            printf '%s' "$token"
+            return 0
+          fi
+          sleep 5
+          attempt=$((attempt + 1))
+        done
+        return 1
+      }
+
+      wait_for_port() {
+        local host="$1"
+        local port="$2"
+        local attempt=1
+        while [ "$attempt" -le 60 ]; do
+          if timeout 2 bash -c "</dev/tcp/$host/$port" >/dev/null 2>&1; then
+            return 0
+          fi
+          sleep 3
+          attempt=$((attempt + 1))
+        done
+        return 1
+      }
+
+      parse_latency_us() {
+        awk '
+          /latency/ {
+            val = $3 + 0
+            unit = $4
+            if (unit == "ns") val = val / 1000.0
+            else if (unit == "ms") val = val * 1000.0
+            else if (unit == "s" || unit == "sec") val = val * 1000000.0
+            printf "%.2f", val
+            exit
+          }
+        '
+      }
+
+      run_iperf3_bps() {
+        local target="$1"
+        local attempt=1
+        local json_out=""
+        local bps=""
+        while [ "$attempt" -le 5 ]; do
+          json_out=$(iperf3 -c "$target" -P 4 -t 10 -J 2>/dev/null || true)
+          bps=$(printf '%s' "$json_out" | jq -r '(.end.sum_received.bits_per_second // .end.sum_sent.bits_per_second // empty)' 2>/dev/null || true)
+          if [ -n "$bps" ] && [ "$bps" != "null" ] && [ "$bps" != "0" ]; then
+            printf '%s' "$bps"
+            return 0
+          fi
+          sleep 5
+          attempt=$((attempt + 1))
+        done
+        printf '0'
+      }
+
+      access_token=$(get_access_token)
+      if [ -z "$access_token" ]; then
+        echo "Failed to acquire Managed Identity access token for Azure Table Storage" >&2
+        exit 1
+      fi
+
+      region=$(hostname | cut -d'-' -f3)
+      source_az=$(hostname | cut -d'-' -f4)
+
+      for dest_az in az1 az2 az3; do
+        target="lx-srv-$region-$dest_az"
+
+        if ! wait_for_port "$target" 19765; then
+          echo "Timed out waiting for qperf daemon on $target:19765" >&2
+          continue
+        fi
+        if ! wait_for_port "$target" 5201; then
+          echo "Timed out waiting for iperf3 daemon on $target:5201" >&2
+          continue
+        fi
+        sleep 1
+
+        lat_raw=$(qperf "$target" tcp_lat 2>/dev/null || true)
+        lat_us=$(printf '%s\n' "$lat_raw" | parse_latency_us)
+
+        bps=$(run_iperf3_bps "$target")
+        tp_mbps=$(awk -v b="$bps" 'BEGIN { printf "%.2f", (b + 0) / 1000000.0 }')
+        tp_gbps=$(awk -v b="$bps" 'BEGIN { printf "%.3f", (b + 0) / 1000000000.0 }')
+
+        if [ -z "$lat_us" ] || [ "$lat_us" = "0.00" ]; then
+          echo "Skipping invalid latency measurement for $target" >&2
+          continue
+        fi
+
+        if [ -r /proc/sys/kernel/random/uuid ]; then
+          uuid=$(cat /proc/sys/kernel/random/uuid)
+        else
+          uuid=$(uuidgen)
+        fi
+
+        lat_str="$lat_us us"
+        bw_str="$tp_gbps Gb/sec"
+
+        payload=$(jq -n \
+          --arg pk "$uuid" \
+          --arg rk "$region" \
+          --arg src "$source_az" \
+          --arg dst "$dest_az" \
+          --arg lat "$lat_str" \
+          --arg bw "$bw_str" \
+          --argjson lat_us "$lat_us" \
+          --argjson tp_mbps "$tp_mbps" \
+          --argjson tp_gbps "$tp_gbps" \
+          '{
+            PartitionKey: $pk,
+            RowKey: $rk,
+            Source: $src,
+            Destination: $dst,
+            Latency: $lat,
+            LatencyUs: $lat_us,
+            Bandwidth: $bw,
+            ThroughputMbps: $tp_mbps,
+            ThroughputGbps: $tp_gbps
+          }')
+
+        curl -fsS -X POST "$TABLE_ENDPOINT" \
+          -H "Authorization: Bearer $access_token" \
+          -H "x-ms-version: 2020-04-08" \
+          -H "Accept: application/json;odata=nometadata" \
+          -H "Content-Type: application/json" \
+          -d "$payload"
+      done
 runcmd:
-  - 'access_token=$(curl "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fstorage.azure.com%2F" -H Metadata:true | jq -r ".access_token")'
-  - region=$(hostname | cut -d'-' -f3)
-  - source=$(hostname | cut -d'-' -f4)
-  - qperf lx-srv-$region-az1 -ub -t 10 tcp_bw > az1_bw.txt
-  - qperf lx-srv-$region-az1 tcp_lat > az1_lat.txt
-  - uuid=$(uuidgen)
-  - bw=$(grep -o '[0-9.]\+ Gb/sec' az1_bw.txt)
-  - lat=$(grep -o '[0-9.]\+ us' az1_lat.txt)
-  - 'if [ -n "$lat" ] && [ "$lat" != "0 us" ]; then curl -X POST "https://sanetprdfrc001.table.core.windows.net/perf" -H "Authorization: Bearer $access_token" -H "x-ms-version: 2020-04-08" -H "Accept: application/json;odata=nometadata" -H "Content-Type: application/json" -d "{\"PartitionKey\":\"$uuid\",\"RowKey\":\"$region\", \"Source\":\"$source\", \"Destination\":\"az1\", \"Bandwidth\":\"$bw\", \"Latency\":\"$lat\"}"; fi'
-  - qperf lx-srv-$region-az2 -ub -t 10 tcp_bw > az2_bw.txt
-  - qperf lx-srv-$region-az2 tcp_lat > az2_lat.txt
-  - uuid=$(uuidgen)
-  - bw=$(grep -o '[0-9.]\+ Gb/sec' az2_bw.txt)
-  - lat=$(grep -o '[0-9.]\+ us' az2_lat.txt)
-  - 'if [ -n "$lat" ] && [ "$lat" != "0 us" ]; then curl -X POST "https://sanetprdfrc001.table.core.windows.net/perf" -H "Authorization: Bearer $access_token" -H "x-ms-version: 2020-04-08" -H "Accept: application/json;odata=nometadata" -H "Content-Type: application/json" -d "{\"PartitionKey\":\"$uuid\",\"RowKey\":\"$region\", \"Source\":\"$source\", \"Destination\":\"az2\", \"Bandwidth\":\"$bw\", \"Latency\":\"$lat\"}"; fi'
-  - qperf lx-srv-$region-az3 -ub -t 10 tcp_bw > az3_bw.txt
-  - qperf lx-srv-$region-az3 tcp_lat > az3_lat.txt
-  - uuid=$(uuidgen)
-  - bw=$(grep -o '[0-9.]\+ Gb/sec' az3_bw.txt)
-  - lat=$(grep -o '[0-9.]\+ us' az3_lat.txt)
-  - 'if [ -n "$lat" ] && [ "$lat" != "0 us" ]; then curl -X POST "https://sanetprdfrc001.table.core.windows.net/perf" -H "Authorization: Bearer $access_token" -H "x-ms-version: 2020-04-08" -H "Accept: application/json;odata=nometadata" -H "Content-Type: application/json" -d "{\"PartitionKey\":\"$uuid\",\"RowKey\":\"$region\", \"Source\":\"$source\", \"Destination\":\"az3\", \"Bandwidth\":\"$bw\", \"Latency\":\"$lat\"}"; fi'
+  - /usr/local/bin/run-netbench.sh
+

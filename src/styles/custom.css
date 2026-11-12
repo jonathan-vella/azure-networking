@@ -1,0 +1,30 @@
+:root {
+  --sl-color-accent-low: #0c2d48;
+  --sl-color-accent: #0078d4;
+  --sl-color-accent-high: #8cc8ff;
+  --sl-content-width: 54rem;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #deecf9;
+  --sl-color-accent: #0067b8;
+  --sl-color-accent-high: #003966;
+}
+
+.mermaid-wrapper {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.5rem;
+  background: var(--sl-color-bg-nav);
+  overflow-x: auto;
+}
+
+.mermaid-wrapper pre.mermaid {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: center;
+}

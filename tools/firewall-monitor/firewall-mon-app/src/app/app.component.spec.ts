@@ -1,16 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
+import { LoggingService } from './services/logging.service';
 
 describe('AppComponent', () => {
+  const loggingServiceStub = {
+    logPageView: () => {},
+    logEvent: () => {},
+    logMetric: () => {},
+    logException: () => {},
+    logTrace: () => {}
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterModule.forRoot([])
       ],
       declarations: [
         AppComponent
       ],
+      providers: [
+        { provide: LoggingService, useValue: loggingServiceStub }
+      ]
     }).compileComponents();
   });
 
@@ -20,16 +32,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'firewall-mon-app'`, () => {
+  it(`should have as title 'az-firewall-mon'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('firewall-mon-app');
+    expect(app.title).toEqual('az-firewall-mon');
   });
 
-  it('should render title', () => {
+  it('should render router-outlet', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('firewall-mon-app app is running!');
+    expect(compiled.querySelector('router-outlet')).not.toBeNull();
   });
 });

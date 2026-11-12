@@ -2,6 +2,9 @@
 package_update: true
 packages:
   - net-tools
+  - bridge-utils
+  - iproute2
   - docker.io
 runcmd:
-  - sudo usermod -aG docker azureuser
+  - usermod -aG docker azureuser
+
