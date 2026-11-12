@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /tools/netbench/dashboard/api
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /tools/netbench/dashboard/web
+    schedule:
+      interval: weekly

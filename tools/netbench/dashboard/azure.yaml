@@ -1,0 +1,13 @@
+name: azure-network-benchmark-dashboard
+infra:
+  provider: terraform
+  path: ./infra
+services:
+  network-benchmark-web:
+    project: ./web
+    host: staticwebapp
+    language: js
+  network-benchmark-api:
+    project: ./api
+    host: function
+    language: js

@@ -1,0 +1,11 @@
+{
+  "name": "azure-network-benchmark-dashboard",
+  "version": "1.0.0",
+  "description": "Network benchmark dashboard for Azure Table Storage data",
+  "scripts": {
+    "build": "echo 'No build step required for static content'",
+    "start": "echo 'Static content ready for deployment'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

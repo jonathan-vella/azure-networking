@@ -1,0 +1,117 @@
+name: LabBuilder - Bicep ARM Build
+
+on: 
+  push: 
+    branches: 
+      - main
+    paths:
+      - '**.bicep'
+  # pull_request: 
+  #   branches:
+  #     - main
+  #   paths:
+  #     - '**.bicep'
+  workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    BicepBuildandLint:
+        name: "Bicep Build and Lint"
+        runs-on: ubuntu-latest
+    
+        steps:
+            # Checkout the repository
+          - name: Checkout
+            uses: actions/checkout@v4
+            
+            # Create a new branch
+          - name: Create new branch
+            uses: actions/github-script@v5
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                const branchName = `bicep-build-${{ github.run_id }}`;
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/heads/${branchName}`,
+                  sha: context.sha
+                });
+            
+            # Build the Bicep file and output the ARM template
+          - name: Bicep Build and Lint
+            run: |
+              bicep build main.bicep --outdir ARM              
+
+            # Commit and push the ./ARM/main.json file to the new branch
+          - name: Commit ARM Template
+            run: |
+              git config --global user.email "github-actions[bot]@users.noreply.github.com"
+              git config --global user.name "github-actions[bot]"
+              git add ARM/main.json
+              git commit -m "ARM Template Build-${{ github.run_id }}"
+              git push origin HEAD:bicep-build-${{ github.run_id }}
+
+            # Create a pull request
+          - name: Create Pull Request
+            id: create_pr
+            uses: actions/github-script@v5
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                const { data: pullRequest } = await github.rest.pulls.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `ARM Template Build-${{ github.run_id }}`,
+                  head: `bicep-build-${{ github.run_id }}`,
+                  base: 'main',
+                  body: 'This PR contains the ARM template build output.',
+                  draft: false
+                });
+                core.setOutput('pullRequestNumber', pullRequest.number);
+
+            # Approve the pull request
+          - name: Approve Pull Request
+            uses: actions/github-script@v5
+            with:
+              github-token: ${{ secrets.PR_APPROVE_TOKEN }}
+              script: |
+                const pullRequestNumber = "${{ steps.create_pr.outputs.pullRequestNumber }}";
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pullRequestNumber,
+                  event: 'APPROVE'
+                });
+
+            # Merge the pull request
+          - name: Merge Pull Request
+            uses: actions/github-script@v5
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                const pullRequestNumber = "${{ steps.create_pr.outputs.pullRequestNumber }}";
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pullRequestNumber,
+                  merge_method: 'squash'
+                });
+
+            # Delete the branch
+          - name: Delete Branch
+            uses: actions/github-script@v5
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                const branchName = `bicep-build-${{ github.run_id }}`;
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branchName}`
+                });
+
+

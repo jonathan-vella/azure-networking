@@ -1,0 +1,73 @@
+site_name: Azure networking
+site_description: Azure networking architectures, patterns, labs, and tools
+site_url: https://jonathan-vella.github.io/azure-networking/
+repo_url: https://github.com/jonathan-vella/azure-networking
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+plugins:
+  - search
+validation:
+  links:
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.smartsymbols
+  - pymdownx.tilde
+  - pymdownx.mark
+  - pymdownx.caret
+nav:
+  - Home: index.md
+  - ExpressRoute:
+      - Traffic segregation: expressroute/segregation/README.md
+      - Bowtie: expressroute/bowtie/README.md
+      - FastPath: expressroute/fastpath/README.md
+      - Resiliency: expressroute/resiliency/README.md
+  - Private Link:
+      - Topologies: private-link/topologies/README.md
+  - Azure network diagrams:
+      - Overview: azure-net/README.md
+      - Calico tooling: azure-net/calicoctl.md
+  - AVS:
+      - Hub-and-spoke patterns: avs/hub-spoke/README.md
+      - License: avs/hub-spoke/LICENSE.md
+  - Virtual WAN:
+      - Review overview: virtual-wan/review/README.md
+      - Checklist: virtual-wan/review/01-vwan-review-checklist.md
+      - Addendum: virtual-wan/review/02-vwan-review-addendum.md
+      - WAF cheat sheet: virtual-wan/review/03-vwan-waf-cheatsheet.md
+      - FAQ: virtual-wan/review/04-vwan-architecture-faq.md
+      - Maintenance:
+          - Overview: virtual-wan/review/prompts/README.md
+          - Blueprint: virtual-wan/review/prompts/00-blueprint.prompt.md
+          - Refresh sources: virtual-wan/review/prompts/refresh-sources.prompt.md
+          - Add controls: virtual-wan/review/prompts/add-or-update-control.prompt.md
+          - Verification: virtual-wan/review/prompts/verify-pack.prompt.md
