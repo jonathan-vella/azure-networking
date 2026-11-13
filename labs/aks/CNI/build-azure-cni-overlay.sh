@@ -11,26 +11,43 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFEST_DIR="${SCRIPT_DIR}/../manifests"
 
 # ------------------------------------------------------------------------------
-# Variables (Brownfield with existing VNet and AKS Node Subnet)
+# Variables (Brownfield BYO-VNet or standalone defaults)
 # ------------------------------------------------------------------------------
-MYACR="${MYACR:-<your-acr-name>}"
-VNETRG="${VNETRG:-<your-vnet-resource-group>}"
-VNET="${VNET:-<your-vnet-name>}"
-SUBNET_NAME="${SUBNET_NAME:-<your-aks-subnet-name>}"
-AKSCLUSTER="${AKSCLUSTER:-<your-aks-cluster-name>}"
-AKSDNS="${AKSDNS:-<your-aks-dns-name-prefix>}"
-LOC="${LOC:-eastus2}"
+PREFIX="${PREFIX:-aks-overlay}"
+LOCATION="${LOCATION:-${LOC:-eastus2}}"
+RG="${RG:-${PREFIX}-rg}"
+VNETRG="${VNETRG:-${RG}}"
+VNET="${VNET:-${PREFIX}-vnet}"
+VNET_CIDR="${VNET_CIDR:-10.41.0.0/16}"
+SUBNET_NAME="${SUBNET_NAME:-snet-aks-nodes}"
+SUBNET_CIDR="${SUBNET_CIDR:-10.41.1.0/24}"
+AKSCLUSTER="${AKSCLUSTER:-${PREFIX}-cluster}"
+AKSDNS="${AKSDNS:-${PREFIX}-dns}"
 NODE_VM_SIZE="${NODE_VM_SIZE:-Standard_D2s_v5}"
 IDENTITY="${IDENTITY:-${AKSCLUSTER}-mi}"
-RG="${RG:-<your-aks-resource-group>}"
+CLEAN_PREFIX="$(printf '%s' "$PREFIX" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]' | cut -c1-16)"
+MYACR="${MYACR:-${CLEAN_PREFIX}acr${RANDOM}}"
 
 az account show -o table
 az provider register -n Microsoft.ContainerService --output none
 
 # Create resource group, ACR, and User-Assigned Managed Identity
-az group create --name "$RG" --location "$LOC"
+az group create --name "$RG" --location "$LOCATION"
 az acr create --resource-group "$RG" --name "$MYACR" --sku Basic
 az identity create --name "$IDENTITY" --resource-group "$RG"
+
+# Create VNet and AKS node subnet when not attaching to a pre-existing brownfield VNet
+if ! az network vnet subnet show --resource-group "$VNETRG" --vnet-name "$VNET" --name "$SUBNET_NAME" --output none 2>/dev/null; then
+  az group create --name "$VNETRG" --location "$LOCATION" --output none
+  az network vnet create \
+    --resource-group "$VNETRG" \
+    --name "$VNET" \
+    --location "$LOCATION" \
+    --address-prefixes "$VNET_CIDR" \
+    --subnet-name "$SUBNET_NAME" \
+    --subnet-prefixes "$SUBNET_CIDR" \
+    --output none
+fi
 
 principal_id=$(az identity show --resource-group "$RG" --name "$IDENTITY" --query principalId -o tsv | tr -d '\r')
 identity_id=$(az identity show --resource-group "$RG" --name "$IDENTITY" --query id -o tsv | tr -d '\r')
@@ -50,7 +67,7 @@ az role assignment create \
 az aks create \
   --resource-group "$RG" \
   --name "$AKSCLUSTER" \
-  --location "$LOC" \
+  --location "$LOCATION" \
   --node-count 3 \
   --node-vm-size "$NODE_VM_SIZE" \
   --generate-ssh-keys \

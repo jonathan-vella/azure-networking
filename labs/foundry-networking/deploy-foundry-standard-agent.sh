@@ -11,9 +11,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BICEP_FILE="${SCRIPT_DIR}/build-foundry-standard-agent-vnet.bicep"
 
-NAME_PREFIX="${NAME_PREFIX:-foundrylab}"
+PREFIX="${PREFIX:-${NAME_PREFIX:-foundrylab}}"
+NAME_PREFIX="${NAME_PREFIX:-${PREFIX}}"
 LOCATION="${LOCATION:-eastus2}"
-RESOURCE_GROUP="${RESOURCE_GROUP:-rg-${NAME_PREFIX}-${LOCATION}}"
+RG="${RG:-${RESOURCE_GROUP:-rg-${NAME_PREFIX}-${LOCATION}}}"
+RESOURCE_GROUP="$RG"
 DEPLOY_HUB_VNET="${DEPLOY_HUB_VNET:-false}"
 DEPLOY_MODEL="${DEPLOY_MODEL:-true}"
 DEPLOY_CAPABILITY_HOSTS="${DEPLOY_CAPABILITY_HOSTS:-true}"
@@ -33,9 +35,10 @@ for rp in "${REQUIRED_PROVIDERS[@]}"; do
   az provider register --namespace "$rp" --output none
 done
 
-echo "==> [2/4] Compiling Bicep template locally..."
+echo "==> [2/4] Linting and compiling Bicep template locally..."
+az bicep lint --file "$BICEP_FILE"
 az bicep build --file "$BICEP_FILE" --stdout > /dev/null
-echo "    Bicep compilation succeeded."
+echo "    Bicep lint and compilation succeeded."
 
 echo "==> [3/4] Creating resource group ${RESOURCE_GROUP} (${LOCATION}) and running ARM preflight validation..."
 az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none

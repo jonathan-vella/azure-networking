@@ -7,5 +7,6 @@ packages:
   - curl
   - docker.io
 runcmd:
+  - systemctl enable --now docker
   - usermod -aG docker azureuser
 

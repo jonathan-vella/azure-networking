@@ -192,7 +192,7 @@ echo "==> [8/8] Applying Gateway API manifests (${MANIFEST_PATH})..."
 kubectl apply -f "$MANIFEST_PATH"
 kubectl wait --for=condition=Programmed gateway/agc-gateway -n agc-demo --timeout=300s
 
-AGC_FQDN=$(kubectl get gateway agc-gateway -n agc-demo -o jsonpath='{.status.addresses[0].value}')
+AGC_FQDN=$(kubectl get gateway agc-gateway -n agc-demo -o jsonpath='{.status.addresses[0].value}' | tr -d '\r')
 echo ""
 echo "=============================================================================="
 echo "Application Gateway for Containers Ready!"

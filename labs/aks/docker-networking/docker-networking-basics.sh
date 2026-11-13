@@ -1,190 +1,157 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Interactive Walkthrough: Linux Container Networking Fundamentals
-# Run individual blocks after SSHing into docker-host-1 and docker-host-2
-# provisioned by build-docker-hosts.sh.
+# Walkthrough: Linux Container Networking Fundamentals
+#
+# Run individual stages on docker-host-1 and docker-host-2 provisioned by
+# build-docker-hosts.sh:
+#   ./docker-networking-basics.sh basics
+#   ./docker-networking-basics.sh bridge-host1
+#   ./docker-networking-basics.sh bridge-host2
+#   ./docker-networking-basics.sh dual-homed
+#   ./docker-networking-basics.sh ipvlan-same-subnet
+#   ./docker-networking-basics.sh ipvlan-routed
+#   ./docker-networking-basics.sh cleanup
 # ==============================================================================
+set -euo pipefail
 
-# 1. SSH into the two lab VMs in separate terminals:
-# ssh azureuser@<VM1_PUBLIC_IP>
-# ssh azureuser@<VM2_PUBLIC_IP>
+PREFIX="${PREFIX:-docker-net}"
+LOCATION="${LOCATION:-eastus2}"
+RG="${RG:-${PREFIX}-rg}"
+DEFAULT_IF="$(ip -o -4 route show to default 2>/dev/null | awk '{print $5; exit}' || true)"
+PARENT_IF="${PARENT_IF:-${DEFAULT_IF:-eth0}}"
+BRIDGE_NAME="${BRIDGE_NAME:-red-bridge}"
+BRIDGE_SUBNET="${BRIDGE_SUBNET:-172.20.0.0/16}"
+IPVLAN_NAME="${IPVLAN_NAME:-ipvlan-net}"
+VNET_SUBNET="${VNET_SUBNET:-10.1.1.0/24}"
 
+STAGE="${1:-help}"
 
+run_basics() {
+  docker version
+  docker info
+  ip addr show
+  docker run --rm hello-world
 
-#
-# docker commands
-#
+  docker rm -f blue1 blue2 web-published web-random 2>/dev/null || true
+  docker run -dit --name blue1 nginxdemos/hello
+  docker run -dit --name blue2 nginxdemos/hello
+  docker ps
 
-# Display Docker version
-docker version
+  docker exec blue1 ip addr show
+  docker exec blue1 ping -c 3 8.8.8.8
+  docker exec blue1 sh -c 'wget -qO- http://ifconfig.me || true'
+  echo ""
 
-# Display Docker system-wide information
-docker info
+  # Publish container port 80 on host port 8080, and publish all exposed ports (-P)
+  docker run -dit --name web-published -p 8080:80 nginxdemos/hello
+  docker run -dit --name web-random -P nginxdemos/hello
+  docker ps
+}
 
-# View running containers
-docker ps
+run_bridge_host1() {
+  brctl show || bridge link show
+  docker network ls
 
-# View all containers (including stopped ones)
+  docker rm -f red1 red2 2>/dev/null || true
+  docker network rm "$BRIDGE_NAME" 2>/dev/null || true
+  docker network create --subnet "$BRIDGE_SUBNET" -d bridge "$BRIDGE_NAME"
+  docker network ls
 
-# List Docker images
-docker images
+  docker run -dit --name red1 --network "$BRIDGE_NAME" --ip 172.20.1.10 nginxdemos/hello
+  docker run -dit --name red2 --network "$BRIDGE_NAME" --ip 172.20.1.11 nginxdemos/hello
+  docker network inspect bridge "$BRIDGE_NAME"
+  docker ps
 
-# List Docker containers
-docker container list
+  # Same-host custom bridge: automatic DNS + L2 reachability succeeds
+  docker exec red1 ip addr show
+  docker exec red1 ping -c 3 red2
 
+  # Cross-host isolated bridge: 172.20.1.12 on docker-host-2 is unreachable without overlay/routing
+  docker exec red1 ping -c 2 -W 2 172.20.1.12 || echo "Expected failure: isolated bridge does not span VMs"
+}
 
-# Before state
-ip add
-docker run hello-world
-docker images
-docker ps
-docker ps -a
+run_bridge_host2() {
+  docker rm -f red3 red4 2>/dev/null || true
+  docker network rm "$BRIDGE_NAME" 2>/dev/null || true
+  docker network create --subnet "$BRIDGE_SUBNET" -d bridge "$BRIDGE_NAME"
 
-# Run a container named blue1 with nginxdemos/hello image
-docker run -dit --name blue1 nginxdemos/hello
+  docker run -dit --name red3 --network "$BRIDGE_NAME" --ip 172.20.1.12 nginxdemos/hello
+  docker run -dit --name red4 --network "$BRIDGE_NAME" --ip 172.20.1.13 nginxdemos/hello
+  docker exec red3 ip addr show
+  docker exec red3 ping -c 3 red4
+}
 
-# Run a container named blue2 with nginxdemos/hello image
-docker run -dit --name blue2 nginxdemos/hello
+run_dual_homed() {
+  docker rm -f blue3 2>/dev/null || true
+  docker run -dit --name blue3 nginxdemos/hello
 
-# View running containers
-docker ps
+  # Fails before attaching blue3 to red-bridge
+  docker exec red1 ping -c 2 -W 2 blue3 || echo "Expected failure before connecting blue3 to ${BRIDGE_NAME}"
 
-# Execute a shell inside the web2 container
-docker exec -it blue1 sh
+  # Attach blue3 as a dual-homed container across default bridge and red-bridge
+  docker network connect "$BRIDGE_NAME" blue3
+  docker exec red1 ping -c 3 blue3
+}
 
-# Display network interfaces
-ifconfig
+run_ipvlan_same_subnet() {
+  # Note: For VNet reachability across Azure hosts, register 10.1.1.10 and 10.1.1.11
+  # as secondary IP configurations on the host Azure NIC.
+  docker rm -f purple1 purple2 2>/dev/null || true
+  docker network rm "$IPVLAN_NAME" 2>/dev/null || true
 
-# Ping Google's DNS server
-ping 8.8.8.8
+  docker network create --driver ipvlan \
+    --subnet "$VNET_SUBNET" \
+    --opt "parent=${PARENT_IF}" \
+    --opt ipvlan_mode=l3 \
+    "$IPVLAN_NAME"
+  docker network inspect "$IPVLAN_NAME"
 
-# Get public IP address using ifconfig.me
-curl ifconfig.me
-exit
+  docker run -d --net="$IPVLAN_NAME" --ip=10.1.1.10 --name purple1 alpine sh -c "while true; do sleep 3600; done"
+  docker run -d --net="$IPVLAN_NAME" --ip=10.1.1.11 --name purple2 alpine sh -c "while true; do sleep 3600; done"
+  docker exec purple1 ping -c 3 10.1.1.11
+}
 
-#
-# expose ports
-#
+run_ipvlan_routed() {
+  # Demonstrates multi-subnet L3 ipvlan routing (requires Azure UDR + NIC IP forwarding
+  # for cross-host return traffic, and NVA SNAT for 0.0.0.0/0 internet egress).
+  docker rm -f purple1 purple2 2>/dev/null || true
+  docker network rm "$IPVLAN_NAME" 2>/dev/null || true
 
-# Run a container with nginxdemos/hello image and expose port 8080
-docker run -dit -p 8080:80 nginxdemos/hello
+  docker network create --driver ipvlan \
+    --subnet 192.168.1.0/24 \
+    --subnet 192.168.2.0/24 \
+    --opt "parent=${PARENT_IF}" \
+    --opt ipvlan_mode=l3 \
+    "$IPVLAN_NAME"
+  docker network inspect "$IPVLAN_NAME"
 
+  docker run -d --net="$IPVLAN_NAME" --ip=192.168.1.10 --name purple1 alpine sh -c "while true; do sleep 3600; done"
+  docker run -d --net="$IPVLAN_NAME" --ip=192.168.2.10 --name purple2 alpine sh -c "while true; do sleep 3600; done"
+  docker exec purple1 ping -c 3 192.168.2.10
+}
 
-#
-# publish all exposed ports
-#
+run_cleanup() {
+  local ids
+  ids=$(docker ps -aq || true)
+  if [[ -n "$ids" ]]; then
+    # shellcheck disable=SC2086
+    docker rm -f $ids
+  fi
+  docker network rm "$BRIDGE_NAME" 2>/dev/null || true
+  docker network rm "$IPVLAN_NAME" 2>/dev/null || true
+}
 
-# Run a container with nginxdemos/hello image and publish all exposed ports
-docker run -dit -P nginxdemos/hello
-
-#
-# create network
-#
-
-# Show bridge control
-brctl show
-
-#
-# docker host 1
-#
-# List Docker networks
-docker network ls
-
-docker network rm red-bridge
-# Create a bridge network named red-bridge with a specific subnet
-#docker network create --driver bridge red-bridge
-docker network create --subnet 172.20.0.0/16 -d bridge red-bridge
-
-# List Docker networks
-docker network ls
-
-# Run a container named red1 in the red-bridge network with nginxdemos/hello image
-#docker run -dit --name red1 --network red-bridge nginxdemos/hello
-# Run a container named red1 in the red-bridge network with nginxdemos/hello image and assign a specific IP address
-docker run -dit --name red1 --network red-bridge --ip 172.20.1.10 nginxdemos/hello
-
-# Run a container named red2 in the red-bridge network with nginxdemos/hello image
-#docker run -dit --name red2 --network red-bridge nginxdemos/hello
-docker run -dit --name red2 --network red-bridge --ip 172.20.1.11 nginxdemos/hello
-#
-# ******docker host 2*******
-#
-docker run -dit --name red3 --network red-bridge --ip 172.20.1.12 nginxdemos/hello
-
-# Run a container named red2 in the red-bridge network with nginxdemos/hello image
-#docker run -dit --name red2 --network red-bridge nginxdemos/hello
-docker run -dit --name red4 --network red-bridge --ip 172.20.1.13 nginxdemos/hello
-#docker network create --subnet 172.18.0.0/16 -d bridge red-bridge
-
-# Inspect the bridge network and nn-bridge network
-docker network inspect bridge red-bridge
-
-# View running containers
-docker ps
-
-# Execute a shell inside the red1 container
-docker exec -it red1 ifconfig
-docker exec -it red1 sh
-ping red2
-docker exec -it red3 sh
-ping red3 # fails
-#
-# docker host 2
-#
-docker exec -it red3 sh
-
-# Execute a shell inside the stoic_bell container
-docker exec -it red2 ifconfig
-
-# Dual homed container from the red2 container
-
-# Run a container named blue3 with nginxdemos/hello image
-docker run -dit --name blue3 nginxdemos/hello
-
-# Connect the blue3 container to the red-bridge network (dual-homed container)
-# docker exec -it red1 ping -c 2 blue3   # fails before connecting
-docker network connect red-bridge blue3
-docker exec -it red1 ping -c 2 blue3     # succeeds after connecting
-
-#
-# Docker Hub
-#
-
-# Clean up Docker containers
-
-# Stop all running containers
-docker stop $(docker ps -aq)
-
-# Remove all containers
-docker rm $(docker ps -aq)
-
-#
-#ipvlan network
-#
-docker network create --driver ipvlan --subnet 10.1.1.0/24 --opt parent=eth0 --opt ipvlan_mode=l3 ipvlan-net
-docker network inspect ipvlan-net
-#run a container with alpine image
-# attach nic on the host (secodary IP private and public)
-docker run -d --net=ipvlan-net --ip=10.1.1.10 --name purple1 alpine sh -c "while true; do sleep 3600; done"
-docker run -d --net=ipvlan-net --ip=10.1.1.11 --name purple2 alpine sh -c "while true; do sleep 3600; done"
-#cleanup
-# Stop and remove all running containers
-docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
-docker network rm ipvlan-net
-
-# different subnet
-# allow inbound nsg on 10.1.1.5
-docker network create --driver ipvlan \
-    --subnet 192.168.1.0/24 --subnet 192.168.2.0/24 \
-    --opt parent=eth0 \
-    --opt ipvlan_mode=l3 ipvlan-net
-docker network inspect ipvlan-net
-# attach nic on the host (secodary IP private and public)
-docker run -d --net=ipvlan-net --ip=192.168.1.10 --name purple1 alpine sh -c "while true; do sleep 3600; done"
-docker run -d --net=ipvlan-net --ip=192.168.2.10 --name purple2 alpine sh -c "while true; do sleep 3600; done"
-docker exec -it purple1 sh
-ping purple2 # works
-ping 10.1.1.5 # works with return route and inbound NSG on destination 10.1.1.5
-ping 8.8.8.8 # needs 0/0 via NVA; NVA does source NAT
-docker network rm ipvlan-net
+case "$STAGE" in
+  basics)             run_basics ;;
+  bridge-host1)       run_bridge_host1 ;;
+  bridge-host2)       run_bridge_host2 ;;
+  dual-homed)         run_dual_homed ;;
+  ipvlan-same-subnet) run_ipvlan_same_subnet ;;
+  ipvlan-routed)      run_ipvlan_routed ;;
+  cleanup)            run_cleanup ;;
+  *)
+    echo "Lab context: RG=${RG}, LOCATION=${LOCATION}, PARENT_IF=${PARENT_IF}"
+    echo "Usage: $0 {basics|bridge-host1|bridge-host2|dual-homed|ipvlan-same-subnet|ipvlan-routed|cleanup}"
+    ;;
+esac
 

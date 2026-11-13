@@ -1,4 +1,4 @@
-# Application Gateway for Containers (Managed ALB Controller) — Kubernetes Gateway API Lab
+# Application Gateway for Containers (Managed ALB Controller) - Kubernetes Gateway API Lab
 # Demonstrates GatewayClass (azure-alb-external), Gateway, and HTTPRoute with:
 #   1. Path-based routing (/orders -> orders-api)
 #   2. Header-based canary routing (X-Canary: true -> web-v2)
@@ -14,6 +14,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: agc-demo
+  labels:
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +24,9 @@ metadata:
   namespace: agc-demo
   labels:
     app: web-v1
+    app.kubernetes.io/name: web-v1
+    app.kubernetes.io/version: v1
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   replicas: 2
   selector:
@@ -31,6 +36,9 @@ spec:
     metadata:
       labels:
         app: web-v1
+        app.kubernetes.io/name: web-v1
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/part-of: aks-agc-gateway-lab
     spec:
       containers:
         - name: echo
@@ -39,7 +47,21 @@ spec:
             - "-text=agc-backend: web-v1 (stable)"
             - "-listen=:8080"
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 25m
@@ -53,14 +75,19 @@ kind: Service
 metadata:
   name: web-v1
   namespace: agc-demo
+  labels:
+    app: web-v1
+    app.kubernetes.io/name: web-v1
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   type: ClusterIP
   selector:
     app: web-v1
   ports:
     - name: http
+      protocol: TCP
       port: 8080
-      targetPort: 8080
+      targetPort: http
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,6 +96,9 @@ metadata:
   namespace: agc-demo
   labels:
     app: web-v2
+    app.kubernetes.io/name: web-v2
+    app.kubernetes.io/version: v2
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   replicas: 2
   selector:
@@ -78,6 +108,9 @@ spec:
     metadata:
       labels:
         app: web-v2
+        app.kubernetes.io/name: web-v2
+        app.kubernetes.io/version: v2
+        app.kubernetes.io/part-of: aks-agc-gateway-lab
     spec:
       containers:
         - name: echo
@@ -86,7 +119,21 @@ spec:
             - "-text=agc-backend: web-v2 (canary)"
             - "-listen=:8080"
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 25m
@@ -100,14 +147,19 @@ kind: Service
 metadata:
   name: web-v2
   namespace: agc-demo
+  labels:
+    app: web-v2
+    app.kubernetes.io/name: web-v2
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   type: ClusterIP
   selector:
     app: web-v2
   ports:
     - name: http
+      protocol: TCP
       port: 8080
-      targetPort: 8080
+      targetPort: http
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -116,6 +168,8 @@ metadata:
   namespace: agc-demo
   labels:
     app: orders-api
+    app.kubernetes.io/name: orders-api
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   replicas: 2
   selector:
@@ -125,6 +179,8 @@ spec:
     metadata:
       labels:
         app: orders-api
+        app.kubernetes.io/name: orders-api
+        app.kubernetes.io/part-of: aks-agc-gateway-lab
     spec:
       containers:
         - name: echo
@@ -133,7 +189,21 @@ spec:
             - "-text=agc-backend: orders-api (/orders)"
             - "-listen=:8080"
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 25m
@@ -147,20 +217,27 @@ kind: Service
 metadata:
   name: orders-api
   namespace: agc-demo
+  labels:
+    app: orders-api
+    app.kubernetes.io/name: orders-api
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   type: ClusterIP
   selector:
     app: orders-api
   ports:
     - name: http
+      protocol: TCP
       port: 8080
-      targetPort: 8080
+      targetPort: http
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: agc-gateway
   namespace: agc-demo
+  labels:
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
   annotations:
     alb.networking.azure.io/alb-namespace: alb-infra
     alb.networking.azure.io/alb-name: agc-alb
@@ -179,6 +256,8 @@ kind: HTTPRoute
 metadata:
   name: agc-app-routes
   namespace: agc-demo
+  labels:
+    app.kubernetes.io/part-of: aks-agc-gateway-lab
 spec:
   parentRefs:
     - name: agc-gateway

@@ -7,20 +7,22 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export RESOURCE_GROUP_NAME="${RESOURCE_GROUP_NAME:-docker-net-rg}"
+export PREFIX="${PREFIX:-docker-net}"
 export LOCATION="${LOCATION:-eastus2}"
+export RG="${RG:-${RESOURCE_GROUP_NAME:-${PREFIX}-rg}}"
+export RESOURCE_GROUP_NAME="$RG"
 export VM_NAME_1="${VM_NAME_1:-docker-host-1}"
 export VM_NAME_2="${VM_NAME_2:-docker-host-2}"
-export VM_IMAGE="${VM_IMAGE:-Ubuntu2404}"
+export VM_IMAGE="${VM_IMAGE:-Canonical:ubuntu-24_04-lts:server:latest}"
 export VM_SIZE="${VM_SIZE:-Standard_B2ls_v2}"
 export ADMIN_USERNAME="${ADMIN_USERNAME:-azureuser}"
-export VNET_NAME="${VNET_NAME:-docker-vnet}"
-export SUBNET_NAME="${SUBNET_NAME:-docker-subnet}"
+export VNET_NAME="${VNET_NAME:-${PREFIX}-vnet}"
+export SUBNET_NAME="${SUBNET_NAME:-${PREFIX}-subnet}"
 export VNET_ADDRESS_PREFIX="${VNET_ADDRESS_PREFIX:-10.1.0.0/16}"
 export SUBNET_ADDRESS_PREFIX="${SUBNET_ADDRESS_PREFIX:-10.1.1.0/24}"
 export PUB_KEY="${PUB_KEY:-$HOME/.ssh/id_rsa.pub}"
 
-MY_IP=$(curl -s https://ifconfig.me)
+MY_IP=$(curl -fsSL https://ifconfig.me | tr -d '\r\n')
 
 az group create --name "$RESOURCE_GROUP_NAME" --location "$LOCATION"
 

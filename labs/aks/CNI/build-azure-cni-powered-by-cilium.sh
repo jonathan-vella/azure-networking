@@ -13,9 +13,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFEST_DIR="${SCRIPT_DIR}/../manifests"
 
-RG="${RG:-aks-cilium-rg}"
-AKSCLUSTER="${AKSCLUSTER:-aks-cilium-lab}"
-LOC="${LOC:-eastus2}"
+PREFIX="${PREFIX:-aks-cilium}"
+LOCATION="${LOCATION:-${LOC:-eastus2}}"
+RG="${RG:-${PREFIX}-rg}"
+AKSCLUSTER="${AKSCLUSTER:-${PREFIX}-lab}"
 NODE_VM_SIZE="${NODE_VM_SIZE:-Standard_D2s_v5}"
 NODE_COUNT="${NODE_COUNT:-3}"
 
@@ -23,13 +24,13 @@ az account show -o table
 az provider register -n Microsoft.ContainerService --output none
 
 # Create Resource Group
-az group create --name "$RG" --location "$LOC"
+az group create --name "$RG" --location "$LOCATION"
 
 # Create AKS cluster with Azure CNI Overlay + Cilium eBPF dataplane
 az aks create \
   --resource-group "$RG" \
   --name "$AKSCLUSTER" \
-  --location "$LOC" \
+  --location "$LOCATION" \
   --node-count "$NODE_COUNT" \
   --node-vm-size "$NODE_VM_SIZE" \
   --network-plugin azure \

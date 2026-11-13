@@ -16,7 +16,8 @@ set -euo pipefail
 PREFIX="${PREFIX:-aml-private-demo}"
 NETWORK_MODE="${NETWORK_MODE:-managed_approved}"
 export LOCATION="${LOCATION:-eastus2}"
-export RESOURCE_GROUP="${RESOURCE_GROUP:-${PREFIX}-rg}"
+export RG="${RG:-${RESOURCE_GROUP:-${PREFIX}-rg}}"
+export RESOURCE_GROUP="$RG"
 export WORKSPACE_NAME="${WORKSPACE_NAME:-${PREFIX}}"
 
 # Customer VNet created by ./build-cust-vnet.sh (used for inbound Private Endpoint)

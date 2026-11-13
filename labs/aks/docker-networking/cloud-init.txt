@@ -3,8 +3,11 @@ package_update: true
 packages:
   - net-tools
   - bridge-utils
+  - dnsutils
   - iproute2
+  - curl
   - docker.io
 runcmd:
+  - systemctl enable --now docker
   - usermod -aG docker azureuser
 
