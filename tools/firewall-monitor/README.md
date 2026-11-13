@@ -4,95 +4,102 @@
 
 <img alt="logo" src="firewall-mon-app/src/assets/logo.png" width="72" height="72" style="vertical-align:middle; background-color: DimGray;border-radius: 15%;">
 </div>
-<h1 align="center">az-firewall-mon🧑‍🚒</h1>
+<h1 align="center">az-firewall-mon</h1>
 
 <div align="center">
-  an <i>alternative and opinionated</i> way to access and inspect Azure Firewall logs
+  Real-time Event Hub log stream viewer for Azure Firewall
 </div>
 
 <br/>
 
 <div align="center">
-  <sub>built by
+  <sub>Originally built by
   <a href="https://github.com/nicolgit">nicolgit</a> and
   <a href="https://github.com/nicolgit/azure-firewall-mon/contributors">
     contributors
-  </a>
+  </a></sub>
 </div>
 
 <br/>
 
 ![azure-firewall-mon-app](images/firewall-mon-app.png)
 
-We all know that Microsoft's recommended approach for analyzing Azure Firewall logs is to set up a Log Analytics Workspace to collect all the data and use Kusto Query Language (KQL) queries to check the results. 
+Microsoft recommends sending Azure Firewall logs to a Log Analytics workspace and analyzing them with Kusto Query Language (KQL). Log Analytics ingestion adds two to five minutes of latency, which slows down live cutovers and rule troubleshooting.
 
-Azure-Firewall-mon focuses more on providing a tool that can answer the simple question "_what is happening right now?_" in an alternative and practical way. The idea is to provide an approach similar to [Sysinternals Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) or [Check Point's SmartView/SmartLog](https://sc1.checkpoint.com/documents/R80.40/WebAdminGuides/EN/CP_R80.40_LoggingAndMonitoring_AdminGuide/Topics-LMG/Using-log-view.htm?tocpath=Logging%7C_____2), where you don't need to implement KQL queries or dashboards first to get it working. All events are available as a _log-stream_.
+`az-firewall-mon` answers one operational question: "What is Azure Firewall allowing or dropping right now?" It streams structured firewall events directly from Azure Event Hubs into a virtual-scrolled browser table, similar to [Sysinternals Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon) or [Check Point SmartView](https://sc1.checkpoint.com/documents/R80.40/WebAdminGuides/EN/CP_R80.40_LoggingAndMonitoring_AdminGuide/Topics-LMG/Using-log-view.htm?tocpath=Logging%7C_____2), with no KQL queries or dashboards required first.
 
-The real strength of the tool is the search field available in the top toolbar. To search for an event, simply start typing and the log flow will be automatically filtered according to those parameters.
+## Related handbook chapters
+
+* [Firewall and NVA patterns](../../src/content/docs/04-network-security/firewall-and-nva-patterns.md)
+* [Labs and tools guide](../../src/content/docs/06-operations-reviews/labs-and-tools-guide.md)
+* [Virtual WAN verification playbook](../../src/content/docs/06-operations-reviews/vwan-review-addendum.md)
+
+## Live filtering and natural-language search
+
+Type in the top toolbar search box to filter the live event stream across all columns as events arrive.
 
 ![text filter](images/01-text-filtering.png)
 
-The timestamp field displays the event date in UTC or local format. You can filter the view for the last few minutes or for a specific time range.
+Display timestamps in UTC or local time, and filter by either a rolling minute window or an explicit start and end time.
 
-![text filter](images/02-time-filtering.png)
+![time filter](images/02-time-filtering.png)
 
-Within this tool, only events from the last 24 hours will appear because this is the duration set on the Event Hub Namespace. A longer duration would slow down the tool and not help answer the question "_what is happening right now?_" that az-firewall-mon aims to address.
+The Event Hub template configures a 24-hour retention period on a single partition so the browser reads only recent traffic tailored for real-time inspection.
 
-As an alternative to full-text search, you can use the **chatGPT mode**: in the top search field, you can enter a request in natural language, and the system will filter the content accordingly.
+Switch the toolbar to AI filter mode (`gpt-4o` on Azure OpenAI) to translate natural-language prompts into structured field filters:
 
-Some examples of queries are as follows:
-
-* "_Show me events from the last 15 minutes_" 
-* "_Search project alpha_" 
-* "_Filter rows with category containing "NetworkRule"_" 
-* "_Filter events between 12:00 and 13:00_" 
-* "_Filter for target containing 192.168.1.1_" 
-* "_Include only logs with protocol TCP_" 
-* "_Show me only the deny actions_" 
-* "_More information on source 192.168.1.1_"
+* "Show me events from the last 15 minutes"
+* "Search project alpha"
+* "Filter rows with category containing NetworkRule"
+* "Filter events between 12:00 and 13:00"
+* "Filter for target containing 192.168.1.1"
+* "Include only logs with protocol TCP"
+* "Show me only the deny actions"
+* "More information on source 192.168.1.1"
 
 ![chatgpt](images/03-chatgpt.gif)
 
-# Set up a connection with your Azure Firewall
-Azure-Firewall-mon is an open-source [Single Page Application](https://en.wikipedia.org/wiki/Single-page_application) written in [Angular](https://angular.dev/) (Angular 20, tested with Vitest) with an [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview) v4 isolated worker backend written in C# (.NET 8).
+## Runtime architecture
 
-Here's the current architecture:
+`az-firewall-mon` is a single-page application built with [Angular 22](https://angular.dev/) (TypeScript 6.0, tested with Vitest 5.1) and backed by an [Azure Functions](https://learn.microsoft.com/en-us/azure/azure-functions/functions-overview) v4 isolated worker API in C# (.NET 8, tested with xUnit).
 
-![architecture](./images/architecture.png)
+![Runtime architecture](./images/architecture.svg)
 
-To use this app with **YOUR FIREWALL data**, you have 2 options:
+To connect `az-firewall-mon` to your firewall telemetry, choose one of two options:
 
-1. Deploy `az-firewall-mon` in your own Azure subscription (**recommended** — keeps all telemetry, OpenAI prompts, and Event Hub traffic inside your tenant)
-2. Use the upstream sample deployment at <https://az-firewall-mon.duckiesfarm.com> for non-sensitive testing only
+1. Deploy `az-firewall-mon` in your own Azure subscription (recommended). All firewall logs, Azure OpenAI prompts, and Application Insights telemetry remain inside your tenant.
+2. Use the upstream demo at <https://az-firewall-mon.duckiesfarm.com> for synthetic or non-sensitive testing only.
 
-> <https://az-firewall-mon.duckiesfarm.com> is an upstream community demo with strict rate limits on Azure Maps and Azure OpenAI. Deploying your own instance in [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) (see [INSTALL.md](INSTALL.md)) gives you full control over performance, network isolation, and data residency.
+> Never paste production Event Hub connection strings into a third-party demo URL. Follow [INSTALL.md](INSTALL.md) to deploy a private instance in your own subscription with Entra ID authentication and optional Private Endpoint isolation.
 
-# Azure Firewall Structured Logs & Event Hub Security (2026 Guidance)
+## Azure Firewall structured logs and Event Hub security
 
-### Prefer Resource-Specific Structured Logs over Legacy `AzureDiagnostics`
-When configuring **Diagnostic Settings** on Azure Firewall, select **Resource-specific** structured log categories instead of the legacy `AzureDiagnostics` mode:
+### Use resource-specific structured logs instead of legacy AzureDiagnostics
 
-| Structured Category | Description | Key Parsed Fields in `az-firewall-mon` |
+When configuring Diagnostic settings on Azure Firewall, select **Resource-specific** structured log categories rather than the legacy `AzureDiagnostics` mode:
+
+| Structured category | Description | Key parsed fields in `az-firewall-mon` |
 |---|---|---|
-| `AZFWNetworkRule` | L3/L4 Network rule evaluations | `Protocol`, `SourceIp`, `SourcePort`, `DestinationIp`, `DestinationPort`, `Action`, `Policy`, `RuleCollectionGroup`, `RuleCollection`, `Rule`, `ActionReason` |
-| `AZFWApplicationRule` | L7 FQDN / HTTP(S) / Web Category rules | `Protocol`, `SourceIp`, `Fqdn`, `DestinationPort`, `TargetUrl`, `WebCategory`, `Action`, `Policy` |
+| `AZFWNetworkRule` | L3/L4 network rule evaluations | `Protocol`, `SourceIp`, `SourcePort`, `DestinationIp`, `DestinationPort`, `Action`, `Policy`, `RuleCollectionGroup`, `RuleCollection`, `Rule`, `ActionReason` |
+| `AZFWApplicationRule` | L7 FQDN, HTTP(S), and web category rules | `Protocol`, `SourceIp`, `Fqdn`, `DestinationPort`, `TargetUrl`, `WebCategory`, `Action`, `Policy` |
 | `AZFWNatRule` | Inbound DNAT rule translations | `Protocol`, `SourceIp`, `SourcePort`, `TranslatedIp`, `TranslatedPort`, `Policy` |
-| `AZFWDnsQuery` | DNS Proxy queries and responses | `SourceIp`, `Protocol`, `QueryId`, `QueryType`, `QueryName`, `ResponseCode` |
-| `AZFWIdpsSignature` | Azure Firewall Premium IDPS alerts/drops | `Protocol`, `SourceIp`, `DestinationIp`, `Action`, `Severity`, `SignatureId`, `Category`, `Description` |
+| `AZFWDnsQuery` | DNS proxy queries and responses | `SourceIp`, `Protocol`, `QueryId`, `QueryType`, `QueryName`, `ResponseCode` |
+| `AZFWIdpsSignature` | Azure Firewall Premium IDPS alerts and drops | `Protocol`, `SourceIp`, `DestinationIp`, `Action`, `Severity`, `SignatureId`, `Category`, `Description` |
 | `AZFWThreatIntel` | Threat intelligence indicator matches | `Protocol`, `SourceIp`, `Fqdn`, `Action`, `ThreatDescription` |
 
-Structured logs emit strongly typed JSON properties rather than packing free-form strings into `properties.msg`, avoiding brittle regex/string parsing, reducing payload overhead, and supporting Premium IDPS and Threat Intelligence categories natively. Legacy categories (`AzureFirewallNetworkRule`, `AzureFirewallApplicationRule`, `AzureFirewallDnsProxy`) remain parsed for backward compatibility, but new deployments should use the `AZFW*` categories above.
+Structured logs emit typed JSON fields instead of packing free-form strings into `properties.msg`. This avoids fragile string parsing, reduces payload size, and parses Premium IDPS and Threat Intelligence categories directly. Legacy categories (`AzureFirewallNetworkRule`, `AzureFirewallApplicationRule`, `AzureFirewallDnsProxy`) remain supported for existing deployments, while new deployments should enable `AZFW*` categories.
 
-### Event Hub SAS Least-Privilege Security (`Listen` Only)
-Because the Angular SPA streams events directly from Azure Event Hubs over AMQP-over-WebSockets (`@azure/event-hubs`), apply strict least-privilege controls:
+### Event Hub SAS least-privilege controls (`Listen` only)
 
-* **Scope SAS to the Event Hub entity, never the Namespace**: Do **not** use `RootManageSharedAccessKey`. Create an Event Hub–level Shared Access Policy with **only** the `Listen` claim (never `Manage` or `Send`).
-* **Short retention & dedicated consumer group**: Configure a `1-day` message retention and `1` partition for real-time inspection, and use a dedicated consumer group (or `$Default` if no other reader shares the hub) so readers do not contend over offsets.
-* **Credential hygiene**: Rotate SAS keys regularly and never hardcode connection strings in source files or commit them to Git. Connection strings entered in the UI are AES-encrypted in browser `localStorage` for the active browser profile only.
+The Angular 22 SPA connects directly to Azure Event Hubs over AMQP-over-WebSockets (`@azure/event-hubs`). Apply these least-privilege controls:
 
-# Stream Azure Firewall Logs to Event Hub
+* **Scope SAS to the Event Hub entity, never the namespace**: Do not use `RootManageSharedAccessKey`. Create an Event Hub entity Shared Access Policy with only the `Listen` claim (never `Manage` or `Send`).
+* **Short retention and dedicated consumer group**: Configure 1-day message retention and 1 partition for live inspection. Use a dedicated consumer group (or `$Default` when no other reader shares the hub) to avoid offset contention.
+* **Credential hygiene**: Rotate SAS keys on a regular schedule and never commit connection strings to Git. Connection strings entered in the UI are AES-encrypted in browser `localStorage` for the active browser profile.
 
-1. Provision an Event Hub Namespace, Event Hub (`1-day` retention, `1` partition), and a least-privilege `Listen`-only Shared Access Policy using [`bicep/firewall-mon-azure-stuff.bicep`](bicep/firewall-mon-azure-stuff.bicep) from [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking):
+## Stream Azure Firewall logs to Event Hub
+
+1. Deploy the Event Hub Namespace, Event Hub (`1-day` retention, `1` partition), and `Listen`-only Shared Access Policy with [`bicep/firewall-mon-azure-stuff.bicep`](bicep/firewall-mon-azure-stuff.bicep):
 
    ```bash
    az deployment group create \
@@ -100,53 +107,57 @@ Because the Angular SPA streams events directly from Azure Event Hubs over AMQP-
      --template-file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep
    ```
 
-2. Open the Azure Firewall instance you want to monitor in the Azure Portal, go to **Monitoring** > **Diagnostic settings** > **Add diagnostic setting**:
-   * Select the structured log categories (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWDnsQuery`, `AZFWIdpsSignature`, `AZFWThreatIntel`)
-   * Select **Stream to an event hub**, and pick the Event Hub Namespace and Event Hub (`fwmonhub` by default) created above
-   * Click **Save**
+2. Open your Azure Firewall resource in the Azure portal and select **Monitoring** > **Diagnostic settings** > **Add diagnostic setting**:
+   * Check the structured log categories (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWDnsQuery`, `AZFWIdpsSignature`, `AZFWThreatIntel`).
+   * Check **Stream to an event hub**, and select the Event Hub Namespace and Event Hub (`fwmonhub` by default) deployed in step 1.
+   * Select **Save**.
 
-3. Open your deployed `az-firewall-mon` web app (see [INSTALL.md](INSTALL.md)):
-   * Paste the connection string of the **`Listen`-only** Event Hub Shared Access Policy (`fwmonkey` by default) into **Event Hub connection string**
-   * Enter the **Event Hub Consumer Group** name (for example `$Default`)
-   * Click **Let's begin**
+3. Open your private `az-firewall-mon` Static Web App (see [INSTALL.md](INSTALL.md)):
+   * Paste the connection string from the `Listen`-only Event Hub Shared Access Policy (`fwmonkey` by default) into **Event Hub connection string**.
+   * Enter the **Event Hub Consumer Group** name (for example `$Default`).
+   * Select **Let's begin**.
 
-# Install az-firewall-mon in your environment
+## Deploy and verify locally
 
-To deploy a private instance of `az-firewall-mon` (Azure Static Web App, Azure Functions API, Azure Maps, Azure OpenAI, and Application Insights), follow [INSTALL.md](INSTALL.md). Once deployed, follow [Stream Azure Firewall Logs to Event Hub](#stream-azure-firewall-logs-to-event-hub) using your Static Web App URL.
+Follow [INSTALL.md](INSTALL.md) to deploy Azure Static Web Apps, the .NET 8 isolated Azure Functions API, Azure Maps, Azure OpenAI (`gpt-4o`), and Application Insights in your tenant.
 
-# More Information
+To build and run the automated test suites locally:
 
-[Azure Firewall](https://learn.microsoft.com/en-us/azure/firewall/overview) (AF) is a cloud-native and intelligent network firewall security service that provides best-of-breed threat protection for your cloud workloads running in Azure. It's a fully stateful, firewall-as-a-service with built-in high availability and unrestricted cloud scalability. It provides both east-west and north-south traffic inspection.
+```bash
+# Angular 22 SPA build and Vitest 5.1 unit tests
+cd tools/firewall-monitor/firewall-mon-app
+npm ci
+npm run build
+npm test
 
-[Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/overview) helps you maximize the availability and performance of your applications and services. It delivers a comprehensive solution for collecting, analyzing, and acting on telemetry from your cloud and on-premises environments. 
+# .NET 8 isolated Azure Functions build and xUnit test suite
+cd ../..
+dotnet build tools/firewall-monitor/firewall-mon-api/api.csproj --configuration Release
+dotnet test tools/firewall-monitor/firewall-mon-api.Tests/firewall-mon-api.Tests.csproj --configuration Release
+```
 
-Azure Firewall is integrated with Azure Monitor. This means you can forward Azure Firewall metrics and logs to:
+## Azure Monitor and Log Analytics reference
 
-* Log Analytics Workspace
-* Azure Storage
-* Event Hub
+* [Azure Firewall documentation](https://learn.microsoft.com/en-us/azure/firewall/overview): Stateful network and application firewall service for east-west and north-south Azure traffic inspection.
+* [Azure Monitor overview](https://learn.microsoft.com/en-us/azure/azure-monitor/overview): Routes Azure Firewall metrics and diagnostic logs to Log Analytics workspaces, Azure Storage, and Azure Event Hubs.
+* [Log Analytics workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview): Retains historical firewall telemetry for long-term auditing, Policy Analytics, and KQL investigation after an incident.
+* [Kusto Query Language (KQL) reference](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/): Query language used to correlate historical `AZFW*` tables in Log Analytics.
 
-A [Log Analytics workspace](https://docs.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview) is a unique environment for log data from Azure Monitor and other Azure services. Each workspace has its own data repository and configuration but might combine data from multiple services.
+## Tools that inspired az-firewall-mon
 
-Be mindful that the ingestion of logs into a Log Analytics workspace has some latency, so you may see a delay before logs are displayed.
-
-Latency refers to the time between when data is created on the monitored system and when it becomes available for analysis in Azure Monitor.
-
-The [Kusto Query Language](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/) (KQL) is a tool to explore your data in a Log Analytics Workspace. The query uses schema entities that are organized in a hierarchy similar to SQL's: databases, tables, and columns.
-
-# UIs and tools that inspired Az-Firewall-mon
-
-## [Check Point's SmartView](https://community.checkpoint.com/t5/Management/SmartView-Accessing-Check-Point-Logs-from-Web/td-p/3710) web log access
+### [Check Point SmartView](https://community.checkpoint.com/t5/Management/SmartView-Accessing-Check-Point-Logs-from-Web/td-p/3710) web log viewer
 
 ![smart view](images/checkpoint-smartview.png)
 
-## SysInternals [process monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
+### Sysinternals [Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
+
 ![process monitor](images/sysinternals-process-monitor.png)
 
-# Credits
+## Credits
 
-* [90342-security.json](https://lottiefiles.com/90342-security) lottie animation by Kawsar Mahmud
-* [lf20_giodppcr.json](https://lottiefiles.com/95739-no-connection-to-internet) lottie animation by hdev coder
-* [rubik.json](https://lottiefiles.com/animations/abstract-modular-cube-1-INITf22TH2) lottie animation by Ision Industries
-* Logo built with the [new Bing](https://www.bing.com/new)
+* [90342-security.json](https://lottiefiles.com/90342-security) Lottie animation by Kawsar Mahmud
+* [lf20_giodppcr.json](https://lottiefiles.com/95739-no-connection-to-internet) Lottie animation by hdev coder
+* [rubik.json](https://lottiefiles.com/animations/abstract-modular-cube-1-INITf22TH2) Lottie animation by Ision Industries
+* Logo created with [Microsoft Bing](https://www.bing.com/new)
+
 
