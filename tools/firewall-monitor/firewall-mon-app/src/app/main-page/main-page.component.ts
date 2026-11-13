@@ -53,7 +53,7 @@ export class MainPageComponent implements AfterViewInit, OnInit, OnDestroy {
     this.toggleExpandJsonSpace();
   }
 
-  @HostListener('document:keydown.escape', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape', ['$event']) onKeydownHandler(event: Event) {
     console.log(event);
 
     this.advSearchVisibility = !this.advSearchVisibility;

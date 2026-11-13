@@ -4,7 +4,7 @@ import * as Model from '../services/model.service';
 import { LoggingService } from './logging.service';
 
 import { EventHubConsumerClient, earliestEventPosition, ReceivedEventData, SubscribeOptions } from "@azure/event-hubs";
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

@@ -24,6 +24,9 @@ updates:
       firewall-monitor-npm:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "typescript"
+        versions: [">= 6.1.0"]
   - package-ecosystem: nuget
     directory: /tools/firewall-monitor/firewall-mon-api
     schedule:

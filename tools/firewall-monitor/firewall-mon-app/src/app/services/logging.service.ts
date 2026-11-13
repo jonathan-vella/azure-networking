@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { AngularPlugin } from '@microsoft/applicationinsights-angularplugin-js';
