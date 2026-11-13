@@ -1,6 +1,6 @@
 param location string
 param vnetname string
-param vnetAddressSpcae string
+param vnetAddressSpace string
 param defaultSubnetPrefix string = ''
 param bastionSubnetPrefix string = ''
 param firewallSubnetPrefix string = ''
@@ -25,8 +25,16 @@ var defaultSubnet = deployDefaultSubnet
         name: 'default'
         properties: {
           addressPrefix: defaultSubnetPrefix
-          networkSecurityGroup: nsgID == 'none' ? null : json('{"id": "${nsgID}"}')
-          routeTable: rtDefID == 'none' ? null : json('{"id": "${rtDefID}"}"')
+          networkSecurityGroup: nsgID == 'none'
+            ? null
+            : {
+                id: nsgID
+              }
+          routeTable: rtDefID == 'none'
+            ? null
+            : {
+                id: rtDefID
+              }
           defaultOutboundAccess: defaultOutboundAccess
         }
       }
@@ -39,7 +47,11 @@ var bastionSubnet = deployBastionSubnet
         name: 'AzureBastionSubnet'
         properties: {
           addressPrefix: bastionSubnetPrefix
-          networkSecurityGroup: bastionNSGID == 'none' ? null : json('{"id": "${bastionNSGID}"}')
+          networkSecurityGroup: bastionNSGID == 'none'
+            ? null
+            : {
+                id: bastionNSGID
+              }
         }
       }
     ]
@@ -51,7 +63,11 @@ var firewallSubnet = deployFirewallSubnet
         name: 'AzureFirewallSubnet'
         properties: {
           addressPrefix: firewallSubnetPrefix
-          routeTable: rtFwID == 'none' ? null : json('{"id": "${rtFwID}"}"')
+          routeTable: rtFwID == 'none'
+            ? null
+            : {
+                id: rtFwID
+              }
         }
       }
     ]
@@ -63,7 +79,11 @@ var gatewaySubnet = deployGatewaySubnet
         name: 'GatewaySubnet'
         properties: {
           addressPrefix: GatewaySubnetPrefix
-          routeTable: rtGwID == 'none' ? null : json('{"id": "${rtGwID}"}"')
+          routeTable: rtGwID == 'none'
+            ? null
+            : {
+                id: rtGwID
+              }
         }
       }
     ]
@@ -78,7 +98,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2025-01-01' = {
     }
     addressSpace: {
       addressPrefixes: [
-        vnetAddressSpcae
+        vnetAddressSpace
       ]
     }
     subnets: concat(defaultSubnet, bastionSubnet, firewallSubnet, gatewaySubnet)
@@ -93,11 +113,11 @@ output defaultSubnetID string = deployDefaultSubnet
   ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetname, 'default')
   : 'Not deployed'
 output bastionSubnetID string = deployBastionSubnet
-  ? resourceId('Microsoft.Network/VirtualNetworks/subnets', vnetname, 'AzureBastionSubnet')
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetname, 'AzureBastionSubnet')
   : 'Not deployed'
 output firewallSubnetID string = deployFirewallSubnet
-  ? resourceId('Microsoft.Network/VirtualNetworks/subnets', vnetname, 'AzureFirewallSubnet')
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetname, 'AzureFirewallSubnet')
   : 'Not deployed'
 output gatewaySubnetID string = deployGatewaySubnet
-  ? resourceId('Microsoft.Network/VirtualNetworks/subnets', vnetname, 'GatewaySubnet')
+  ? resourceId('Microsoft.Network/virtualNetworks/subnets', vnetname, 'GatewaySubnet')
   : 'Not deployed'

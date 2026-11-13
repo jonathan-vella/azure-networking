@@ -9,9 +9,9 @@ resource avnmNetworkGroup 'Microsoft.Network/networkManagers/networkGroups@2025-
   }
 }
 
-resource avnmNetworkGroupMemeber 'Microsoft.Network/networkManagers/networkGroups/staticMembers@2025-01-01' = [
+resource avnmNetworkGroupMember 'Microsoft.Network/networkManagers/networkGroups/staticMembers@2025-01-01' = [
   for (vnetid, i) in spokeVNETids: {
-    name: 'avnmNetworkGroupMemeber${i}'
+    name: 'avnmNetworkGroupMember${i}'
     parent: avnmNetworkGroup
     properties: {
       resourceId: vnetid

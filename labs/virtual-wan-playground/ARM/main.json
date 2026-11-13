@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.48.1.52935",
-      "templateHash": "6930104836566479527"
+      "templateHash": "7847685034198255485"
     }
   },
   "definitions": {
@@ -32,6 +32,7 @@
           }
         }
       },
+      "minLength": 1,
       "maxLength": 2,
       "metadata": {
         "__bicep_imported_from!": {
@@ -71,14 +72,14 @@
       "type": "string",
       "defaultValue": "Standard_B2ls_v2",
       "metadata": {
-        "description": "Spoke Virtual Machine SKU. Default = Standard_B2s"
+        "description": "Spoke Virtual Machine SKU. Default = Standard_B2ls_v2"
       }
     },
     "vmSizeOnPrem": {
       "type": "string",
       "defaultValue": "Standard_B2ls_v2",
       "metadata": {
-        "description": "OnPrem Virtual Machine SKU. Default = Standard_B2s"
+        "description": "OnPrem Virtual Machine SKU. Default = Standard_B2ls_v2"
       }
     },
     "osTypeSpoke": {
@@ -128,7 +129,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy Spoke VNETs. Default = true"
+        "description": "Deploy Spoke VNETs. Default = false"
       }
     },
     "spokeRgNamePrefix": {
@@ -170,7 +171,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Enable or Disbale default outbound access on Subnets. Default = true"
+        "description": "Enable or Disable default outbound access on Subnets. Default = true"
       }
     },
     "deployHUB": {
@@ -188,33 +189,33 @@
         "VWAN"
       ],
       "metadata": {
-        "description": "Deploy Hub VNET or Azuere vWAN. Default = VNET"
+        "description": "Deploy Hub VNET or Azure vWAN. Default = VNET"
       }
     },
     "hubRgName": {
       "type": "string",
       "defaultValue": "rg-hub",
       "metadata": {
-        "description": "Hub resource group pre-fix name. Default = rg-hub"
+        "description": "Hub resource group prefix name. Default = rg-hub"
       }
     },
     "deployBastionInHub": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy Bastion Host in Hub VNET. Default = true"
+        "description": "Deploy Bastion Host in Hub VNET. Default = false"
       }
     },
     "bastionInHubSKU": {
       "type": "string",
-      "defaultValue": "Basic",
+      "defaultValue": "Standard",
       "allowedValues": [
         "Basic",
         "Standard",
         "Premium"
       ],
       "metadata": {
-        "description": "Hub Bastion SKU"
+        "description": "Hub Bastion SKU. Default = Standard"
       }
     },
     "deployGatewayInHub": {
@@ -260,7 +261,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Dploy route tables (UDR's) to VM subnet(s) in Hub and Spokes"
+        "description": "Deploy route tables (UDRs) to VM subnet(s) in Hub and Spokes"
       }
     },
     "hubBgp": {
@@ -273,6 +274,8 @@
     "hubBgpAsn": {
       "type": "int",
       "defaultValue": 65515,
+      "minValue": 1,
+      "maxValue": 4294967294,
       "metadata": {
         "description": "Hub BGP ASN"
       }
@@ -309,7 +312,7 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Deploy Virtual Network Gateway in OnPrem"
+        "description": "Deploy simulated OnPrem VNET"
       }
     },
     "onpremRgName": {
@@ -328,13 +331,14 @@
     },
     "bastionInOnPremSKU": {
       "type": "string",
-      "defaultValue": "Basic",
+      "defaultValue": "Standard",
       "allowedValues": [
         "Basic",
-        "Standard"
+        "Standard",
+        "Premium"
       ],
       "metadata": {
-        "description": "OnPrem Bastion SKU"
+        "description": "OnPrem Bastion SKU. Default = Standard"
       }
     },
     "deployVMinOnPrem": {
@@ -375,6 +379,8 @@
     "onpremBgpAsn": {
       "type": "int",
       "defaultValue": 65020,
+      "minValue": 1,
+      "maxValue": 4294967294,
       "metadata": {
         "description": "OnPrem BGP ASN"
       }
@@ -385,44 +391,75 @@
       {
         "name": "avnmSubscriptions",
         "count": "[length(parameters('locations'))]",
-        "input": "[if(variables('deployAVNM'), createArray(format('/subscriptions/{0}', tryGet(parameters('locations')[copyIndex('avnmSubscriptions')], 'hubSubscriptionID')), format('/subscriptions/{0}', tryGet(parameters('locations')[copyIndex('avnmSubscriptions')], 'spokeSubscriptionID'))), createArray('NoAVNM'))]"
+        "input": "[if(variables('deployAVNM'), createArray(format('/subscriptions/{0}', subscription().subscriptionId), format('/subscriptions/{0}', tryGet(parameters('locations')[copyIndex('avnmSubscriptions')], 'hubSubscriptionID')), format('/subscriptions/{0}', tryGet(parameters('locations')[copyIndex('avnmSubscriptions')], 'spokeSubscriptionID'))), createArray('NoAVNM'))]"
       }
     ],
     "regionShortCodes": {
       "southafricanorth": "SAN",
+      "southafricawest": "SAW",
       "australiaeast": "AUE",
+      "australiacentral": "AUC",
+      "australiacentral2": "AU2",
+      "australiasoutheast": "AUS",
       "centralindia": "CIN",
+      "indiasouthcentral": "INS",
+      "jioindiacentral": "JIC",
+      "jioindiawest": "JIW",
+      "southindia": "SIN",
+      "westindia": "WIN",
       "eastasia": "EAS",
       "indonesiacentral": "IDC",
       "japaneast": "JAE",
       "japanwest": "JAW",
       "koreacentral": "KOC",
+      "koreasouth": "KOS",
+      "malaysiawest": "MYW",
       "newzealandnorth": "NZN",
       "southeastasia": "SEA",
+      "taiwannorth": "TWN",
       "canadacentral": "CAC",
+      "canadaeast": "CAE",
+      "austriaeast": "ATE",
+      "belgiumcentral": "BEC",
+      "denmarkeast": "DKE",
       "francecentral": "FRC",
+      "francesouth": "FRS",
+      "germanynorth": "GNO",
       "germanywestcentral": "GWC",
       "italynorth": "ITN",
       "northeurope": "NEU",
       "norwayeast": "NOE",
+      "norwaywest": "NOW",
       "polandcentral": "POC",
-      "spaincentral": "SCE",
+      "spaincentral": "SPC",
       "swedencentral": "SCE",
+      "swedensouth": "SCS",
       "switzerlandnorth": "SWN",
+      "switzerlandwest": "SWW",
       "uksouth": "UKS",
+      "ukwest": "UKW",
       "westeurope": "WEU",
+      "chilecentral": "CLC",
       "mexicocentral": "MEC",
       "israelcentral": "ISC",
       "qatarcentral": "QAC",
+      "uaecentral": "UAC",
       "uaenorth": "UAE",
       "brazilsouth": "BRS",
+      "brazilsoutheast": "BSE",
       "centralus": "CUS",
       "eastus": "EUS",
+      "eastus2": "EUS2",
+      "northcentralus": "NCU",
       "southcentralus": "SCU",
+      "westcentralus": "WCU",
+      "westus": "WUS",
       "westus2": "WUS2",
       "westus3": "WUS3"
     },
     "isMultiRegion": "[greater(length(parameters('locations')), 1)]",
+    "firstRegionShortCode": "[coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[0].region), toUpper(take(parameters('locations')[0].region, 4)))]",
+    "secondRegionShortCode": "[if(variables('isMultiRegion'), coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[1].region), toUpper(take(parameters('locations')[1].region, 4))), 'SingleRegion')]",
     "isVnetHub": "[equals(parameters('hubType'), 'VNET')]",
     "isVwanHub": "[equals(parameters('hubType'), 'VWAN')]",
     "avnmSubscriptionScopes": "[union(flatten(variables('avnmSubscriptions')), flatten(variables('avnmSubscriptions')))]",
@@ -430,7 +467,7 @@
     "deployAVNM": "[and(and(and(parameters('deployHUB'), parameters('deploySpokes')), variables('isVnetHub')), parameters('deployVnetPeeringAVNM'))]",
     "deployGlobalVnetPeerings": "[and(and(variables('isMultiRegion'), variables('isVnetHub')), parameters('deployHUB'))]",
     "deployRoutes": "[and(and(and(and(variables('isMultiRegion'), parameters('deployFirewallInHub')), parameters('deployUDRs')), variables('isVnetHub')), parameters('deployHUB'))]",
-    "deployCrossRegionVPNConnections": "[and(and(and(and(and(parameters('deployGatewayInHub'), parameters('deployGatewayinOnPrem')), parameters('deploySiteToSite')), parameters('deployHUB')), variables('isMultiRegion')), or(variables('isVnetHub'), variables('isVwanHub')))]"
+    "deployCrossRegionVPNConnections": "[and(and(and(and(and(and(parameters('deployGatewayInHub'), parameters('deployGatewayinOnPrem')), parameters('deploySiteToSite')), parameters('deployHUB')), parameters('deployOnPrem')), variables('isMultiRegion')), or(variables('isVnetHub'), variables('isVwanHub')))]"
   },
   "resources": {
     "vwanhubrg": {
@@ -567,7 +604,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "8968723531929147709"
+              "templateHash": "2387376948287831860"
             }
           },
           "parameters": {
@@ -751,6 +788,7 @@
                 }
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Network/networkManagers', parameters('avnmName'))]",
                 "[resourceId('Microsoft.Resources/deployments', 'UserAssignedIdentityForAVNM')]"
               ]
             }
@@ -900,7 +938,7 @@
       },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "[format('deployRegion-{0}', variables('regionShortCodes')[parameters('locations')[copyIndex()].region])]",
+      "name": "[format('deployRegion-{0}', coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[copyIndex()].region), toUpper(take(parameters('locations')[copyIndex()].region, 4))))]",
       "subscriptionId": "[parameters('locations')[copyIndex()].hubSubscriptionID]",
       "location": "[deployment().location]",
       "properties": {
@@ -916,7 +954,10 @@
             "value": "[variables('isMultiRegion')]"
           },
           "shortLocationCode": {
-            "value": "[variables('regionShortCodes')[parameters('locations')[copyIndex()].region]]"
+            "value": "[coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[copyIndex()].region), toUpper(take(parameters('locations')[copyIndex()].region, 4)))]"
+          },
+          "rootSubscriptionID": {
+            "value": "[subscription().subscriptionId]"
           },
           "hubSubscriptionID": {
             "value": "[parameters('locations')[copyIndex()].hubSubscriptionID]"
@@ -1065,7 +1106,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "6292084141625162644"
+              "templateHash": "4069336962815361459"
             }
           },
           "definitions": {
@@ -1195,6 +1236,9 @@
             }
           },
           "parameters": {
+            "rootSubscriptionID": {
+              "type": "string"
+            },
             "hubSubscriptionID": {
               "type": "string"
             },
@@ -1358,7 +1402,8 @@
               "type": "string",
               "allowedValues": [
                 "Basic",
-                "Standard"
+                "Standard",
+                "Premium"
               ]
             },
             "deployVMinOnPrem": {
@@ -1391,7 +1436,7 @@
             "isVnetHub": "[equals(parameters('hubType'), 'VNET')]",
             "isVwanHub": "[equals(parameters('hubType'), 'VWAN')]",
             "varHubRgName": "[format('{0}-{1}', parameters('hubRgName'), parameters('shortLocationCode'))]",
-            "deployVPNConnectionsVNET": "[and(and(and(and(parameters('deployGatewayInHub'), parameters('deployGatewayinOnPrem')), parameters('deploySiteToSite')), variables('isVnetHub')), parameters('deployHUB'))]",
+            "deployVPNConnectionsVNET": "[and(and(and(and(and(parameters('deployGatewayInHub'), parameters('deployGatewayinOnPrem')), parameters('deploySiteToSite')), variables('isVnetHub')), parameters('deployHUB')), parameters('deployOnPrem'))]",
             "deployVPNConnectionsVWAN": "[and(and(and(and(and(parameters('deployGatewayInHub'), parameters('deployGatewayinOnPrem')), parameters('deploySiteToSite')), variables('isVwanHub')), parameters('deployHUB')), parameters('deployOnPrem'))]"
           },
           "resources": {
@@ -1455,7 +1500,7 @@
                   },
                   "SecondRegionAddressSpace": "[if(parameters('isMultiRegion'), createObject('value', parameters('SecondRegionAddressSpace')), createObject('value', ''))]",
                   "vpnGwBgpAsn": "[if(parameters('hubBgp'), createObject('value', parameters('hubBgpAsn')), createObject('value', 65515))]",
-                  "vpnGwEnebaleBgp": {
+                  "vpnGwEnableBgp": {
                     "value": "[parameters('hubBgp')]"
                   },
                   "deployUDRs": {
@@ -1475,7 +1520,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "5477710159594437315"
+                      "templateHash": "12190617256550105533"
                     }
                   },
                   "parameters": {
@@ -1498,7 +1543,12 @@
                       "type": "bool"
                     },
                     "bastionSku": {
-                      "type": "string"
+                      "type": "string",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard",
+                        "Premium"
+                      ]
                     },
                     "deployFirewallInHub": {
                       "type": "bool"
@@ -1530,7 +1580,7 @@
                     "firewallDNSproxy": {
                       "type": "bool"
                     },
-                    "vpnGwEnebaleBgp": {
+                    "vpnGwEnableBgp": {
                       "type": "bool"
                     },
                     "vpnGwBgpAsn": {
@@ -1582,7 +1632,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3978351246984729528"
+                              "templateHash": "3704863253889212477"
                             }
                           },
                           "parameters": {
@@ -1602,7 +1652,7 @@
                             }
                           },
                           "variables": {
-                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowGatewayManager', 'properties', createObject('description', 'Allow GatewayManager', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2702, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpsInBound', 'properties', createObject('description', 'Allow HTTPs', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2703, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('protocol', 'TCP', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
+                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowHttpsInbound', 'properties', createObject('description', 'Allow HTTPS inbound from Internet', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 120, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowGatewayManagerInbound', 'properties', createObject('description', 'Allow GatewayManager inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 130, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureLoadBalancerInbound', 'properties', createObject('description', 'Allow AzureLoadBalancer health probes inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'AzureLoadBalancer', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 140, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionHostCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication inbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 150, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('description', 'Allow SSH and RDP outbound to VirtualNetwork', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('description', 'Allow HTTPS outbound to AzureCloud', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication outbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 120, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpOutbound', 'properties', createObject('description', 'Allow HTTP outbound to Internet for session and certificate validation', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '80', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'Internet', 'access', 'Allow', 'priority', 130, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
                           },
                           "resources": [
                             {
@@ -1639,10 +1689,10 @@
                           "location": {
                             "value": "[parameters('location')]"
                           },
-                          "vnetAddressSpcae": {
+                          "vnetAddressSpace": {
                             "value": "[parameters('hubAddressSpace')]"
                           },
-                          "rtGwID": "[if(and(parameters('deployFirewallInHub'), parameters('deployGatewayInHub')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('hubRgName')), 'Microsoft.Resources/deployments', 'routeTable-VPNGW'), '2025-04-01').outputs.rtID.value), createObject('value', 'none'))]",
+                          "rtGwID": "[if(and(and(parameters('deployFirewallInHub'), parameters('deployGatewayInHub')), parameters('deployUDRs')), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('hubRgName')), 'Microsoft.Resources/deployments', 'routeTable-VPNGW'), '2025-04-01').outputs.rtID.value), createObject('value', 'none'))]",
                           "bastionNSGID": "[if(parameters('deployBastionInHub'), createObject('value', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('hubRgName')), 'Microsoft.Resources/deployments', variables('bastionNsgName')), '2025-04-01').outputs.nsgID.value), createObject('value', 'none'))]",
                           "vnetname": {
                             "value": "[variables('hubVnetName')]"
@@ -1686,7 +1736,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3420738275300482464"
+                              "templateHash": "2401604771307845662"
                             }
                           },
                           "parameters": {
@@ -1696,7 +1746,7 @@
                             "vnetname": {
                               "type": "string"
                             },
-                            "vnetAddressSpcae": {
+                            "vnetAddressSpace": {
                               "type": "string"
                             },
                             "defaultSubnetPrefix": {
@@ -1768,10 +1818,10 @@
                             }
                           },
                           "variables": {
-                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('nsgID')))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtDefID')))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
-                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('bastionNSGID'))))))), createArray())]",
-                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtFwID'))))))), createArray())]",
-                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtGwID'))))))), createArray())]"
+                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), createObject('id', parameters('nsgID'))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), createObject('id', parameters('rtDefID'))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
+                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), createObject('id', parameters('bastionNSGID')))))), createArray())]",
+                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), createObject('id', parameters('rtFwID')))))), createArray())]",
+                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), createObject('id', parameters('rtGwID')))))), createArray())]"
                           },
                           "resources": [
                             {
@@ -1785,7 +1835,7 @@
                                 },
                                 "addressSpace": {
                                   "addressPrefixes": [
-                                    "[parameters('vnetAddressSpcae')]"
+                                    "[parameters('vnetAddressSpace')]"
                                   ]
                                 },
                                 "subnets": "[concat(variables('defaultSubnet'), variables('bastionSubnet'), variables('firewallSubnet'), variables('gatewaySubnet'))]"
@@ -1812,15 +1862,15 @@
                             },
                             "bastionSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
                             },
                             "firewallSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
                             },
                             "gatewaySubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
                             }
                           }
                         }
@@ -1864,7 +1914,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "10479723678893450285"
+                              "templateHash": "6519183984604072102"
                             }
                           },
                           "parameters": {
@@ -1879,6 +1929,7 @@
                             },
                             "bastionSku": {
                               "type": "string",
+                              "defaultValue": "Standard",
                               "allowedValues": [
                                 "Basic",
                                 "Standard",
@@ -1890,6 +1941,9 @@
                               "defaultValue": {}
                             }
                           },
+                          "variables": {
+                            "isStandardOrPremium": "[or(equals(parameters('bastionSku'), 'Standard'), equals(parameters('bastionSku'), 'Premium'))]"
+                          },
                           "resources": [
                             {
                               "type": "Microsoft.Network/bastionHosts",
@@ -1897,6 +1951,9 @@
                               "name": "[parameters('bastionName')]",
                               "location": "[parameters('location')]",
                               "properties": {
+                                "enableIpConnect": "[variables('isStandardOrPremium')]",
+                                "enableTunneling": "[variables('isStandardOrPremium')]",
+                                "scaleUnits": "[if(variables('isStandardOrPremium'), 2, null())]",
                                 "ipConfigurations": [
                                   {
                                     "name": "IpConf",
@@ -2261,9 +2318,9 @@
                           "tagsByResource": {
                             "value": "[parameters('tagsByResource')]"
                           },
-                          "vpnGatewayBgpAsn": "[if(parameters('vpnGwEnebaleBgp'), createObject('value', parameters('vpnGwBgpAsn')), createObject('value', 65515))]",
+                          "vpnGatewayBgpAsn": "[if(parameters('vpnGwEnableBgp'), createObject('value', parameters('vpnGwBgpAsn')), createObject('value', 65515))]",
                           "vpnGatewayEnableBgp": {
-                            "value": "[parameters('vpnGwEnebaleBgp')]"
+                            "value": "[parameters('vpnGwEnableBgp')]"
                           }
                         },
                         "template": {
@@ -2704,7 +2761,7 @@
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2025-04-01",
               "name": "[format('{0}-{1}-VWAN', parameters('hubRgName'), parameters('shortLocationCode'))]",
-              "subscriptionId": "[parameters('hubSubscriptionID')]",
+              "subscriptionId": "[parameters('rootSubscriptionID')]",
               "location": "[deployment().location]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -3500,7 +3557,7 @@
                   },
                   "deployUDRs": "[if(parameters('deployAvnmUDRs'), createObject('value', false()), createObject('value', parameters('deployUDRs')))]",
                   "firewallDNSproxy": {
-                    "value": "[and(parameters('firewallDNSproxy'), parameters('deployFirewallInHub'))]"
+                    "value": "[and(and(parameters('deployHUB'), parameters('firewallDNSproxy')), parameters('deployFirewallInHub'))]"
                   },
                   "dcrID": {
                     "value": "[coalesce(parameters('dcrID'), '')]"
@@ -3516,7 +3573,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "11839842712941276989"
+                      "templateHash": "14733618709963828641"
                     }
                   },
                   "parameters": {
@@ -3604,7 +3661,7 @@
                           "location": {
                             "value": "[parameters('location')]"
                           },
-                          "vnetAddressSpcae": {
+                          "vnetAddressSpace": {
                             "value": "[parameters('AddressSpace')]"
                           },
                           "nsgID": {
@@ -3640,7 +3697,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3420738275300482464"
+                              "templateHash": "2401604771307845662"
                             }
                           },
                           "parameters": {
@@ -3650,7 +3707,7 @@
                             "vnetname": {
                               "type": "string"
                             },
-                            "vnetAddressSpcae": {
+                            "vnetAddressSpace": {
                               "type": "string"
                             },
                             "defaultSubnetPrefix": {
@@ -3722,10 +3779,10 @@
                             }
                           },
                           "variables": {
-                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('nsgID')))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtDefID')))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
-                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('bastionNSGID'))))))), createArray())]",
-                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtFwID'))))))), createArray())]",
-                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtGwID'))))))), createArray())]"
+                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), createObject('id', parameters('nsgID'))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), createObject('id', parameters('rtDefID'))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
+                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), createObject('id', parameters('bastionNSGID')))))), createArray())]",
+                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), createObject('id', parameters('rtFwID')))))), createArray())]",
+                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), createObject('id', parameters('rtGwID')))))), createArray())]"
                           },
                           "resources": [
                             {
@@ -3739,7 +3796,7 @@
                                 },
                                 "addressSpace": {
                                   "addressPrefixes": [
-                                    "[parameters('vnetAddressSpcae')]"
+                                    "[parameters('vnetAddressSpace')]"
                                   ]
                                 },
                                 "subnets": "[concat(variables('defaultSubnet'), variables('bastionSubnet'), variables('firewallSubnet'), variables('gatewaySubnet'))]"
@@ -3766,15 +3823,15 @@
                             },
                             "bastionSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
                             },
                             "firewallSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
                             },
                             "gatewaySubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
                             }
                           }
                         }
@@ -4122,7 +4179,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3978351246984729528"
+                              "templateHash": "3704863253889212477"
                             }
                           },
                           "parameters": {
@@ -4142,7 +4199,7 @@
                             }
                           },
                           "variables": {
-                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowGatewayManager', 'properties', createObject('description', 'Allow GatewayManager', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2702, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpsInBound', 'properties', createObject('description', 'Allow HTTPs', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2703, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('protocol', 'TCP', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
+                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowHttpsInbound', 'properties', createObject('description', 'Allow HTTPS inbound from Internet', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 120, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowGatewayManagerInbound', 'properties', createObject('description', 'Allow GatewayManager inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 130, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureLoadBalancerInbound', 'properties', createObject('description', 'Allow AzureLoadBalancer health probes inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'AzureLoadBalancer', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 140, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionHostCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication inbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 150, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('description', 'Allow SSH and RDP outbound to VirtualNetwork', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('description', 'Allow HTTPS outbound to AzureCloud', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication outbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 120, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpOutbound', 'properties', createObject('description', 'Allow HTTP outbound to Internet for session and certificate validation', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '80', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'Internet', 'access', 'Allow', 'priority', 130, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
                           },
                           "resources": [
                             {
@@ -4569,7 +4626,7 @@
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2025-04-01",
               "name": "[format('AVNM-{0}', parameters('shortLocationCode'))]",
-              "subscriptionId": "[parameters('hubSubscriptionID')]",
+              "subscriptionId": "[parameters('rootSubscriptionID')]",
               "location": "[deployment().location]",
               "properties": {
                 "expressionEvaluationOptions": {
@@ -4621,7 +4678,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "1325387977372723343"
+                      "templateHash": "9134371498985733297"
                     }
                   },
                   "parameters": {
@@ -4693,7 +4750,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "9304832583805753108"
+                              "templateHash": "8666799214921575886"
                             }
                           },
                           "parameters": {
@@ -4718,12 +4775,12 @@
                             },
                             {
                               "copy": {
-                                "name": "avnmNetworkGroupMemeber",
+                                "name": "avnmNetworkGroupMember",
                                 "count": "[length(parameters('spokeVNETids'))]"
                               },
                               "type": "Microsoft.Network/networkManagers/networkGroups/staticMembers",
                               "apiVersion": "2025-01-01",
-                              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('avnmName'), parameters('avnmGroupName')), '/')[0], split(format('{0}/{1}', parameters('avnmName'), parameters('avnmGroupName')), '/')[1], format('avnmNetworkGroupMemeber{0}', copyIndex()))]",
+                              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('avnmName'), parameters('avnmGroupName')), '/')[0], split(format('{0}/{1}', parameters('avnmName'), parameters('avnmGroupName')), '/')[1], format('avnmNetworkGroupMember{0}', copyIndex()))]",
                               "properties": {
                                 "resourceId": "[parameters('spokeVNETids')[copyIndex()]]"
                               },
@@ -4758,7 +4815,7 @@
                           "avnmNetworkGroupID": {
                             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('avnmRgName')), 'Microsoft.Resources/deployments', format('AVNM-NetworkGroup-{0}', parameters('shortLocationCode'))), '2025-04-01').outputs.id.value]"
                           },
-                          "avvmConnectivityConfigName": {
+                          "avnmConnectivityConfigName": {
                             "value": "[format('{0}-ConnectivityConfig-{1}', parameters('avnmName'), parameters('shortLocationCode'))]"
                           },
                           "hubVNETid": {
@@ -4776,14 +4833,14 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "12822654945778126886"
+                              "templateHash": "18330592446927593076"
                             }
                           },
                           "parameters": {
                             "avnmName": {
                               "type": "string"
                             },
-                            "avvmConnectivityConfigName": {
+                            "avnmConnectivityConfigName": {
                               "type": "string"
                             },
                             "connectivityTopology": {
@@ -4825,7 +4882,7 @@
                             {
                               "type": "Microsoft.Network/networkManagers/connectivityConfigurations",
                               "apiVersion": "2025-01-01",
-                              "name": "[format('{0}/{1}', parameters('avnmName'), parameters('avvmConnectivityConfigName'))]",
+                              "name": "[format('{0}/{1}', parameters('avnmName'), parameters('avnmConnectivityConfigName'))]",
                               "properties": {
                                 "connectivityTopology": "[parameters('connectivityTopology')]",
                                 "description": "LabBuilder AVNM - Connectivity Configuration",
@@ -4851,11 +4908,11 @@
                           "outputs": {
                             "id": {
                               "type": "string",
-                              "value": "[resourceId('Microsoft.Network/networkManagers/connectivityConfigurations', split(format('{0}/{1}', parameters('avnmName'), parameters('avvmConnectivityConfigName')), '/')[0], split(format('{0}/{1}', parameters('avnmName'), parameters('avvmConnectivityConfigName')), '/')[1])]"
+                              "value": "[resourceId('Microsoft.Network/networkManagers/connectivityConfigurations', split(format('{0}/{1}', parameters('avnmName'), parameters('avnmConnectivityConfigName')), '/')[0], split(format('{0}/{1}', parameters('avnmName'), parameters('avnmConnectivityConfigName')), '/')[1])]"
                             },
                             "name": {
                               "type": "string",
-                              "value": "[format('{0}/{1}', parameters('avnmName'), parameters('avvmConnectivityConfigName'))]"
+                              "value": "[format('{0}/{1}', parameters('avnmName'), parameters('avnmConnectivityConfigName'))]"
                             }
                           }
                         }
@@ -5015,7 +5072,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "10298138874517997466"
+                              "templateHash": "8736374882856859021"
                             }
                           },
                           "parameters": {
@@ -5069,7 +5126,7 @@
                                 "retentionInterval": "PT1H",
                                 "timeout": "PT1H",
                                 "arguments": "[format('-networkManagerName \"{0}\" -targetLocations {1} -configIds {2} -subscriptionId {3} -configType {4} -resourceGroupName {5}', parameters('avnmName'), parameters('location'), parameters('configurationId'), subscription().subscriptionId, parameters('configType'), resourceGroup().name)]",
-                                "scriptContent": "    param (\n      # AVNM subscription id\n      [parameter(mandatory=$true)][string]$subscriptionId,\n\n      # AVNM resource name\n      [parameter(mandatory=$true)][string]$networkManagerName,\n\n      # string with comma-separated list of config ids to deploy. ids must be of the same config type\n      [parameter(mandatory=$true)][string[]]$configIds,\n\n      # string with comma-separated list of deployment target regions\n      [parameter(mandatory=$true)][string[]]$targetLocations,\n\n      # configuration type to deploy. must be either connecticity or securityadmin\n      [parameter(mandatory=$true)][ValidateSet('Connectivity','Routing')][string]$configType,\n\n      # AVNM resource group name\n      [parameter(mandatory=$true)][string]$resourceGroupName\n    )\n  \n    $null = Login-AzAccount -Identity -Subscription $subscriptionId\n  \n    [System.Collections.Generic.List[string]]$configIdList = @()  \n    $configIdList.addRange($configIds) \n    [System.Collections.Generic.List[string]]$targetLocationList = @() # target locations for deployment\n    $targetLocationList.addRange($targetLocations)     \n    \n    $deployment = @{\n        Name = $networkManagerName\n        ResourceGroupName = $resourceGroupName\n        ConfigurationId = $configIdList\n        TargetLocation = $targetLocationList\n        CommitType = $configType\n    }\n  \n    try {\n      Deploy-AzNetworkManagerCommit @deployment -ErrorAction Stop\n    }\n    catch {\n      Write-Error \"Deployment failed with error: $_\"\n      throw \"Deployment failed with error: $_\"\n    }\n    "
+                                "scriptContent": "    param (\r\n      # AVNM subscription id\r\n      [parameter(mandatory=$true)][string]$subscriptionId,\r\n\r\n      # AVNM resource name\r\n      [parameter(mandatory=$true)][string]$networkManagerName,\r\n\r\n      # string with comma-separated list of config ids to deploy. ids must be of the same config type\r\n      [parameter(mandatory=$true)][string[]]$configIds,\r\n\r\n      # string with comma-separated list of deployment target regions\r\n      [parameter(mandatory=$true)][string[]]$targetLocations,\r\n\r\n      # configuration type to deploy. must be either connecticity or securityadmin\r\n      [parameter(mandatory=$true)][ValidateSet('Connectivity','Routing')][string]$configType,\r\n\r\n      # AVNM resource group name\r\n      [parameter(mandatory=$true)][string]$resourceGroupName\r\n    )\r\n  \r\n    $null = Login-AzAccount -Identity -Subscription $subscriptionId\r\n  \r\n    [System.Collections.Generic.List[string]]$configIdList = @()  \r\n    $configIdList.addRange($configIds) \r\n    [System.Collections.Generic.List[string]]$targetLocationList = @() # target locations for deployment\r\n    $targetLocationList.addRange($targetLocations)     \r\n    \r\n    $deployment = @{\r\n        Name = $networkManagerName\r\n        ResourceGroupName = $resourceGroupName\r\n        ConfigurationId = $configIdList\r\n        TargetLocation = $targetLocationList\r\n        CommitType = $configType\r\n    }\r\n  \r\n    try {\r\n      Deploy-AzNetworkManagerCommit @deployment -ErrorAction Stop\r\n    }\r\n    catch {\r\n      Write-Error \"Deployment failed with error: $_\"\r\n      throw \"Deployment failed with error: $_\"\r\n    }\r\n    "
                               },
                               "tags": "[coalesce(tryGet(parameters('tagsByResource'), 'Microsoft.Resources/deploymentScripts'), createObject())]"
                             }
@@ -5119,7 +5176,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "10298138874517997466"
+                              "templateHash": "8736374882856859021"
                             }
                           },
                           "parameters": {
@@ -5173,7 +5230,7 @@
                                 "retentionInterval": "PT1H",
                                 "timeout": "PT1H",
                                 "arguments": "[format('-networkManagerName \"{0}\" -targetLocations {1} -configIds {2} -subscriptionId {3} -configType {4} -resourceGroupName {5}', parameters('avnmName'), parameters('location'), parameters('configurationId'), subscription().subscriptionId, parameters('configType'), resourceGroup().name)]",
-                                "scriptContent": "    param (\n      # AVNM subscription id\n      [parameter(mandatory=$true)][string]$subscriptionId,\n\n      # AVNM resource name\n      [parameter(mandatory=$true)][string]$networkManagerName,\n\n      # string with comma-separated list of config ids to deploy. ids must be of the same config type\n      [parameter(mandatory=$true)][string[]]$configIds,\n\n      # string with comma-separated list of deployment target regions\n      [parameter(mandatory=$true)][string[]]$targetLocations,\n\n      # configuration type to deploy. must be either connecticity or securityadmin\n      [parameter(mandatory=$true)][ValidateSet('Connectivity','Routing')][string]$configType,\n\n      # AVNM resource group name\n      [parameter(mandatory=$true)][string]$resourceGroupName\n    )\n  \n    $null = Login-AzAccount -Identity -Subscription $subscriptionId\n  \n    [System.Collections.Generic.List[string]]$configIdList = @()  \n    $configIdList.addRange($configIds) \n    [System.Collections.Generic.List[string]]$targetLocationList = @() # target locations for deployment\n    $targetLocationList.addRange($targetLocations)     \n    \n    $deployment = @{\n        Name = $networkManagerName\n        ResourceGroupName = $resourceGroupName\n        ConfigurationId = $configIdList\n        TargetLocation = $targetLocationList\n        CommitType = $configType\n    }\n  \n    try {\n      Deploy-AzNetworkManagerCommit @deployment -ErrorAction Stop\n    }\n    catch {\n      Write-Error \"Deployment failed with error: $_\"\n      throw \"Deployment failed with error: $_\"\n    }\n    "
+                                "scriptContent": "    param (\r\n      # AVNM subscription id\r\n      [parameter(mandatory=$true)][string]$subscriptionId,\r\n\r\n      # AVNM resource name\r\n      [parameter(mandatory=$true)][string]$networkManagerName,\r\n\r\n      # string with comma-separated list of config ids to deploy. ids must be of the same config type\r\n      [parameter(mandatory=$true)][string[]]$configIds,\r\n\r\n      # string with comma-separated list of deployment target regions\r\n      [parameter(mandatory=$true)][string[]]$targetLocations,\r\n\r\n      # configuration type to deploy. must be either connecticity or securityadmin\r\n      [parameter(mandatory=$true)][ValidateSet('Connectivity','Routing')][string]$configType,\r\n\r\n      # AVNM resource group name\r\n      [parameter(mandatory=$true)][string]$resourceGroupName\r\n    )\r\n  \r\n    $null = Login-AzAccount -Identity -Subscription $subscriptionId\r\n  \r\n    [System.Collections.Generic.List[string]]$configIdList = @()  \r\n    $configIdList.addRange($configIds) \r\n    [System.Collections.Generic.List[string]]$targetLocationList = @() # target locations for deployment\r\n    $targetLocationList.addRange($targetLocations)     \r\n    \r\n    $deployment = @{\r\n        Name = $networkManagerName\r\n        ResourceGroupName = $resourceGroupName\r\n        ConfigurationId = $configIdList\r\n        TargetLocation = $targetLocationList\r\n        CommitType = $configType\r\n    }\r\n  \r\n    try {\r\n      Deploy-AzNetworkManagerCommit @deployment -ErrorAction Stop\r\n    }\r\n    catch {\r\n      Write-Error \"Deployment failed with error: $_\"\r\n      throw \"Deployment failed with error: $_\"\r\n    }\r\n    "
                               },
                               "tags": "[coalesce(tryGet(parameters('tagsByResource'), 'Microsoft.Resources/deploymentScripts'), createObject())]"
                             }
@@ -5218,7 +5275,7 @@
                     "value": "[range(0, parameters('amountOfSpokes'))[copyIndex()]]"
                   },
                   "hubSubscriptionID": {
-                    "value": "[parameters('hubSubscriptionID')]"
+                    "value": "[parameters('rootSubscriptionID')]"
                   },
                   "enableRoutingIntent": {
                     "value": "[or(parameters('internetTrafficRoutingPolicy'), parameters('privateTrafficRoutingPolicy'))]"
@@ -5408,7 +5465,7 @@
                     "value": "[parameters('osTypeOnPrem')]"
                   },
                   "vpnGwBgpAsn": "[if(parameters('onpremBgp'), createObject('value', parameters('onpremBgpAsn')), createObject('value', 65515))]",
-                  "vpnGwEnebaleBgp": {
+                  "vpnGwEnableBgp": {
                     "value": "[parameters('onpremBgp')]"
                   },
                   "bastionSku": {
@@ -5425,7 +5482,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "871729124156955503"
+                      "templateHash": "5358952026066252676"
                     }
                   },
                   "parameters": {
@@ -5442,7 +5499,12 @@
                       "type": "bool"
                     },
                     "bastionSku": {
-                      "type": "string"
+                      "type": "string",
+                      "allowedValues": [
+                        "Basic",
+                        "Standard",
+                        "Premium"
+                      ]
                     },
                     "adminUsername": {
                       "type": "string"
@@ -5468,7 +5530,7 @@
                     "osType": {
                       "type": "string"
                     },
-                    "vpnGwEnebaleBgp": {
+                    "vpnGwEnableBgp": {
                       "type": "bool"
                     },
                     "vpnGwBgpAsn": {
@@ -5484,7 +5546,7 @@
                     "nsgName": "[format('NSG-OnPrem-{0}', parameters('shortLocationCode'))]",
                     "bastionName": "[format('Bastion-OnPrem-{0}', parameters('shortLocationCode'))]",
                     "gatewayName": "[format('Gateway-OnPrem-{0}', parameters('shortLocationCode'))]",
-                    "bastionNsgName": "[format('NSG-Bastion-OnPrm-{0}', parameters('shortLocationCode'))]",
+                    "bastionNsgName": "[format('NSG-Bastion-OnPrem-{0}', parameters('shortLocationCode'))]",
                     "varOnPremRgName": "[format('{0}-{1}', parameters('OnPremRgName'), parameters('shortLocationCode'))]",
                     "defaultSubnetPrefix": "[cidrSubnet(parameters('AddressSpace'), 26, 0)]",
                     "bastionSubnetPrefix": "[cidrSubnet(parameters('AddressSpace'), 26, 1)]",
@@ -5530,7 +5592,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3978351246984729528"
+                              "templateHash": "3704863253889212477"
                             }
                           },
                           "parameters": {
@@ -5550,7 +5612,7 @@
                             }
                           },
                           "variables": {
-                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowGatewayManager', 'properties', createObject('description', 'Allow GatewayManager', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2702, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpsInBound', 'properties', createObject('description', 'Allow HTTPs', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2703, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('protocol', 'TCP', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
+                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowHttpsInbound', 'properties', createObject('description', 'Allow HTTPS inbound from Internet', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 120, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowGatewayManagerInbound', 'properties', createObject('description', 'Allow GatewayManager inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 130, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureLoadBalancerInbound', 'properties', createObject('description', 'Allow AzureLoadBalancer health probes inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'AzureLoadBalancer', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 140, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionHostCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication inbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 150, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('description', 'Allow SSH and RDP outbound to VirtualNetwork', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('description', 'Allow HTTPS outbound to AzureCloud', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication outbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 120, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpOutbound', 'properties', createObject('description', 'Allow HTTP outbound to Internet for session and certificate validation', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '80', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'Internet', 'access', 'Allow', 'priority', 130, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
                           },
                           "resources": [
                             {
@@ -5590,7 +5652,7 @@
                           "location": {
                             "value": "[parameters('location')]"
                           },
-                          "vnetAddressSpcae": {
+                          "vnetAddressSpace": {
                             "value": "[parameters('AddressSpace')]"
                           },
                           "nsgID": {
@@ -5629,7 +5691,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3420738275300482464"
+                              "templateHash": "2401604771307845662"
                             }
                           },
                           "parameters": {
@@ -5639,7 +5701,7 @@
                             "vnetname": {
                               "type": "string"
                             },
-                            "vnetAddressSpcae": {
+                            "vnetAddressSpace": {
                               "type": "string"
                             },
                             "defaultSubnetPrefix": {
@@ -5711,10 +5773,10 @@
                             }
                           },
                           "variables": {
-                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('nsgID')))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtDefID')))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
-                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}', parameters('bastionNSGID'))))))), createArray())]",
-                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtFwID'))))))), createArray())]",
-                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), json(format('{{\"id\": \"{0}\"}}\"', parameters('rtGwID'))))))), createArray())]"
+                            "defaultSubnet": "[if(parameters('deployDefaultSubnet'), createArray(createObject('name', 'default', 'properties', createObject('addressPrefix', parameters('defaultSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('nsgID'), 'none'), null(), createObject('id', parameters('nsgID'))), 'routeTable', if(equals(parameters('rtDefID'), 'none'), null(), createObject('id', parameters('rtDefID'))), 'defaultOutboundAccess', parameters('defaultOutboundAccess')))), createArray())]",
+                            "bastionSubnet": "[if(parameters('deployBastionSubnet'), createArray(createObject('name', 'AzureBastionSubnet', 'properties', createObject('addressPrefix', parameters('bastionSubnetPrefix'), 'networkSecurityGroup', if(equals(parameters('bastionNSGID'), 'none'), null(), createObject('id', parameters('bastionNSGID')))))), createArray())]",
+                            "firewallSubnet": "[if(parameters('deployFirewallSubnet'), createArray(createObject('name', 'AzureFirewallSubnet', 'properties', createObject('addressPrefix', parameters('firewallSubnetPrefix'), 'routeTable', if(equals(parameters('rtFwID'), 'none'), null(), createObject('id', parameters('rtFwID')))))), createArray())]",
+                            "gatewaySubnet": "[if(parameters('deployGatewaySubnet'), createArray(createObject('name', 'GatewaySubnet', 'properties', createObject('addressPrefix', parameters('GatewaySubnetPrefix'), 'routeTable', if(equals(parameters('rtGwID'), 'none'), null(), createObject('id', parameters('rtGwID')))))), createArray())]"
                           },
                           "resources": [
                             {
@@ -5728,7 +5790,7 @@
                                 },
                                 "addressSpace": {
                                   "addressPrefixes": [
-                                    "[parameters('vnetAddressSpcae')]"
+                                    "[parameters('vnetAddressSpace')]"
                                   ]
                                 },
                                 "subnets": "[concat(variables('defaultSubnet'), variables('bastionSubnet'), variables('firewallSubnet'), variables('gatewaySubnet'))]"
@@ -5755,15 +5817,15 @@
                             },
                             "bastionSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployBastionSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureBastionSubnet'), 'Not deployed')]"
                             },
                             "firewallSubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployFirewallSubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'AzureFirewallSubnet'), 'Not deployed')]"
                             },
                             "gatewaySubnetID": {
                               "type": "string",
-                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/VirtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
+                              "value": "[if(parameters('deployGatewaySubnet'), resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetname'), 'GatewaySubnet'), 'Not deployed')]"
                             }
                           }
                         }
@@ -6111,7 +6173,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "3978351246984729528"
+                              "templateHash": "3704863253889212477"
                             }
                           },
                           "parameters": {
@@ -6131,7 +6193,7 @@
                             }
                           },
                           "variables": {
-                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowGatewayManager', 'properties', createObject('description', 'Allow GatewayManager', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2702, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpsInBound', 'properties', createObject('description', 'Allow HTTPs', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 2703, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('protocol', 'TCP', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
+                            "securityRules": "[if(parameters('isBastionNSG'), createArray(createObject('name', 'AllowHttpsInbound', 'properties', createObject('description', 'Allow HTTPS inbound from Internet', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'Internet', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 120, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowGatewayManagerInbound', 'properties', createObject('description', 'Allow GatewayManager inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'GatewayManager', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 130, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureLoadBalancerInbound', 'properties', createObject('description', 'Allow AzureLoadBalancer health probes inbound', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', 'AzureLoadBalancer', 'destinationAddressPrefix', '*', 'access', 'Allow', 'priority', 140, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionHostCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication inbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 150, 'direction', 'Inbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowSshRdpOutbound', 'properties', createObject('description', 'Allow SSH and RDP outbound to VirtualNetwork', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 100, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('22', '3389'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowAzureCloudOutbound', 'properties', createObject('description', 'Allow HTTPS outbound to AzureCloud', 'protocol', 'Tcp', 'sourcePortRange', '*', 'destinationPortRange', '443', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'AzureCloud', 'access', 'Allow', 'priority', 110, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowBastionCommunication', 'properties', createObject('description', 'Allow Bastion data-plane communication outbound', 'protocol', '*', 'sourcePortRange', '*', 'sourceAddressPrefix', 'VirtualNetwork', 'destinationAddressPrefix', 'VirtualNetwork', 'access', 'Allow', 'priority', 120, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray('8080', '5701'), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray())), createObject('name', 'AllowHttpOutbound', 'properties', createObject('description', 'Allow HTTP outbound to Internet for session and certificate validation', 'protocol', '*', 'sourcePortRange', '*', 'destinationPortRange', '80', 'sourceAddressPrefix', '*', 'destinationAddressPrefix', 'Internet', 'access', 'Allow', 'priority', 130, 'direction', 'Outbound', 'sourcePortRanges', createArray(), 'destinationPortRanges', createArray(), 'sourceAddressPrefixes', createArray(), 'destinationAddressPrefixes', createArray()))), createArray())]"
                           },
                           "resources": [
                             {
@@ -6190,7 +6252,7 @@
                             "_generator": {
                               "name": "bicep",
                               "version": "0.48.1.52935",
-                              "templateHash": "10479723678893450285"
+                              "templateHash": "6519183984604072102"
                             }
                           },
                           "parameters": {
@@ -6205,6 +6267,7 @@
                             },
                             "bastionSku": {
                               "type": "string",
+                              "defaultValue": "Standard",
                               "allowedValues": [
                                 "Basic",
                                 "Standard",
@@ -6216,6 +6279,9 @@
                               "defaultValue": {}
                             }
                           },
+                          "variables": {
+                            "isStandardOrPremium": "[or(equals(parameters('bastionSku'), 'Standard'), equals(parameters('bastionSku'), 'Premium'))]"
+                          },
                           "resources": [
                             {
                               "type": "Microsoft.Network/bastionHosts",
@@ -6223,6 +6289,9 @@
                               "name": "[parameters('bastionName')]",
                               "location": "[parameters('location')]",
                               "properties": {
+                                "enableIpConnect": "[variables('isStandardOrPremium')]",
+                                "enableTunneling": "[variables('isStandardOrPremium')]",
+                                "scaleUnits": "[if(variables('isStandardOrPremium'), 2, null())]",
                                 "ipConfigurations": [
                                   {
                                     "name": "IpConf",
@@ -6290,9 +6359,9 @@
                           "tagsByResource": {
                             "value": "[parameters('tagsByResource')]"
                           },
-                          "vpnGatewayBgpAsn": "[if(parameters('vpnGwEnebaleBgp'), createObject('value', parameters('vpnGwBgpAsn')), createObject('value', 65515))]",
+                          "vpnGatewayBgpAsn": "[if(parameters('vpnGwEnableBgp'), createObject('value', parameters('vpnGwBgpAsn')), createObject('value', 65515))]",
                           "vpnGatewayEnableBgp": {
-                            "value": "[parameters('vpnGwEnebaleBgp')]"
+                            "value": "[parameters('vpnGwEnableBgp')]"
                           }
                         },
                         "template": {
@@ -6465,7 +6534,7 @@
                     },
                     "OnPremGwBgpAsn": {
                       "type": "int",
-                      "value": "[if(and(parameters('deployGatewayInOnPrem'), parameters('vpnGwEnebaleBgp')), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('varOnPremRgName')), 'Microsoft.Resources/deployments', variables('gatewayName')), '2025-04-01').outputs.vpnGwAsn.value, 0)]"
+                      "value": "[if(and(parameters('deployGatewayInOnPrem'), parameters('vpnGwEnableBgp')), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('varOnPremRgName')), 'Microsoft.Resources/deployments', variables('gatewayName')), '2025-04-01').outputs.vpnGwAsn.value, 0)]"
                     }
                   }
                 }
@@ -6922,7 +6991,7 @@
                   },
                   "sharedKey": "[if(variables('deployVPNConnectionsVWAN'), createObject('value', parameters('sharedKey')), createObject('value', 'none'))]",
                   "hubSubscriptionID": {
-                    "value": "[parameters('hubSubscriptionID')]"
+                    "value": "[parameters('rootSubscriptionID')]"
                   },
                   "onPremSubscriptionID": {
                     "value": "[parameters('onPremSubscriptionID')]"
@@ -6944,7 +7013,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "12115934406337404817"
+                      "templateHash": "14197108577724598553"
                     }
                   },
                   "parameters": {
@@ -7173,7 +7242,7 @@
                     {
                       "type": "Microsoft.Resources/deployments",
                       "apiVersion": "2025-04-01",
-                      "name": "[format('vwanVPNsites-{0}', parameters('OnPremLocation'))]",
+                      "name": "[format('vwanVPNsites-{0}{1}', parameters('OnPremLocation'), variables('vWanCrossRegionPostfix'))]",
                       "subscriptionId": "[parameters('hubSubscriptionID')]",
                       "resourceGroup": "[parameters('HubRgName')]",
                       "properties": {
@@ -7446,7 +7515,7 @@
       "condition": "[variables('deployGlobalVnetPeerings')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "[format('deployGlobalVnetPeerings-{0}-{1}', variables('regionShortCodes')[parameters('locations')[0].region], variables('regionShortCodes')[parameters('locations')[1].region])]",
+      "name": "[format('deployGlobalVnetPeerings-{0}-{1}', variables('firstRegionShortCode'), variables('secondRegionShortCode'))]",
       "location": "[deployment().location]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -7659,8 +7728,8 @@
         }
       },
       "dependsOn": [
-        "[format('deployRegion[{0}]', 0)]",
-        "[format('deployRegion[{0}]', 1)]"
+        "[format('deployRegion[{0}]', 1)]",
+        "[format('deployRegion[{0}]', 0)]"
       ]
     },
     "route": {
@@ -7671,16 +7740,16 @@
       "condition": "[variables('deployRoutes')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "[format('DeployRegionRoute-{0}', variables('regionShortCodes')[parameters('locations')[copyIndex()].region])]",
+      "name": "[format('DeployRegionRoute-{0}', coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[copyIndex()].region), toUpper(take(parameters('locations')[copyIndex()].region, 4))))]",
       "subscriptionId": "[parameters('locations')[copyIndex()].hubSubscriptionID]",
-      "resourceGroup": "[format('{0}-{1}', parameters('hubRgName'), variables('regionShortCodes')[parameters('locations')[copyIndex()].region])]",
+      "resourceGroup": "[format('{0}-{1}', parameters('hubRgName'), coalesce(tryGet(variables('regionShortCodes'), parameters('locations')[copyIndex()].region), toUpper(take(parameters('locations')[copyIndex()].region, 4))))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
         },
         "mode": "Incremental",
         "parameters": {
-          "routeName": "[if(variables('deployRoutes'), createObject('value', format('{0}/toRegion{1}', reference(format('deployRegion[{0}]', copyIndex())).outputs.HubRtFirewallName.value, variables('regionShortCodes')[parameters('locations')[if(and(equals(length(parameters('locations')), 2), equals(copyIndex(), 0)), 1, 0)].region])), createObject('value', 'noRoute'))]",
+          "routeName": "[if(variables('deployRoutes'), createObject('value', format('{0}/toRegion{1}', reference(format('deployRegion[{0}]', copyIndex())).outputs.HubRtFirewallName.value, if(equals(copyIndex(), 0), variables('secondRegionShortCode'), variables('firstRegionShortCode')))), createObject('value', 'noRoute'))]",
           "routeNextHopType": {
             "value": "VirtualAppliance"
           },
@@ -7747,7 +7816,7 @@
       "condition": "[variables('deployCrossRegionVPNConnections')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
-      "name": "[format('CrossRegionVPNConnections{0}-{1}-{2}', add(copyIndex(), 1), variables('regionShortCodes')[parameters('locations')[0].region], variables('regionShortCodes')[parameters('locations')[1].region])]",
+      "name": "[format('CrossRegionVPNConnections{0}-{1}-{2}', add(copyIndex(), 1), variables('firstRegionShortCode'), variables('secondRegionShortCode'))]",
       "location": "[deployment().location]",
       "properties": {
         "expressionEvaluationOptions": {
@@ -7775,7 +7844,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.48.1.52935",
-              "templateHash": "9926414426565428428"
+              "templateHash": "14128396237350736659"
             }
           },
           "definitions": {
@@ -7990,7 +8059,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "enableBgp": {
-                    "value": "[and(parameters('HubVPN').enableBgp, parameters('HubVPN').enableBgp)]"
+                    "value": "[and(parameters('HubVPN').enableBgp, parameters('OnPrem').enableBgp)]"
                   },
                   "sharedKey": {
                     "value": "[parameters('sharedKey')]"
@@ -8421,7 +8490,7 @@
                     "value": "[parameters('tagsByResource')]"
                   },
                   "enableBgp": {
-                    "value": "[and(parameters('HubVPN').enableBgp, parameters('HubVPN').enableBgp)]"
+                    "value": "[and(parameters('HubVPN').enableBgp, parameters('OnPrem').enableBgp)]"
                   },
                   "sharedKey": {
                     "value": "[parameters('sharedKey')]"
@@ -8449,7 +8518,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.48.1.52935",
-                      "templateHash": "12115934406337404817"
+                      "templateHash": "14197108577724598553"
                     }
                   },
                   "parameters": {
@@ -8678,7 +8747,7 @@
                     {
                       "type": "Microsoft.Resources/deployments",
                       "apiVersion": "2025-04-01",
-                      "name": "[format('vwanVPNsites-{0}', parameters('OnPremLocation'))]",
+                      "name": "[format('vwanVPNsites-{0}{1}', parameters('OnPremLocation'), variables('vWanCrossRegionPostfix'))]",
                       "subscriptionId": "[parameters('hubSubscriptionID')]",
                       "resourceGroup": "[parameters('HubRgName')]",
                       "properties": {

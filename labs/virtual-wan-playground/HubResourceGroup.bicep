@@ -6,6 +6,11 @@ param AddressSpace string
 param isMultiRegion bool
 param hubAddressSpace string
 param deployBastionInHub bool
+@allowed([
+  'Basic'
+  'Standard'
+  'Premium'
+])
 param bastionSku string
 param deployFirewallInHub bool
 param AzureFirewallTier string
@@ -18,7 +23,7 @@ param AllSpokeAddressSpaces array
 param SecondRegionAddressSpace string
 param firewallDNSproxy bool
 
-param vpnGwEnebaleBgp bool
+param vpnGwEnableBgp bool
 param vpnGwBgpAsn int
 
 var firewallSubnetPrefix = cidrSubnet(hubAddressSpace, 26, 0)
@@ -57,8 +62,8 @@ module vnet 'modules/vnet.bicep' = {
   name: 'hubvnet'
   params: {
     location: location
-    vnetAddressSpcae: hubAddressSpace
-    rtGwID: deployFirewallInHub && deployGatewayInHub ? rtvpngw!.outputs.rtID : 'none'
+    vnetAddressSpace: hubAddressSpace
+    rtGwID: deployFirewallInHub && deployGatewayInHub && deployUDRs ? rtvpngw!.outputs.rtID : 'none'
     bastionNSGID: deployBastionInHub ? bastioNsg!.outputs.nsgID : 'none'
     vnetname: hubVnetName
     bastionSubnetPrefix: bastionSubnetPrefix
@@ -120,8 +125,8 @@ module vpngw 'modules/vpngateway.bicep' = if (deployGatewayInHub) {
     vpnGatewayName: gatewayName
     vpnGatewaySubnetID: deployGatewayInHub ? vnet.outputs.gatewaySubnetID : ''
     tagsByResource: tagsByResource
-    vpnGatewayBgpAsn: vpnGwEnebaleBgp ? vpnGwBgpAsn : 65515
-    vpnGatewayEnableBgp: vpnGwEnebaleBgp
+    vpnGatewayBgpAsn: vpnGwEnableBgp ? vpnGwBgpAsn : 65515
+    vpnGatewayEnableBgp: vpnGwEnableBgp
   }
 }
 

@@ -4,6 +4,11 @@ param location string
 param shortLocationCode string
 param AddressSpace string
 param deployBastionInOnPrem bool
+@allowed([
+  'Basic'
+  'Standard'
+  'Premium'
+])
 param bastionSku string
 param adminUsername string
 @secure()
@@ -15,7 +20,7 @@ param vmSize string
 param tagsByResource object
 param osType string
 
-param vpnGwEnebaleBgp bool
+param vpnGwEnableBgp bool
 param vpnGwBgpAsn int
 
 param dcrID string
@@ -25,7 +30,7 @@ var vmName = 'VM-OnPrem-${shortLocationCode}'
 var nsgName = 'NSG-OnPrem-${shortLocationCode}'
 var bastionName = 'Bastion-OnPrem-${shortLocationCode}'
 var gatewayName = 'Gateway-OnPrem-${shortLocationCode}'
-var bastionNsgName = 'NSG-Bastion-OnPrm-${shortLocationCode}'
+var bastionNsgName = 'NSG-Bastion-OnPrem-${shortLocationCode}'
 var varOnPremRgName = '${OnPremRgName}-${shortLocationCode}'
 
 var defaultSubnetPrefix = cidrSubnet(AddressSpace, 26, 0)
@@ -56,7 +61,7 @@ module vnet 'modules/vnet.bicep' = {
   name: vnetName
   params: {
     location: location
-    vnetAddressSpcae: AddressSpace
+    vnetAddressSpace: AddressSpace
     nsgID: nsg.outputs.nsgID
     bastionNSGID: deployBastionInOnPrem ? bastioNsg!.outputs.nsgID : 'none'
     vnetname: vnetName
@@ -120,8 +125,8 @@ module vpngw 'modules/vpngateway.bicep' = if (deployGatewayInOnPrem) {
     vpnGatewayName: gatewayName
     vpnGatewaySubnetID: deployGatewayInOnPrem ? vnet.outputs.gatewaySubnetID : ''
     tagsByResource: tagsByResource
-    vpnGatewayBgpAsn: vpnGwEnebaleBgp ? vpnGwBgpAsn : 65515
-    vpnGatewayEnableBgp: vpnGwEnebaleBgp
+    vpnGatewayBgpAsn: vpnGwEnableBgp ? vpnGwBgpAsn : 65515
+    vpnGatewayEnableBgp: vpnGwEnableBgp
   }
 }
 
@@ -130,4 +135,4 @@ output OnPremGatewayPublicIP string = deployGatewayInOnPrem ? vpngw!.outputs.vpn
 output OnPremGatewayID string = deployGatewayInOnPrem ? vpngw!.outputs.vpnGwID : 'none'
 output OnPremAddressSpace string = AddressSpace
 output OnPremGwBgpPeeringAddress string = deployGatewayInOnPrem ? vpngw!.outputs.vpnGwBgpPeeringAddress : 'none'
-output OnPremGwBgpAsn int = deployGatewayInOnPrem && vpnGwEnebaleBgp ? vpngw!.outputs.vpnGwAsn : 0
+output OnPremGwBgpAsn int = deployGatewayInOnPrem && vpnGwEnableBgp ? vpngw!.outputs.vpnGwAsn : 0

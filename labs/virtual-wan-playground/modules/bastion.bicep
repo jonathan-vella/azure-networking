@@ -6,13 +6,18 @@ param subnetID string
   'Standard'
   'Premium'
 ])
-param bastionSku string
+param bastionSku string = 'Standard'
 param tagsByResource object = {}
+
+var isStandardOrPremium = bastionSku == 'Standard' || bastionSku == 'Premium'
 
 resource bastion 'Microsoft.Network/bastionHosts@2025-05-01' = {
   name: bastionName
   location: location
   properties: {
+    enableIpConnect: isStandardOrPremium
+    enableTunneling: isStandardOrPremium
+    scaleUnits: isStandardOrPremium ? 2 : null
     ipConfigurations: [
       {
         name: 'IpConf'

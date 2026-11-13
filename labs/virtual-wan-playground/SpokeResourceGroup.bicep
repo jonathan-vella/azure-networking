@@ -39,7 +39,7 @@ module vnet 'modules/vnet.bicep' = {
   name: vnetName
   params: {
     location: location
-    vnetAddressSpcae: AddressSpace
+    vnetAddressSpace: AddressSpace
     nsgID: nsg.outputs.nsgID
     rtDefID: deployFirewallInHub && HubDeployed && deployUDRs ? rt!.outputs.rtID : 'none'
     vnetname: vnetName

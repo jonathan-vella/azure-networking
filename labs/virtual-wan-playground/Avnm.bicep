@@ -32,7 +32,7 @@ module avnmConnectivityConfig 'modules/avnmconfigconnectivity.bicep' = {
   params: {
     avnmName: avnmName
     avnmNetworkGroupID: avnmGroup.outputs.id
-    avvmConnectivityConfigName: '${avnmName}-ConnectivityConfig-${shortLocationCode}'
+    avnmConnectivityConfigName: '${avnmName}-ConnectivityConfig-${shortLocationCode}'
     hubVNETid: hubVNETid
     useHubGateway: useHubGateway
     groupConnectivity: deployVnetPeeringMesh ? 'DirectlyConnected' : 'None'

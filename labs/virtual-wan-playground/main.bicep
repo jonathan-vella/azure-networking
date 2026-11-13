@@ -29,10 +29,10 @@ param adminUsername string = ''
 @secure()
 param adminPassword string = ''
 
-@description('Spoke Virtual Machine SKU. Default = Standard_B2s')
+@description('Spoke Virtual Machine SKU. Default = Standard_B2ls_v2')
 param vmSizeSpoke string = 'Standard_B2ls_v2'
 
-@description('OnPrem Virtual Machine SKU. Default = Standard_B2s')
+@description('OnPrem Virtual Machine SKU. Default = Standard_B2ls_v2')
 param vmSizeOnPrem string = 'Standard_B2ls_v2'
 
 @description('Spoke Virtual Machine(s) OS type. Windows or Linux. Default = Windows')
@@ -59,7 +59,7 @@ param diagnosticWorkspaceId string = ''
 param dcrRgName string = 'rg-dcr'
 
 // Spoke VNET Parameters
-@description('Deploy Spoke VNETs. Default = true')
+@description('Deploy Spoke VNETs. Default = false')
 param deploySpokes bool = false
 
 @description('Spoke resource group prefix name. Default = rg-spoke')
@@ -77,33 +77,33 @@ param deployVnetPeeringMesh bool = false
 @description('Let Azure Virtual Network Manager manage UDRs in Spoke VNETs')
 param deployAvnmUDRs bool = false
 
-@description('Enable or Disbale default outbound access on Subnets. Default = true')
+@description('Enable or Disable default outbound access on Subnets. Default = true')
 param defaultOutboundAccess bool = true
 
 // Hub VNET Parameters
 @description('Deploy Hub')
 param deployHUB bool = true
 
-@description('Deploy Hub VNET or Azuere vWAN. Default = VNET')
+@description('Deploy Hub VNET or Azure vWAN. Default = VNET')
 @allowed([
   'VNET'
   'VWAN'
 ])
 param hubType string = 'VNET'
 
-@description('Hub resource group pre-fix name. Default = rg-hub')
+@description('Hub resource group prefix name. Default = rg-hub')
 param hubRgName string = 'rg-hub'
 
-@description('Deploy Bastion Host in Hub VNET. Default = true')
+@description('Deploy Bastion Host in Hub VNET. Default = false')
 param deployBastionInHub bool = false
 
-@description('Hub Bastion SKU')
+@description('Hub Bastion SKU. Default = Standard')
 @allowed([
   'Basic'
   'Standard'
   'Premium'
 ])
-param bastionInHubSKU string = 'Basic'
+param bastionInHubSKU string = 'Standard'
 
 @description('Deploy Virtual Network Gateway in Hub VNET')
 param deployGatewayInHub bool = false
@@ -124,13 +124,15 @@ param deployFirewallrules bool = false
 @description('Enable Azure Firewall DNS Proxy')
 param firewallDNSproxy bool = false
 
-@description('Dploy route tables (UDR\'s) to VM subnet(s) in Hub and Spokes')
+@description('Deploy route tables (UDRs) to VM subnet(s) in Hub and Spokes')
 param deployUDRs bool = true
 
 @description('Enable BGP on Hub Gateway')
 param hubBgp bool = true
 
 @description('Hub BGP ASN')
+@minValue(1)
+@maxValue(4294967294)
 param hubBgpAsn int = 65515
 
 // AVNM parameters
@@ -147,8 +149,8 @@ param internetTrafficRoutingPolicy bool = false
 @description('Enable Azure vWAN routing Intent Policy for Private Traffic')
 param privateTrafficRoutingPolicy bool = false
 
-// OnPrem parameters\
-@description('Deploy Virtual Network Gateway in OnPrem')
+// OnPrem parameters
+@description('Deploy simulated OnPrem VNET')
 param deployOnPrem bool = false
 
 @description('OnPrem Resource Group Name')
@@ -157,12 +159,13 @@ param onpremRgName string = 'rg-onprem'
 @description('Deploy Bastion Host in OnPrem VNET')
 param deployBastionInOnPrem bool = false
 
-@description('OnPrem Bastion SKU')
+@description('OnPrem Bastion SKU. Default = Standard')
 @allowed([
   'Basic'
   'Standard'
+  'Premium'
 ])
-param bastionInOnPremSKU string = 'Basic'
+param bastionInOnPremSKU string = 'Standard'
 
 @description('Deploy VM in OnPrem VNET')
 param deployVMinOnPrem bool = false
@@ -181,51 +184,87 @@ param sharedKey string = ''
 param onpremBgp bool = true
 
 @description('OnPrem BGP ASN')
+@minValue(1)
+@maxValue(4294967294)
 param onpremBgpAsn int = 65020
 
-// Define the short codes for regions, three letters, capitalized. Only exclude restricted regions.
+// Define unique short codes for Azure Public Cloud regions, with automatic fallback for newly added regions.
 var regionShortCodes = {
   southafricanorth: 'SAN'
+  southafricawest: 'SAW'
   australiaeast: 'AUE'
+  australiacentral: 'AUC'
+  australiacentral2: 'AU2'
+  australiasoutheast: 'AUS'
   centralindia: 'CIN'
+  indiasouthcentral: 'INS'
+  jioindiacentral: 'JIC'
+  jioindiawest: 'JIW'
+  southindia: 'SIN'
+  westindia: 'WIN'
   eastasia: 'EAS'
   indonesiacentral: 'IDC'
   japaneast: 'JAE'
   japanwest: 'JAW'
   koreacentral: 'KOC'
+  koreasouth: 'KOS'
+  malaysiawest: 'MYW'
   newzealandnorth: 'NZN'
   southeastasia: 'SEA'
+  taiwannorth: 'TWN'
   canadacentral: 'CAC'
+  canadaeast: 'CAE'
+  austriaeast: 'ATE'
+  belgiumcentral: 'BEC'
+  denmarkeast: 'DKE'
   francecentral: 'FRC'
+  francesouth: 'FRS'
+  germanynorth: 'GNO'
   germanywestcentral: 'GWC'
   italynorth: 'ITN'
   northeurope: 'NEU'
   norwayeast: 'NOE'
+  norwaywest: 'NOW'
   polandcentral: 'POC'
-  spaincentral: 'SCE'
+  spaincentral: 'SPC'
   swedencentral: 'SCE'
+  swedensouth: 'SCS'
   switzerlandnorth: 'SWN'
+  switzerlandwest: 'SWW'
   uksouth: 'UKS'
+  ukwest: 'UKW'
   westeurope: 'WEU'
+  chilecentral: 'CLC'
   mexicocentral: 'MEC'
   israelcentral: 'ISC'
   qatarcentral: 'QAC'
+  uaecentral: 'UAC'
   uaenorth: 'UAE'
   brazilsouth: 'BRS'
+  brazilsoutheast: 'BSE'
   centralus: 'CUS'
   eastus: 'EUS'
+  eastus2: 'EUS2'
+  northcentralus: 'NCU'
   southcentralus: 'SCU'
+  westcentralus: 'WCU'
+  westus: 'WUS'
   westus2: 'WUS2'
   westus3: 'WUS3'
 }
 
 var isMultiRegion = length(locations) > 1
+var firstRegionShortCode = regionShortCodes[?locations[0].region] ?? toUpper(take(locations[0].region, 4))
+var secondRegionShortCode = isMultiRegion
+  ? (regionShortCodes[?locations[1].region] ?? toUpper(take(locations[1].region, 4)))
+  : 'SingleRegion'
 var isVnetHub = hubType == 'VNET'
 var isVwanHub = hubType == 'VWAN'
 
 var avnmSubscriptions = [
   for (location, i) in locations: deployAVNM
     ? [
+        '/subscriptions/${subscription().subscriptionId}'
         '/subscriptions/${location.?hubSubscriptionID}'
         '/subscriptions/${location.?spokeSubscriptionID}'
       ]
@@ -304,11 +343,12 @@ module dcrvminsights 'modules/dcrvminsights.bicep' = if (!empty(diagnosticWorksp
 module deployRegion 'mainRegion.bicep' = [
   for (location, i) in locations: {
     scope: subscription(location.hubSubscriptionID)
-    name: 'deployRegion-${regionShortCodes[location.region]}'
+    name: 'deployRegion-${regionShortCodes[?location.region] ?? toUpper(take(location.region, 4))}'
     params: {
       location: location.region
       isMultiRegion: isMultiRegion
-      shortLocationCode: regionShortCodes[location.region]
+      shortLocationCode: regionShortCodes[?location.region] ?? toUpper(take(location.region, 4))
+      rootSubscriptionID: subscription().subscriptionId
       hubSubscriptionID: location.hubSubscriptionID
       spokeSubscriptionID: location.spokeSubscriptionID
       onPremSubscriptionID: location.onPremSubscriptionID
@@ -366,9 +406,9 @@ module deployRegion 'mainRegion.bicep' = [
 // variable to validate if we need to deploy global vnet peering
 var deployGlobalVnetPeerings = isMultiRegion && isVnetHub && deployHUB
 
-//  If MultiRegion and VnetHub, deploy Global Vnet Peerings
+// If MultiRegion and VnetHub, deploy Global Vnet Peerings
 module GlobalVnetPeerings 'VnetPeerings.bicep' = if (deployGlobalVnetPeerings) {
-  name: 'deployGlobalVnetPeerings-${regionShortCodes[locations[0].region]}-${regionShortCodes[locations[1].region]}'
+  name: 'deployGlobalVnetPeerings-${firstRegionShortCode}-${secondRegionShortCode}'
   params: {
     vnetIDA: deployGlobalVnetPeerings ? deployRegion[0].outputs.HubVnetID : 'noMultiRegion'
     vnetIDB: deployGlobalVnetPeerings ? deployRegion[1].outputs.HubVnetID : 'noMultiRegion'
@@ -378,14 +418,17 @@ module GlobalVnetPeerings 'VnetPeerings.bicep' = if (deployGlobalVnetPeerings) {
 // variable to validate if we need to deploy these routes
 var deployRoutes = isMultiRegion && deployFirewallInHub && deployUDRs && isVnetHub && deployHUB
 
-// If MultiRegion and deployFirewallInHub and deployUDRs, deploy routes ion both Hubs
+// If MultiRegion and deployFirewallInHub and deployUDRs, deploy routes in both Hubs
 module route 'modules/route.bicep' = [
   for (location, i) in locations: if (deployRoutes) {
-    scope: resourceGroup(location.hubSubscriptionID, '${hubRgName}-${regionShortCodes[location.region]}')
-    name: 'DeployRegionRoute-${regionShortCodes[location.region]}'
+    scope: resourceGroup(
+      location.hubSubscriptionID,
+      '${hubRgName}-${regionShortCodes[?location.region] ?? toUpper(take(location.region, 4))}'
+    )
+    name: 'DeployRegionRoute-${regionShortCodes[?location.region] ?? toUpper(take(location.region, 4))}'
     params: {
       routeName: deployRoutes
-        ? '${deployRegion[i].outputs.HubRtFirewallName}/toRegion${regionShortCodes[locations[length(locations) == 2 && i == 0 ? 1 : 0].region]}'
+        ? '${deployRegion[i].outputs.HubRtFirewallName}/toRegion${i == 0 ? secondRegionShortCode : firstRegionShortCode}'
         : 'noRoute'
       routeNextHopType: 'VirtualAppliance'
       routeNextHopIpAddress: deployRoutes
@@ -397,11 +440,11 @@ module route 'modules/route.bicep' = [
 ]
 
 // variable to validate if we need to deploy VPN connections
-var deployCrossRegionVPNConnections = deployGatewayInHub && deployGatewayinOnPrem && deploySiteToSite && deployHUB && isMultiRegion && (isVnetHub || isVwanHub)
+var deployCrossRegionVPNConnections = deployGatewayInHub && deployGatewayinOnPrem && deploySiteToSite && deployHUB && deployOnPrem && isMultiRegion && (isVnetHub || isVwanHub)
 
 module CrossRegionVPNConnections 'VpnCrossRegionConnections.bicep' = [
   for (location, i) in locations: if (deployCrossRegionVPNConnections) {
-    name: 'CrossRegionVPNConnections${i+1}-${regionShortCodes[locations[0].region]}-${regionShortCodes[locations[1].region ]}'
+    name: 'CrossRegionVPNConnections${i+1}-${firstRegionShortCode}-${secondRegionShortCode}'
     params: {
       HubVPN: deployCrossRegionVPNConnections
         ? deployRegion[length(locations) == 2 && i == 0 ? 1 : 0].outputs.VpnSettings.Hub
