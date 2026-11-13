@@ -55,7 +55,7 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: tools/firewall-monitor/firewall-mon-app/package-lock.json
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
       - name: Build and test Angular app
