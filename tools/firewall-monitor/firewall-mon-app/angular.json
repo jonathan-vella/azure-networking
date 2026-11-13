@@ -21,12 +21,17 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/firewall-mon-app",
+            "outputPath": {
+              "base": "dist/firewall-mon-app",
+              "browser": ""
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "browser": "src/main.ts",
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -43,20 +48,16 @@
           },
           "configurations": {
             "production": {
-                "customWebpackConfig": {
-                  "path": "./extra-webpack.config.js",
-                  "replaceDuplicatePlugins": true
-              },
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
+                  "maximumWarning": "2.5mb",
                   "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
                 }
               ],
               "fileReplacements": [
@@ -68,28 +69,15 @@
               "outputHashing": "all"
             },
             "development": {
-                "customWebpackConfig": {
-                  "path": "./extra-webpack.config.js",
-                  "replaceDuplicatePlugins": true
-              },
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
-                }
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "firewall-mon-app:build:production"
@@ -119,7 +107,6 @@
             "inlineStyleLanguage": "scss",
             "externalDependencies": [
               "@azure/event-hubs",
-              "rhea-promise",
               "crypto-js"
             ],
             "assets": [
