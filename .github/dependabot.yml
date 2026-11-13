@@ -44,7 +44,9 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: terraform
-    directory: /tools/netbench
+    directories:
+      - /tools/netbench
+      - /tools/netbench/dashboard/infra
     schedule:
       interval: weekly
     groups:

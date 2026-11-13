@@ -18,9 +18,19 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/netbench/dashboard/api/package-lock.json
       - run: npm ci
       - run: npm run verify
       - run: npm run build
+      - name: Test Netbench Dashboard API
+        working-directory: tools/netbench/dashboard/api
+        run: |
+          npm ci
+          if ! grep -q "no test specified" package.json; then
+            npm test --if-present
+          fi
 
   iac-and-labs:
     runs-on: ubuntu-latest
@@ -31,9 +41,19 @@ jobs:
           terraform_version: "1.9.x"
       - run: az bicep install --version v0.48.1
       - run: az bicep build --file labs/virtual-wan-playground/main.bicep --outfile "$RUNNER_TEMP/playground.json"
+      - name: Validate Virtual WAN Playground Bicep parameters
+        run: |
+          for p in labs/virtual-wan-playground/bicepparams/*.bicepparam; do
+            az bicep build-params --file "$p" --outfile "$RUNNER_TEMP/$(basename "$p").json"
+          done
       - run: az bicep build --file labs/foundry-networking/build-foundry-standard-agent-vnet.bicep --outfile "$RUNNER_TEMP/foundry.json"
       - run: az bicep build --file tools/firewall-monitor/bicep/setup.bicep --outfile "$RUNNER_TEMP/fwmon-setup.json"
       - run: az bicep build --file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep --outfile "$RUNNER_TEMP/fwmon-resources.json"
+      - name: Validate shell script syntax
+        run: |
+          while IFS= read -r -d '' f; do
+            bash -n "$f"
+          done < <(find labs samples tools -not -path '*/node_modules/*' -type f -name '*.sh' -print0)
       - name: Validate Netbench Terraform
         working-directory: tools/netbench
         run: |
@@ -66,3 +86,8 @@ jobs:
           npm test
       - name: Build Azure Functions API
         run: dotnet build tools/firewall-monitor/firewall-mon-api/api.csproj --configuration Release
+      - name: Test Azure Functions API
+        run: |
+          if [ -d tools/firewall-monitor/firewall-mon-api.Tests ]; then
+            dotnet test tools/firewall-monitor/firewall-mon-api.Tests/firewall-mon-api.Tests.csproj --configuration Release
+          fi
