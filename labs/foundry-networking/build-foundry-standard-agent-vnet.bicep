@@ -69,8 +69,11 @@ param modelVersion string = '2024-11-20'
 @description('Model capacity (in thousands of tokens per minute) when deployModel is true.')
 param modelCapacity int = 10
 
-@description('Deploy Account and Project Capability Hosts (set true once caller holds Storage Blob Data Contributor & Cosmos DB Operator).')
+@description('Deploy Project Capability Host (and optional Account Capability Host when createAccountCapabilityHost is true). Requires caller to hold Storage Blob Data Contributor & Cosmos DB Operator.')
 param deployCapabilityHosts bool = true
+
+@description('Explicitly create the account-level Capability Host (<account>@aml_aiagentservice). Keep false on fresh networkInjections deployments because Microsoft.CognitiveServices auto-creates it; set true only when recreating a deleted account Capability Host.')
+param createAccountCapabilityHost bool = false
 
 @description('Tags applied to all provisioned resources.')
 param tags object = {
@@ -79,7 +82,7 @@ param tags object = {
 }
 
 var suffix = substring(uniqueString(subscription().id, resourceGroup().id, namePrefix), 0, 6)
-var cleanPrefix = toLower(replace(namePrefix, '-', ''))
+var cleanPrefix = toLower(replace(replace(namePrefix, '-', ''), '_', ''))
 
 var spokeVnetName = 'vnet-${namePrefix}-spoke-${suffix}'
 var hubVnetName = 'vnet-${namePrefix}-hub-${suffix}'
@@ -639,6 +642,7 @@ resource foundryProject 'Microsoft.CognitiveServices/accounts/projects@2025-06-0
   }
   dependsOn: [
     foundryDnsZoneGroup
+    spokeDnsLinks
   ]
 }
 
@@ -735,21 +739,26 @@ resource projectKeyVaultRole 'Microsoft.Authorization/roleAssignments@2022-04-01
   }
 }
 
-resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-06-01' = if (deployCapabilityHosts) {
+resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-09-01' = if (deployCapabilityHosts && createAccountCapabilityHost) {
   parent: foundryAccount
-  name: 'caphost-account'
+  name: '${foundryAccountName}@aml_aiagentservice'
   properties: {
     capabilityHostKind: 'Agents'
+    #disable-next-line BCP037
+    customerSubnet: agentSubnetId
   }
   dependsOn: [
     foundryProject
   ]
 }
 
-resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-06-01' = if (deployCapabilityHosts) {
+resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-09-01' = if (deployCapabilityHosts) {
   parent: foundryProject
   name: 'caphost-project'
   properties: {
+    // ARM requires capabilityHostKind: 'Agents' at runtime; Bicep Swagger omits it on ProjectCapabilityHostProperties.
+    #disable-next-line BCP037
+    capabilityHostKind: 'Agents'
     storageConnections: [
       storageConnection.name
     ]
@@ -769,6 +778,7 @@ resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/ca
     storageDnsZoneGroup
     cosmosDnsZoneGroup
     searchDnsZoneGroup
+    spokeDnsLinks
   ]
 }
 

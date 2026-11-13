@@ -4,10 +4,13 @@ metadata:
   name: network-tools
   labels:
     app: network-tools
+    app.kubernetes.io/name: network-tools
+    app.kubernetes.io/part-of: aks-networking-labs
 spec:
+  terminationGracePeriodSeconds: 5
   containers:
     - name: network-tools
-      image: nicolaka/netshoot:latest
+      image: nicolaka/netshoot:v0.16
       command: ["sleep", "3600"]
       resources:
         requests:

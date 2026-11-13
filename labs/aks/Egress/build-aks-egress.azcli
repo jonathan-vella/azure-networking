@@ -12,15 +12,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFEST_DIR="${SCRIPT_DIR}/../manifests"
 
 PREFIX="${PREFIX:-aks-egress}"
+LOCATION="${LOCATION:-${LOC:-eastus2}}"
 RG="${RG:-${PREFIX}-rg}"
-LOC="${LOC:-eastus2}"
 NODE_VM_SIZE="${NODE_VM_SIZE:-Standard_D2s_v5}"
 OUTBOUND_MODE="${OUTBOUND_MODE:-udr}" # "udr" (Azure Firewall) or "natgw" (User-Assigned NAT Gateway)
 
-AKSCLUSTER="${PREFIX}"
-VNET_NAME="${PREFIX}-vnet"
-AKSSUBNET_NAME="aks-subnet"
+AKSCLUSTER="${AKSCLUSTER:-${PREFIX}}"
+VNET_NAME="${VNET_NAME:-${PREFIX}-vnet}"
+VNET_CIDR="${VNET_CIDR:-10.42.0.0/16}"
+AKSSUBNET_NAME="${AKSSUBNET_NAME:-aks-subnet}"
+AKS_SUBNET_CIDR="${AKS_SUBNET_CIDR:-10.42.1.0/24}"
 FWSUBNET_NAME="AzureFirewallSubnet" # Required exact name for Azure Firewall
+FW_SUBNET_CIDR="${FW_SUBNET_CIDR:-10.42.2.0/24}"
+SERVICE_CIDR="${SERVICE_CIDR:-10.101.0.0/16}"
+DNS_SERVICE_IP="${DNS_SERVICE_IP:-10.101.0.10}"
+POD_CIDR="${POD_CIDR:-10.244.0.0/16}"
 FWNAME="${PREFIX}-fw"
 FWPUBLICIP_NAME="${PREFIX}-fwpublicip"
 FWIPCONFIG_NAME="${PREFIX}-fwconfig"
@@ -30,26 +36,28 @@ FWROUTE_NAME_INTERNET="${PREFIX}-fwinternet"
 
 NATGW="${PREFIX}-natgw"
 NATGWIP_NAME="${PREFIX}-natgw-pip"
-MYACR="${MYACR:-aksegressextacr$RANDOM}"
+CLEAN_PREFIX="$(printf '%s' "$PREFIX" | tr -cd '[:alnum:]' | tr '[:upper:]' '[:lower:]' | cut -c1-16)"
+MYACR="${MYACR:-${CLEAN_PREFIX}acr${RANDOM}}"
 AKSDNS="${AKSDNS:-${PREFIX}-dns}"
 IDENTITY="${IDENTITY:-${PREFIX}-mi}"
 
-az group create --name "$RG" --location "$LOC"
+az provider register -n Microsoft.ContainerService --output none
+az group create --name "$RG" --location "$LOCATION"
 
 # Create VNet + AKS Subnet + AzureFirewallSubnet
 az network vnet create \
   --resource-group "$RG" \
   --name "$VNET_NAME" \
-  --location "$LOC" \
-  --address-prefixes 10.42.0.0/16 \
+  --location "$LOCATION" \
+  --address-prefixes "$VNET_CIDR" \
   --subnet-name "$AKSSUBNET_NAME" \
-  --subnet-prefixes 10.42.1.0/24
+  --subnet-prefixes "$AKS_SUBNET_CIDR"
 
 az network vnet subnet create \
   --resource-group "$RG" \
   --vnet-name "$VNET_NAME" \
   --name "$FWSUBNET_NAME" \
-  --address-prefixes 10.42.2.0/24
+  --address-prefixes "$FW_SUBNET_CIDR"
 
 SUBNETID=$(az network vnet subnet show -g "$RG" --vnet-name "$VNET_NAME" --name "$AKSSUBNET_NAME" --query id -o tsv | tr -d '\r')
 VNET_ID=$(az network vnet show -g "$RG" --name "$VNET_NAME" --query id -o tsv | tr -d '\r')
@@ -71,15 +79,15 @@ if [[ "$OUTBOUND_MODE" == "udr" ]]; then
   echo "==> Deploying Azure Firewall + UDR (outboundType: userDefinedRouting)..."
   az extension add --name azure-firewall --upgrade --yes 2>/dev/null || true
 
-  az network public-ip create -g "$RG" -n "$FWPUBLICIP_NAME" -l "$LOC" --sku Standard
-  az network firewall create -g "$RG" -n "$FWNAME" -l "$LOC" --enable-dns-proxy true
+  az network public-ip create -g "$RG" -n "$FWPUBLICIP_NAME" -l "$LOCATION" --sku Standard
+  az network firewall create -g "$RG" -n "$FWNAME" -l "$LOCATION" --sku AZFW_VNet --tier Standard --enable-dns-proxy true
   az network firewall ip-config create -g "$RG" -f "$FWNAME" -n "$FWIPCONFIG_NAME" \
     --public-ip-address "$FWPUBLICIP_NAME" --vnet-name "$VNET_NAME"
 
   FWPUBLIC_IP=$(az network public-ip show -g "$RG" -n "$FWPUBLICIP_NAME" --query ipAddress -o tsv | tr -d '\r')
   FWPRIVATE_IP=$(az network firewall show -g "$RG" -n "$FWNAME" --query "ipConfigurations[0].privateIPAddress" -o tsv | tr -d '\r')
 
-  az network route-table create -g "$RG" -l "$LOC" --name "$FWROUTE_TABLE_NAME"
+  az network route-table create -g "$RG" -l "$LOCATION" --name "$FWROUTE_TABLE_NAME"
   az network route-table route create -g "$RG" --name "$FWROUTE_NAME" \
     --route-table-name "$FWROUTE_TABLE_NAME" --address-prefix 0.0.0.0/0 \
     --next-hop-type VirtualAppliance --next-hop-ip-address "$FWPRIVATE_IP"
@@ -89,64 +97,67 @@ if [[ "$OUTBOUND_MODE" == "udr" ]]; then
 
   # Required AKS control-plane, NTP, and container registry network/application rules
   az network firewall network-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwnr' -n 'apiudp' \
-    --protocols 'UDP' --source-addresses '*' --destination-addresses "AzureCloud.${LOC}" \
+    --protocols 'UDP' --source-addresses "$AKS_SUBNET_CIDR" --destination-addresses "AzureCloud.${LOCATION}" \
     --destination-ports 1194 --action allow --priority 100
   az network firewall network-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwnr' -n 'apitcp' \
-    --protocols 'TCP' --source-addresses '*' --destination-addresses "AzureCloud.${LOC}" \
+    --protocols 'TCP' --source-addresses "$AKS_SUBNET_CIDR" --destination-addresses "AzureCloud.${LOCATION}" \
     --destination-ports 9000
   az network firewall network-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwnr' -n 'time' \
-    --protocols 'UDP' --source-addresses '*' --destination-fqdns 'ntp.ubuntu.com' --destination-ports 123
+    --protocols 'UDP' --source-addresses "$AKS_SUBNET_CIDR" --destination-fqdns 'ntp.ubuntu.com' --destination-ports 123
   az network firewall network-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwnr' -n 'registries' \
-    --protocols 'TCP' --source-addresses '*' \
-    --destination-fqdns ghcr.io pkg-containers.githubusercontent.com docker.io registry-1.docker.io production.cloudflare.docker.com mcr.microsoft.com \
+    --protocols 'TCP' --source-addresses "$AKS_SUBNET_CIDR" \
+    --destination-fqdns ghcr.io pkg-containers.githubusercontent.com auth.docker.io docker.io registry-1.docker.io production.cloudflare.docker.com production.cloudfront.docker.com mcr.microsoft.com \
     --destination-ports 443
 
   az network firewall application-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwar' -n 'fqdn' \
-    --source-addresses '*' --protocols 'http=80' 'https=443' \
+    --source-addresses "$AKS_SUBNET_CIDR" --protocols 'http=80' 'https=443' \
     --fqdn-tags "AzureKubernetesService" --action allow --priority 100
+  az network firewall application-rule create -g "$RG" -f "$FWNAME" --collection-name 'aksfwar' -n 'mcr-data' \
+    --source-addresses "$AKS_SUBNET_CIDR" --protocols 'https=443' \
+    --target-fqdns '*.data.mcr.microsoft.com'
 
   az network vnet subnet update -g "$RG" --vnet-name "$VNET_NAME" --name "$AKSSUBNET_NAME" \
     --route-table "$FWROUTE_TABLE_NAME"
 
-  CURRENT_IP=$(curl -s https://ifconfig.me)
+  CURRENT_IP=$(curl -fsSL https://ifconfig.me | tr -d '\r\n')
   az aks create \
     --resource-group "$RG" \
     --name "$AKSCLUSTER" \
-    --location "$LOC" \
+    --location "$LOCATION" \
     --node-count 3 \
     --node-vm-size "$NODE_VM_SIZE" \
     --generate-ssh-keys \
     --dns-name-prefix "$AKSDNS" \
     --network-plugin azure \
     --network-plugin-mode overlay \
-    --pod-cidr 10.244.0.0/16 \
+    --pod-cidr "$POD_CIDR" \
     --outbound-type userDefinedRouting \
     --api-server-authorized-ip-ranges "${FWPUBLIC_IP}/32,${CURRENT_IP}/32" \
-    --service-cidr 10.101.0.0/16 \
-    --dns-service-ip 10.101.0.10 \
+    --service-cidr "$SERVICE_CIDR" \
+    --dns-service-ip "$DNS_SERVICE_IP" \
     --vnet-subnet-id "$SUBNETID" \
     --assign-identity "$identity_id" \
     --attach-acr "$MYACR"
 else
   echo "==> Deploying User-Assigned NAT Gateway (outboundType: userAssignedNATGateway)..."
-  az network public-ip create -g "$RG" -n "$NATGWIP_NAME" -l "$LOC" --sku Standard
-  az network nat gateway create -g "$RG" -n "$NATGW" -l "$LOC" --public-ip-addresses "$NATGWIP_NAME"
+  az network public-ip create -g "$RG" -n "$NATGWIP_NAME" -l "$LOCATION" --sku Standard
+  az network nat gateway create -g "$RG" -n "$NATGW" -l "$LOCATION" --public-ip-addresses "$NATGWIP_NAME"
   az network vnet subnet update -g "$RG" --vnet-name "$VNET_NAME" --name "$AKSSUBNET_NAME" --nat-gateway "$NATGW"
 
   az aks create \
     --resource-group "$RG" \
     --name "$AKSCLUSTER" \
-    --location "$LOC" \
+    --location "$LOCATION" \
     --node-count 3 \
     --node-vm-size "$NODE_VM_SIZE" \
     --generate-ssh-keys \
     --dns-name-prefix "$AKSDNS" \
     --network-plugin azure \
     --network-plugin-mode overlay \
-    --pod-cidr 10.244.0.0/16 \
+    --pod-cidr "$POD_CIDR" \
     --outbound-type userAssignedNATGateway \
-    --service-cidr 10.101.0.0/16 \
-    --dns-service-ip 10.101.0.10 \
+    --service-cidr "$SERVICE_CIDR" \
+    --dns-service-ip "$DNS_SERVICE_IP" \
     --vnet-subnet-id "$SUBNETID" \
     --assign-identity "$identity_id" \
     --attach-acr "$MYACR"

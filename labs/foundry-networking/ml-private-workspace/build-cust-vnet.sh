@@ -13,10 +13,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export COMMON_RESOURCE_GROUP="${COMMON_RESOURCE_GROUP:-ml-private-common-rg}"
+export PREFIX="${PREFIX:-ml-private}"
 export LOCATION="${LOCATION:-eastus2}"
+export RG="${RG:-${COMMON_RESOURCE_GROUP:-${PREFIX}-common-rg}}"
+export COMMON_RESOURCE_GROUP="$RG"
 export LINUX_VM="${LINUX_VM:-ai-jumpbox-linux}"
-export LINUX_IMAGE="${LINUX_IMAGE:-Ubuntu2404}"
+export LINUX_IMAGE="${LINUX_IMAGE:-Canonical:ubuntu-24_04-lts:server:latest}"
 export LINUX_VM_SIZE="${LINUX_VM_SIZE:-Standard_B2ls_v2}"
 export DEPLOY_WINDOWS_VM="${DEPLOY_WINDOWS_VM:-false}"
 export WINDOWS_VM="${WINDOWS_VM:-ai-jumpbox-win}"
@@ -32,7 +34,7 @@ export PEP_SUBNET_PREFIX="${PEP_SUBNET_PREFIX:-10.100.3.0/24}"
 export NSG_NAME="${NSG_NAME:-vm-jumpbox-nsg}"
 export PUB_KEY="${PUB_KEY:-$HOME/.ssh/id_rsa.pub}"
 
-MY_IP=$(curl -s https://ifconfig.me)
+MY_IP=$(curl -fsSL https://ifconfig.me | tr -d '\r\n')
 
 az group create --name "$COMMON_RESOURCE_GROUP" --location "$LOCATION"
 
@@ -40,6 +42,7 @@ az group create --name "$COMMON_RESOURCE_GROUP" --location "$LOCATION"
 az network vnet create \
   --resource-group "$COMMON_RESOURCE_GROUP" \
   --name "$VNET_NAME" \
+  --location "$LOCATION" \
   --address-prefixes "$VNET_ADDRESS_PREFIX"
 
 az network vnet subnet create \
@@ -53,7 +56,7 @@ az network vnet subnet create \
   --vnet-name "$VNET_NAME" \
   --name "$PEP_SUBNET_NAME" \
   --address-prefixes "$PEP_SUBNET_PREFIX" \
-  --disable-private-endpoint-network-policies true
+  --private-endpoint-network-policies Disabled
 
 # Create NSG allowing SSH (and RDP when Windows jumpbox is enabled) from client IP only
 az network nsg create --resource-group "$COMMON_RESOURCE_GROUP" --name "$NSG_NAME"
