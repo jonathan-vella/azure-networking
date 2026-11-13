@@ -5,166 +5,202 @@ sidebar:
   order: 1
 ---
 
-Centralized traffic inspection sits on the critical path of every enterprise packet. A poorly architected firewall tier either becomes a single-zone outage amplifier, breaks TCP state via asymmetric return routing, or blinds SecOps with unstructured diagnostic logs and SNAT port exhaustion.
+Centralized traffic inspection sits on the critical path of enterprise network flows. Poorly designed firewall tiers amplify single-zone outages, drop TCP sessions through asymmetric return paths, or blind security operations with unstructured logs and SNAT port exhaustion.
 
-This chapter compares **Azure Firewall** (`Basic`, `Standard`, and `Premium`) against **Third-Party Network Virtual Appliance (NVA)** high-availability topologies—including **Active-Active with Internal Load Balancer + Azure Route Server BGP/ECMP**, **Active-Passive**, and **Azure Gateway Load Balancer (GWLB)** transparent bump-in-the-wire service chaining.
+This chapter compares [Azure Firewall](https://learn.microsoft.com/en-us/azure/firewall/features-by-sku) (`Basic`, `Standard`, and `Premium`) against third-party Network Virtual Appliance (NVA) high-availability patterns: active-active clusters behind an Internal Load Balancer with [Azure Route Server](https://learn.microsoft.com/en-us/azure/route-server/next-hop-ip), active-passive failover pairs, and [Azure Gateway Load Balancer](https://learn.microsoft.com/en-us/azure/load-balancer/gateway-overview) VXLAN service chaining.
+
+![Azure Firewall Hub, Active-Active NVA with ILB and Route Server, and Gateway Load Balancer VXLAN patterns](../../../assets/diagrams/security/nva-ha-and-gwlb-patterns.svg)
 
 ---
 
-## 1. Azure Firewall Architecture & SKU Selector
+## 1. Azure Firewall architecture and SKU selection
 
-**Azure Firewall** is a cloud-native, zone-redundant, stateful Firewall-as-a-Service deployed into a dedicated `/26` `AzureFirewallSubnet` (plus an optional `/26` `AzureFirewallManagementSubnet` required for `Basic` SKU and Forced Tunneling). For new deployments in Availability Zone-enabled regions, Azure Firewall allocates across zones automatically at no extra cost—never attach a subnet-level NSG to `AzureFirewallSubnet`.
+Azure Firewall is a managed, stateful firewall deployed into a dedicated `/26` `AzureFirewallSubnet` (plus a dedicated `/26` `AzureFirewallManagementSubnet` required for the `Basic` SKU and Forced Tunneling). New deployments in regions with Availability Zones span zones automatically at no extra deployment fee. Never attach a Network Security Group (NSG) to `AzureFirewallSubnet`.
 
-### Basic vs. Standard vs. Premium SKU Matrix
+### Basic, Standard, and Premium SKU comparison
+
+Figures below reflect documented [Azure Firewall SKU capabilities](https://learn.microsoft.com/en-us/azure/firewall/features-by-sku) and [tested performance limits](https://learn.microsoft.com/en-us/azure/firewall/firewall-performance) (up to 20 autoscale instances by default, or up to 50 instances with prescaling):
 
 | Capability | Azure Firewall Basic | Azure Firewall Standard | Azure Firewall Premium |
 | --- | --- | --- | --- |
-| **Target Footprint** | SMB / Isolated Dev-Test (< 250 Mbps) | Enterprise L3–L7 Egress & East-West | Regulated, Zero-Trust, PCI-DSS, Deep L7 |
-| **Autoscaling Throughput** | Fixed 2 backend VMs (**~250 Mbps**) | Autoscales up to **30 Gbps** | Autoscales up to **100 Gbps** |
-| **Single "Fat Flow" Ceiling** | N/A | **1 Gbps** per flow | **10 Gbps** per flow |
-| **Stateful 5-Tuple + SNAT/DNAT** | Yes (Requires Mgmt Subnet) | Yes (Up to 250 Public IPs) | Yes (Up to 250 Public IPs) |
-| **Network-Level FQDN Filtering** | No *(HTTP/S & MSSQL SNI App rules only)* | **Yes** (All TCP/UDP ports — requires **DNS Proxy**) | **Yes** (All TCP/UDP ports — requires **DNS Proxy**) |
-| **Threat Intelligence** | **Alert mode only** | Alert **and Deny** modes | Alert **and Deny** modes |
-| **DNS Proxy & Custom DNS** | No | **Yes** | **Yes** |
-| **Web Categories** | No | Domain/SNI level | **Full URL path level** (with TLS inspection) |
-| **Outbound TLS Inspection** | No | No | **Yes** (Forward proxy via Key Vault intermediate CA) |
-| **Managed IDPS** | No | No | **Yes** (58,000+ signatures, East-West & North-South) |
-| **Full URL Path Filtering** | No | No | **Yes** (`contoso.com/api/v1` vs. `contoso.com/*`) |
+| **Target workload** | SMB or isolated dev/test (< 250 Mbps) | Enterprise L3-L7 egress and east-west | Regulated, PCI-DSS, deep L7 inspection |
+| **Aggregate throughput** | Up to **250 Mbps** (fixed 2 VMs, no autoscale) | Up to **30 Gbps** (~3 Gbps initial before autoscale) | Up to **100 Gbps** (~18 Gbps initial; **up to 22 Gbps** with TLS + IDPS Deny active) |
+| **Single-flow ceiling** | Up to 250 Mbps | **1 Gbps** fat flow (up to 1.5 Gbps single TCP) | **10 Gbps** fat flow (up to 9 Gbps single TCP; ~600 Mbps with IDPS Deny) |
+| **Public IP capacity** | Multiple PIPs (requires Mgmt `/26` subnet) | Up to **250 PIPs** (VNet) / **80 PIPs** (Secured vHub) | Up to **250 PIPs** (VNet) / **80 PIPs** (Secured vHub) |
+| **Network-rule FQDN filtering** | No (HTTP/S and MSSQL SNI App rules only) | **Yes** (all TCP/UDP ports, requires DNS Proxy) | **Yes** (all TCP/UDP ports, requires DNS Proxy) |
+| **Threat Intelligence** | **Alert mode only** | **Alert and Deny** modes | **Alert and Deny** modes |
+| **DNS Proxy and Custom DNS** | No | **Yes** | **Yes** |
+| **Web categories** | No | FQDN / SNI match only | **Full URL path match** (HTTP and inspected HTTPS) |
+| **Outbound / east-west TLS inspection** | No | No | **Yes** (forward proxy via Key Vault Intermediate CA) |
+| **Managed IDPS** | No | No | **Yes** (67,000+ rules in 50+ categories; up to 10,000 custom rules) |
+| **Full URL path filtering** | No | No | **Yes** (`www.contoso.com/api/v1` vs. `www.contoso.com`) |
 | **Forced Tunneling without PIP** | No | **Yes** | **Yes** |
 
-:::tip[Inbound TLS Inspection Architecture]
-Azure Firewall Premium performs **outbound** and **east-west** TLS forward-proxy inspection natively, but **does not terminate inbound TLS** on DNAT rules. For inbound HTTPS web workloads requiring WAF (OWASP CRS / bot protection) and end-to-end TLS inspection, place **Azure Application Gateway WAF v2** (or Azure Front Door Premium + Private Link) in front of—or in parallel with—Azure Firewall rather than exposing raw DNAT ports.
+### Outbound TLS inspection and Key Vault identity requirements
+
+Azure Firewall Premium decrypts outbound and east-west HTTPS traffic by generating leaf certificates on the fly from a customer-supplied Intermediate CA certificate stored in Azure Key Vault. Production deployments must satisfy three [Azure Firewall Premium certificate requirements](https://learn.microsoft.com/en-us/azure/firewall/premium-certificates).
+
+First, export a single Intermediate CA certificate (never a Root CA in production) valid for at least one year forward (renewed at least two months prior to expiration) as a password-less PKCS#12 (`.pfx`) archive with an exportable RSA >= 4096-bit private key, `basicConstraints = critical, CA:true` with `pathlen >= 1`, and `keyUsage = critical, keyCertSign`. PEM files and `.pfx` bundles containing the full certificate chain are rejected.
+
+Second, import that `.pfx` through Key Vault Certificates (recommended for expiration alerts, because Key Vault creates the backing Secret automatically) or upload it directly as a Key Vault Secret. Azure Firewall reads certificates exclusively through the Key Vault Secrets API, so Certificate objects without a corresponding Secret fail.
+
+Third, assign a User-Assigned Managed Identity to the Firewall Policy and grant it Key Vault Secret `Get` and `List` permissions via the `Key Vault Secrets User` RBAC role or a Vault Access Policy. Certificate-plane permissions alone do not work. Because Azure Firewall Premium is a Key Vault Trusted Service, Key Vault public network access can remain disabled.
+
+:::tip[Inbound TLS termination]
+Azure Firewall Premium acts as a TLS forward proxy for outbound and east-west traffic, not an inbound TLS reverse proxy on DNAT rules. For inbound HTTPS workloads needing OWASP WAF protection and TLS termination, place Azure Application Gateway WAF v2 or Azure Front Door Premium in front of or alongside Azure Firewall.
 :::
 
 ---
 
-## 2. Azure Firewall Routing Symmetry, SNAT & DNAT Rules
+## 2. Routing symmetry, SNAT, and DNAT rules
 
-Stateful firewalls drop packets immediately if they see a `SYN-ACK` without having inspected the initial `SYN`. Three symmetry traps account for most Azure Firewall production incidents:
+Stateful firewalls drop packets when a `SYN-ACK` arrives without a matching `SYN` session entry. Three routing and NAT behaviors cause most Azure Firewall connectivity incidents.
 
-### 1. DNAT Asymmetric Return Routing
-When an external client hits an Azure Firewall Public IP via a **DNAT rule**, Azure Firewall translates the destination IP to the spoke VM's private IP **and automatically SNATs the source IP** to one of the firewall's private `AzureFirewallSubnet` instance IPs (`10.x.x.x`).
-- **Why it works by default**: Because the packet's source IP is rewritten to `AzureFirewallSubnet`, the spoke VM naturally returns `SYN-ACK` to the exact firewall backend instance via the VNet peering system route—preserving client IP visibility only in `AZFWNatRule` logs, **not** inside the guest OS TCP header.
-- **When you need original client IPs**: Use **Application Gateway WAF v2** (`X-Forwarded-For` header) for HTTP/S, or use **Azure Gateway Load Balancer** chaining (Section 4) for non-HTTP protocols where source IP preservation is mandatory.
+### DNAT return symmetry and the spoke UDR trap
 
-### 2. Private-to-Private SNAT (`IANAPrivateRanges`) & Application Rules
-By default, Azure Firewall **does not SNAT** traffic destined to RFC 1918 private ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`) when matched by **Network Rules**, preserving true source IPs across spokes and ExpressRoute.
-- **Hidden Application Rule Caveat**: **Application Rules** run through a user-space HTTP/S/MSSQL proxy on Azure Firewall backend instances. Consequently, **Application Rules implicitly SNAT source IPs to an `AzureFirewallSubnet` private IP even for private destinations!** If a target Private Endpoint or internal server enforces client-IP allowlists, inspect internal east-west flows using **Network Rules + IDPS** (on Premium) rather than Application Rules, and ensure both forward and reverse UDRs point symmetrically to the firewall's private IP (`10.0.1.4`).
-- If your enterprise uses non-RFC1918 public address space internally on-premises, add those CIDRs to **`IANAPrivateRanges` (Private IP Ranges — Do Not SNAT)** in Firewall Policy so hybrid flows aren't accidentally SNATed to the firewall's Public IP!
+When an external client hits an Azure Firewall Public IP matching a [DNAT rule](https://learn.microsoft.com/en-us/azure/firewall/tutorial-firewall-dnat-policy), Azure Firewall translates the destination IP to the workload's private IP and SNATs the packet source IP to the specific firewall backend instance inside `AzureFirewallSubnet` (for example, `10.20.0.6`), rather than the `.4` frontend load-balancer VIP.
 
-### 3. SNAT Port Exhaustion at Scale
-Each Public IP attached to Azure Firewall (or an associated **NAT Gateway**—the preferred high-scale egress pairing!) provides finite ephemeral SNAT ports. Attach an **Azure NAT Gateway** to `AzureFirewallSubnet` (supported on Hub VNet deployments) or assign multiple Public IPs via IP Prefixes to provide up to **64,512 SNAT ports per IP** with zero cross-flow port starvation.
+Because the rewritten source IP belongs to `AzureFirewallSubnet`, the destination VM returns `SYN-ACK` directly to `10.20.0.6` over the VNet or peering system route. The original internet client IP is recorded in `AZFWNatRule` logs rather than the guest OS TCP header. Adding an explicit UDR on the workload subnet for `AzureFirewallSubnet` (such as `10.20.0.0/26 -> 10.20.0.4`) diverts return `SYN-ACK` packets away from backend instance `.6` to `.4` and drops the connection.
+
+[DNAT is also unsupported when Forced Tunneling is enabled](https://learn.microsoft.com/en-us/troubleshoot/azure/firewall/firewall-known-issues) because inbound return packets follow the forced `0.0.0.0/0` path toward on-premises instead of returning through Azure Firewall. When workloads require the original internet client IP in-band, use Application Gateway WAF v2 (`X-Forwarded-For`) for HTTP/S or chain a third-party NVA to Azure Gateway Load Balancer (Section 4) for non-HTTP protocols.
+
+### Private-range SNAT (`privateRanges` and `autoLearnPrivateRanges`)
+
+By default on Network Rules, Azure Firewall [does not SNAT](https://learn.microsoft.com/en-us/azure/firewall/snat-private-range) traffic destined for IANA RFC 1918 (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) or shared RFC 6598 (`100.64.0.0/10`) address space (`IANAPrivateRanges`), so client source IPs stay intact across peered spokes and ExpressRoute.
+
+Application Rules behave differently. They pass through a transparent HTTP/S/MSSQL proxy on the firewall instances and always SNAT the source IP to an `AzureFirewallSubnet` address, regardless of destination CIDR. When an internal server or Private Endpoint enforces source-IP allowlists, filter east-west traffic with Network Rules (paired with DNS Proxy FQDN filtering and Premium IDPS where needed) instead of Application Rules, and keep forward and reverse UDRs symmetric through the firewall private IP (`10.0.1.4`).
+
+If your organization routes non-RFC 1918 public address blocks internally on-premises, configure `snat.privateRanges` in Firewall Policy (retaining the RFC 1918 prefixes alongside your custom CIDRs; `0.0.0.0/0` disables Network Rule SNAT entirely, while `255.255.255.255/32` forces SNAT on every Network Rule). Alternatively, set `snat.autoLearnPrivateRanges: 'Enabled'` (`-AutoLearnPrivateRange` in PowerShell), which requires Azure Route Server deployed in the same Hub VNet and linked to the firewall via `RouteServerId` (Secured Virtual Hubs include Route Server automatically) so the firewall learns internal routes every 30 minutes.
+
+### Scaling SNAT ports with Azure NAT Gateway
+
+Each Public IP attached directly to Azure Firewall supplies 2,496 SNAT ports per backend VMSS instance (4,992 ports initially across two instances). While you can associate up to 250 individual Standard Public IPs allocated from a Public IP Prefix, attaching an [Azure NAT Gateway V2 (`StandardV2` SKU) to `AzureFirewallSubnet`](https://learn.microsoft.com/en-us/azure/firewall/integrate-with-nat-gateway-v2) provides **64,512 ephemeral SNAT ports per Public IP** (up to 16 Public IPs) dynamically across active flows. Always choose the zone-redundant `StandardV2` NAT Gateway SKU (with `StandardV2` Public IPs) when integrating with a zone-redundant Hub VNet firewall; the zonal `Standard` (v1) NAT Gateway SKU does not support zone-redundant firewall deployments. In Virtual WAN, NAT Gateway cannot attach inside a Secured vHub and is placed on spoke subnets instead.
 
 ---
 
-## 3. Observability: Resource-Specific Structured Logs vs. Legacy Diagnostics
+## 3. Observability with resource-specific structured logs
 
-Stop sending Azure Firewall telemetry into the monolithic legacy **`AzureDiagnostics`** Log Analytics table!
+Route Azure Firewall diagnostic telemetry to **Resource-specific** Log Analytics tables rather than the legacy `AzureDiagnostics` table. See [Azure Firewall structured logs](https://learn.microsoft.com/en-us/azure/firewall/firewall-structured-logs) and the [monitoring data reference](https://learn.microsoft.com/en-us/azure/firewall/monitor-firewall-reference).
 
-| Dimension | Legacy `AzureDiagnostics` Mode | Modern **Resource-Specific (Structured) Logs** |
+| Dimension | Legacy `AzureDiagnostics` Mode | Resource-Specific Structured Logs |
 | --- | --- | --- |
-| **Schema & Parsing** | Free-form text stuffed into `msg_s`, slow regex parsing at query time, 500-column table ceiling risk | Strongly typed dedicated tables (`SrcIp`, `DstIp`, `DstPort`, `Action`, `Policy`, `RuleCollection`, `Rule`) |
-| **Table Granularity & RBAC** | All services mixed in one table | Per-table RBAC, retention, Basic/Auxiliary log tiers, and Data Collection Rule (DCR) transformations |
-| **Advanced Telemetry** | Application, Network, DNS Proxy only | Unlocks **`AZFWIdpsSignature`**, **`AZFWThreatIntel`**, **`AZFWFatFlow`**, **`AZFWFlowTrace`**, **`AZFWInternalFqdnResolutionFailure`**, and rule aggregations |
+| **Schema and query speed** | Unstructured strings packed into `msg_s`; slow query-time parsing; 500-column workspace ceiling risk | Strongly typed columns (`SourceIp`, `DestinationIp`, `DestinationPort`, `Fqdn`, `TargetUrl`, `Action`, `Rule`) |
+| **Access and cost control** | All services share one monolithic table | Per-table RBAC, Data Collection Rule (DCR) filtering, and Basic log plan (~80% ingestion cost reduction) |
+| **Exclusive log categories** | Application, Network, and DNS Proxy logs only | Adds `AZFWIdpsSignature`, `AZFWThreatIntel`, `AZFWFlowTrace`, `AZFWFatFlow`, `AZFWInternalFqdnResolutionFailure`, and Policy Analytics aggregation tables |
 
-### Core Structured Log Tables & KQL Triage Query
+:::note[Log Analytics table plan constraint]
+`Policy Analytics` and Microsoft Security Copilot integrations require the **Analytics** table plan on `AZFW*` rule and aggregation tables (`AZFWNetworkRuleAggregation`, `AZFWApplicationRuleAggregation`, `AZFWNatRuleAggregation`). Table plans can change at most once every 7 days.
+:::
 
-Enable **Resource-specific** destination mode in Diagnostic Settings for `AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWThreatIntel`, `AZFWIdpsSignature`, `AZFWDnsQuery`, and `AZFWFatFlow`:
+### Core structured log tables and KQL triage queries
+
+Enable **Resource specific** mode in Diagnostic Settings for `AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWThreatIntel`, `AZFWIdpsSignature`, `AZFWDnsQuery`, and `AZFWFlowTrace` (`AZFWFatFlow` is enabled via Azure PowerShell; note that `AZFWNatRule` records matched DNAT translations via `TranslatedIp` and `TranslatedPort` without an `Action` column):
 
 ```kql
-// Unified real-time triage across all structured Azure Firewall decision tables
+// 1. Unified deny/alert triage across Network, Application, ThreatIntel, and IDPS tables
 AZFWNetworkRule
-| union AZFWApplicationRule, AZFWNatRule, AZFWThreatIntel, AZFWIdpsSignature
+| union AZFWApplicationRule, AZFWThreatIntel, AZFWIdpsSignature
 | where TimeGenerated > ago(1h)
-| where Action in ("Deny", "Alert", "Drop")
-| project TimeGenerated, Type, Action, Protocol, SourceIp, DestinationIp, Fqdn, DestinationPort, Policy, RuleCollection, Rule
+| where Action has_any ("Deny", "Alert", "Drop")
+| extend Target = coalesce(DestinationIp, Fqdn, TargetUrl)
+| extend Detail = coalesce(Rule, strcat("IDPS ", tostring(SignatureId), ": ", Description), ThreatDescription, ActionReason)
+| project TimeGenerated, Type, Action, Protocol, SourceIp, Target, DestinationPort, Policy, RuleCollection, Detail
 | order by TimeGenerated desc
 | take 100
 ```
 
-:::tip[Live Real-Time Firewall Diagnostic Tool]
-When troubleshooting live rule drops without waiting 2–5 minutes for Log Analytics ingestion, stream structured Azure Firewall logs via **Azure Event Hubs** directly into our real-time web analyzer: **[Firewall Monitor (`tools/firewall-monitor`)](https://github.com/jonathan-vella/azure-networking/tree/main/tools/firewall-monitor)** (also walked through in the **[Labs & Tools Guide](/azure-networking/06-operations-reviews/labs-and-tools-guide/)**).
+```kql
+// 2. Asymmetric routing & TCP state debugging via AZFWFlowTrace flags
+AZFWFlowTrace
+| where TimeGenerated > ago(30m)
+| where Flag has_any ("INVALID", "RST", "SYN-ACK")
+| project TimeGenerated, SourceIp, SourcePort, DestinationIp, DestinationPort, Protocol, Flag, Action, ActionReason
+| order by TimeGenerated desc
+```
+
+:::tip[Real-time firewall stream analyzer]
+To inspect live rule drops without waiting for Log Analytics ingestion, stream structured Azure Firewall logs over Azure Event Hubs into [Firewall Monitor (`tools/firewall-monitor`)](https://github.com/jonathan-vella/azure-networking/tree/main/tools/firewall-monitor), documented in the [Labs & Tools Guide](/azure-networking/06-operations-reviews/labs-and-tools-guide/).
 :::
 
 ---
 
-## 4. Third-Party NVA High Availability Patterns
+## 4. Third-party NVA high availability patterns
 
-When your security team standardizes on third-party NGFWs (Palo Alto VM-Series, Fortinet FortiGate, Check Point CloudGuard) for unified Panorama/FortiManager policy parity or specialized L7 decoders, **you own high availability, symmetry, and health-probe routing**. Never rely on legacy Azure API route-table rewrite scripts during failover (API control-plane calls take 30–90+ seconds and fail during ARM throttling).
+Organizations standardizing on third-party NGFWs (Palo Alto VM-Series, Fortinet FortiGate, Check Point CloudGuard) for central manager parity or specialized L7 decoders own appliance availability, routing symmetry, and health-probe paths. Avoid legacy control-plane scripts that rewrite Azure Route Tables on failure; ARM API updates take 30 to 90+ seconds and stall under throttling. Use one of three data-plane HA patterns instead.
 
-Use one of three cloud-native HA architectures:
+### Pattern A: Active-active NVAs with Internal Load Balancer and Azure Route Server
 
-### Pattern A: Active-Active NVAs + Internal Load Balancer (HA Ports) + Azure Route Server
-
-This is the classic Hub-and-Spoke scale-out design for east-west and hybrid inspection, optionally paired with **[Azure Route Server (ARS)](/azure-networking/02-core-topologies/hub-spoke-and-route-server/)** for dynamic route injection across up to 8 BGP NVA instances:
+This Hub-and-Spoke scale-out design pairs a Standard Internal Load Balancer (`HA Ports` rule: `protocol: All`, `port: 0`, covering TCP, UDP, and ICMP; Basic Load Balancer retired September 30, 2025) with [Azure Route Server](/azure-networking/02-core-topologies/hub-spoke-and-route-server/) (`ASN 65515`) across up to 8 eBGP-peered NVA instances:
 
 ```mermaid
 flowchart LR
-  SPOKE1["Spoke A<br/>(UDR or ARS BGP)"] --> ILB["Standard Internal LB<br/>(HA Ports: All TCP/UDP)<br/>Frontend VIP: 10.0.2.4"]
+  SPOKE1["Spoke A<br/>(UDR or ARS BGP)"] --> ILB["Standard Internal LB<br/>(HA Ports: Port 0 / All)<br/>Frontend VIP: 10.0.2.4"]
   subgraph NVA_CLUSTER["Zone-Redundant NVA Cluster (AZ 1 / 2 / 3)"]
-    NVA1["NVA 1 (AZ1)<br/>ASN 65001"]
-    NVA2["NVA 2 (AZ2)<br/>ASN 65001"]
+    NVA1["NVA 1 (AZ 1)<br/>ASN 65001 | PBR/VRF"]
+    NVA2["NVA 2 (AZ 2)<br/>ASN 65001 | PBR/VRF"]
   end
   ILB -- "5-Tuple Hash +<br/>Probe 168.63.129.16" --> NVA1 & NVA2
   ARS["Azure Route Server<br/>(ASN 65515)"] <-. "eBGP Peerings<br/>(Next-Hop: ILB VIP or ECMP)" .-> NVA1 & NVA2
   NVA1 & NVA2 --> SPOKE2["Spoke B / On-Premises"]
 ```
 
-- **Convergence Speed**: Standard Internal Load Balancer (`HA Ports` rule) probes NVAs from Azure wire-server IP **`168.63.129.16`** every 5 seconds (`2` or `3` probe threshold), failing over dead NVA instances in **10–15 seconds**.
-- **The Multi-NIC `168.63.129.16` Probe Trap**: On dual-NIC NVAs (`Untrust` NIC0 + `Trust` NIC1), **both** external Public LB and Internal LB health probes originate from `168.63.129.16`. If the NVA guest OS uses a single default route table, health probe replies for `Trust` NIC1 accidentally egress out `Untrust` NIC0 and get dropped by Azure SDN—marking healthy NVAs completely down! Configure **policy-based routing (PBR) / separate VRFs** inside the NVA so `168.63.129.16` probes return strictly out the ingress interface.
-- **Asymmetry Trap Without SNAT**: When `Spoke A → ILB VIP → NVA 1 → Spoke B` forwards without SNAT, `Spoke B`'s reply (`Spoke B → ILB VIP`) hashes on the *reverse* 5-tuple—which can land on **`NVA 2`** and be dropped! Either:
-  1. Enable **SNAT** on the NVA for inter-zone flows (loses source IP visibility on destination VMs), **or**
-  2. Advertise next-hop **`ILB VIP`** via ARS while running an active-passive health-probe responder (only the primary NVA answers HTTP `200 OK` on the probe port—Pattern B), **or**
-  3. Use **Gateway Load Balancer** (Pattern C) for true zero-SNAT flow stickiness on north-south endpoints.
+Standard Load Balancer probes NVA listeners from wire-server IP `168.63.129.16` (for example every 5 seconds with a 2-probe threshold) and removes failed instances in 10 to 15 seconds. Ensure NSGs permit `AzureLoadBalancer` (`168.63.129.16`) inbound above any custom `Deny` rules.
 
-:::note[Hands-On BGP NVA Config Sample]
-Need a working reference configuration for eBGP peering with Azure Route Server (`ASN 65515`), `no-export` / community filtering, multi-hop settings, and ECMP route injection? Inspect our **[BGP BIRD NVA Sample (`samples/bgp-bird`)](https://github.com/jonathan-vella/azure-networking/tree/main/samples/bgp-bird)**.
+On dual-NIC NVAs (`Untrust` NIC0 + `Trust` NIC1), both external and internal Load Balancer health probes arrive from `168.63.129.16`. If the NVA OS uses a single flat routing table, replies to `Trust` NIC1 probes egress via `Untrust` NIC0's default route and get dropped by Azure SDN, which marks healthy appliances down. Configure policy-based routing (PBR) or separate VRFs so [health probe responses](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-custom-probe-overview) exit the exact interface that received the probe.
+
+When `Spoke A -> ILB VIP -> NVA 1 -> Spoke B` forwards without SNAT, `Spoke B`'s reply hashes on the reverse 5-tuple and can land on `NVA 2`, which drops the unknown TCP session. Maintain return symmetry through one of three approaches:
+1. Enable SNAT on the NVA for east-west flows (which hides original client IPs from target VMs).
+2. Use [Azure Route Server Next-Hop IP support](https://learn.microsoft.com/en-us/azure/route-server/next-hop-ip) so NVAs advertise the ILB Frontend VIP as BGP next hop while only the active NVA answers `200 OK` on the health probe (Pattern B).
+3. Use Gateway Load Balancer (Pattern C) for north-south public endpoints.
+
+:::note[BGP NVA reference configuration]
+For a working eBGP configuration peering with Azure Route Server (`ASN 65515`), `no-export` community handling, multihop settings, and ECMP route injection, inspect the [BGP BIRD NVA Sample (`samples/bgp-bird`)](https://github.com/jonathan-vella/azure-networking/tree/main/samples/bgp-bird).
 :::
 
-### Pattern B: Active-Passive NVA Pair Behind Standard Load Balancers
+### Pattern B: Active-passive NVA pair behind Standard Load Balancers
 
-Both NVA instances sit in the backend pool of an Internal LB (`Trust`) and External LB (`Untrust`), syncing session state over a dedicated HA heartbeat link. Only the **Active** NVA responds `200 OK` to the Load Balancer health probe (`168.63.129.16`), while the **Passive** NVA intentionally returns `503` / drops probes until failover.
-- **Pros**: **Zero SNAT required** for east-west or hybrid traffic because 100% of forward and reverse flows land on the single Active NVA, and state tables sync continuously to the standby unit.
-- **Cons**: Throughput is capped at a **single VM's NIC ceiling** while you pay 2x VM + license costs for an idle standby.
+Both NVA instances sit in the backend pools of an Internal Load Balancer (`Trust`) and Public Load Balancer (`Untrust`), synchronizing session state over an HA link. Only the active NVA returns `200 OK` to `168.63.129.16` probes; the passive NVA returns `503` or closes the probe port until failover.
 
-### Pattern C: Azure Gateway Load Balancer (GWLB) Bump-in-the-Wire Chaining
+Zero SNAT is required for east-west or hybrid traffic because forward and return packets always land on the single active NVA, with state tables replicated to the standby node. The trade-off is cost and scale: aggregate bandwidth caps at one VM's NIC limit while you pay compute and license costs for an idle standby.
 
-[**Azure Gateway Load Balancer**](https://learn.microsoft.com/en-us/azure/load-balancer/gateway-overview) solves the north-south NVA symmetry and UDR-sprawl problem via transparent **VXLAN encapsulation** (ports `10800`/`10801` by default):
+### Pattern C: Azure Gateway Load Balancer VXLAN service chaining
+
+[Azure Gateway Load Balancer (GWLB)](https://learn.microsoft.com/en-us/azure/load-balancer/gateway-overview) inserts third-party NVAs transparently into the north-south data path using native SDN chaining on the consumer side and two [VXLAN tunnel interfaces](https://learn.microsoft.com/en-us/azure/load-balancer/tutorial-create-gateway-load-balancer) between GWLB and the NVA backend pool:
 
 ```mermaid
 flowchart LR
-  INET["Internet Client"] --> PIP["Workload Public LB<br/>or VM Standard PIP<br/>(Chained to GWLB)"]
-  PIP == "1. Intercept & VXLAN<br/>Internal Tunnel" ==> GWLB["Gateway Load Balancer<br/>(Symmetric Flow Stickiness)"]
-  GWLB == "2. VXLAN to NVA" ==> NVA["3rd-Party NVA Pool<br/>(Zero SNAT Required)"]
-  NVA == "3. Inspected Return<br/>via External VXLAN" ==> PIP
-  PIP --> APP["Application VM / Backend<br/>(Sees True Client IP!)"]
+  INET["Internet Client"] --> PIP["Consumer Public LB<br/>or VM Standard PIP<br/>(Chained Frontend)"]
+  PIP <== "Azure SDN<br/>Service Chain" ==> GWLB["Gateway Load Balancer<br/>(Private VIP | HA Ports)"]
+  GWLB == "1. External VXLAN<br/>UDP 10801 (VNI 801/901)" ==> NVA["3rd-Party NVA Pool<br/>(VXLAN VTEP | Zero SNAT)"]
+  NVA == "2. Internal VXLAN<br/>UDP 10800 (VNI 800/900)" ==> GWLB
+  PIP --> APP["Application VM<br/>(Sees True Client IP)"]
 ```
 
-- **How It Works**: You chain a workload's `Standard` Public Load Balancer frontend (or VM `Standard` Public IP)—even **across different subscriptions or tenants**—directly to the Gateway Load Balancer frontend in a single property setting.
-- **Why Architects Love GWLB**:
-  1. **Guaranteed Flow Symmetry Without SNAT**: GWLB hashes both inbound and outbound packets of the same 5-tuple to the **exact same healthy NVA backend instance**, preserving the **true internet client IP** all the way to the application VM without complex UDRs.
-  2. **Bump-in-the-Wire Insertion**: Insert or remove IDPS, packet brokers, DDoS scrubbers, or NGFWs transparently without re-IPing workloads or touching spoke route tables.
-- **Scope Boundary**: GWLB chains onto **Public endpoints** (`Standard` Public Load Balancer frontends or `Standard` VM Public IPs) for **north-south internet ingress/egress**. It does **not** intercept private east-west VNet-to-VNet or ExpressRoute private flows (combine GWLB for north-south with ILB/ARS or Azure Firewall for east-west).
+Consumer resources never encapsulate VXLAN packets themselves; Azure's SDN fabric steers traffic between the chained consumer frontend and the GWLB private frontend. On the GWLB backend pool, you define up to two VXLAN tunnel interfaces toward the NVA VTEPs: the **External** tunnel (default UDP port `10801`; portal default VNI `801`, CLI tutorial VNI `901`) carries inbound internet traffic from GWLB to the NVA pool, and the **Internal** tunnel (default UDP port `10800`; portal default VNI `800`, CLI VNI `900`) returns inspected traffic from the NVA through GWLB to the consumer application (reversing symmetrically on outbound return packets).
+
+Only a Standard Public Load Balancer frontend or a VM NIC Standard IP configuration can chain to a GWLB frontend (which is always a private IP). Cross-subscription and cross-tenant chaining is supported via CLI, ARM, or Bicep (`Microsoft.Network/loadBalancers/frontendIPConfigurations/join/action` plus guest RBAC; cross-tenant chaining is unavailable in the Azure portal). For outbound inspection behind a Standard Public Load Balancer, chain GWLB to the frontend IP selected in outbound rules.
+
+GWLB guarantees 5-tuple symmetric flow stickiness to the same healthy NVA instance without SNAT or spoke UDRs, so the application VM sees the original internet client IP. GWLB cannot be used as a UDR next hop, does not work with Global Load Balancer, and inspects north-south public endpoints only. Combine GWLB for internet edges with ILB/ARS or Azure Firewall for private east-west flows.
 
 ---
 
-## 5. Architecture Trade-Off Matrix
+## 5. Architecture trade-off matrix
 
-| Evaluation Criteria | Azure Firewall (Standard / Premium) | 3rd-Party NVA (Active-Active ILB + ARS) | 3rd-Party NVA (Active-Passive ILB/ELB) | 3rd-Party NVA + Gateway Load Balancer |
+| Evaluation criteria | Azure Firewall (Standard / Premium) | 3rd-Party NVA (active-active ILB + ARS) | 3rd-Party NVA (active-passive ILB/ELB) | 3rd-Party NVA + Gateway Load Balancer |
 | --- | --- | --- | --- | --- |
-| **HA & Zone Failover** | Built-in (`99.99%` SLA multi-AZ), zero LB config | 10–15s probe failover; requires PBR for `168.63.129.16` | 10–15s stateful failover via HA sync | Built-in symmetric flow stickiness across AZs |
-| **Max Scale** | **30 Gbps** (Std) / **100 Gbps** (Prem) | Scales horizontally (up to 8 BGP peers on ARS) | Capped at **1 VM SKU** bandwidth | Scales horizontally across NVA pool |
-| **Traffic Scope** | North-South + East-West + Hybrid (`vWAN` & Hub) | East-West + Hybrid + Egress | North-South + East-West + Hybrid | **North-South Public IP / Public LB flows only** |
-| **Source IP Preservation** | Yes on Network Rules; SNATed on App Rules & DNAT | Requires SNAT unless paired with symmetric hashing/VRFs | **Yes** (No SNAT needed) | **Yes** (True bump-in-the-wire via VXLAN) |
-| **Day-2 Patching & OS Ops** | **Zero** (Fully managed PaaS) | Customer owns VM OS upgrades, certs, state scale | Customer owns VM upgrades & HA cluster | Customer owns NVA VMs & VXLAN tunnel config |
-| **Virtual WAN Support** | Native **Secured Virtual Hub + Routing Intent** | Certified SaaS/NVA integrated in-hub or spoke NVA | Spoke / custom NVA peering | Chains to Public LBs / PIPs outside vHub |
+| **HA and zone failover** | Built-in (`99.99%` multi-AZ SLA), zero LB config | 10-15s probe failover; requires PBR per NIC for `168.63.129.16` | 10-15s stateful failover via HA session sync | Symmetric multi-AZ flow stickiness via HA Ports |
+| **Throughput scale** | **30 Gbps** (Std) / **100 Gbps** (Prem; 22 Gbps TLS+IDPS Deny) | Horizontal scale (up to 8 BGP peers on ARS) | Capped at **1 VM SKU** bandwidth | Horizontal scale across NVA VMSS/pool |
+| **Traffic scope** | North-south, east-west, and hybrid (Hub and vWAN) | East-west, hybrid, and egress | North-south, east-west, and hybrid | **North-south Standard Public LB / VM PIP only** |
+| **Source IP preservation** | Yes on Network Rules; SNATed on App Rules and DNAT | Requires SNAT unless paired with state sync or active-passive probe | **Yes** (no SNAT needed) | **Yes** (transparent VXLAN bump-in-the-wire) |
+| **OS patching and ops** | **Zero** (managed PaaS) | Customer manages VM images, certs, BGP, and PBR | Customer manages VM images and HA cluster | Customer manages NVA VMs and VXLAN VTEPs |
+| **Virtual WAN integration** | Native **Secured Virtual Hub + Routing Intent** | Certified integrated SaaS/NVA in-hub or NVA spoke | NVA spoke peering | Chains onto Public LBs / PIPs outside vHub |
 
 ---
 
-## What I Recommend
+## Recommendations
 
-1. **Default to Azure Firewall Standard (or Premium when TLS inspection, IDPS, or full-path URL filtering is required)** for greenfield Hub-and-Spoke and **[Virtual WAN Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/)** deployments—eliminating NVA OS patching, asymmetric SNAT headaches, and manual BGP plumbing.
-2. **Mandate Resource-Specific Structured Logs** (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWIdpsSignature`, `AZFWThreatIntel`) from day one, pair `AzureFirewallSubnet` with an **Azure NAT Gateway** for high-scale egress SNAT, and keep **[Firewall Monitor](https://github.com/jonathan-vella/azure-networking/tree/main/tools/firewall-monitor)** ready for live Event Hub packet-drop debugging.
-3. **When third-party NGFWs are non-negotiable**:
-   - Use **Gateway Load Balancer (GWLB)** for transparent, zero-SNAT north-south public endpoint inspection.
-   - Use **Active-Passive NVAs behind Standard ILB (`HA Ports`)** for moderate throughput (< 5–10 Gbps) where preserving east-west source IPs without SNAT matters most, or **Active-Active NVAs + Azure Route Server** (modeled on **[`samples/bgp-bird`](https://github.com/jonathan-vella/azure-networking/tree/main/samples/bgp-bird)**) when horizontal multi-AZ throughput is paramount.
+1. Default to **Azure Firewall Standard** (or **Premium** when TLS inspection, IDPS, or full-path URL filtering is required) for greenfield Hub-and-Spoke and [Virtual WAN Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/) estates. Pair `AzureFirewallSubnet` with a zone-redundant **StandardV2 NAT Gateway** in VNet hubs to prevent SNAT port starvation.
+2. Enable **Resource-specific structured logs** (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWIdpsSignature`, `AZFWThreatIntel`, `AZFWDnsQuery`, `AZFWFlowTrace`) on the **Analytics** table plan when using Policy Analytics, and keep [Firewall Monitor](https://github.com/jonathan-vella/azure-networking/tree/main/tools/firewall-monitor) available for live Event Hub troubleshooting.
+3. Chain **Gateway Load Balancer** (`UDP 10801` External / `UDP 10800` Internal VXLAN to NVA VTEPs) onto Standard Public Load Balancers or VM PIPs when third-party NGFWs must inspect north-south internet traffic without SNAT or spoke UDRs.
+4. For third-party NGFW east-west and hybrid inspection, deploy **active-passive NVAs behind Standard ILB (`HA Ports`)** with ARS Next-Hop VIP when preserving source IPs matters more than single-VM bandwidth, or **active-active NVAs + Azure Route Server** (modeled on [`samples/bgp-bird`](https://github.com/jonathan-vella/azure-networking/tree/main/samples/bgp-bird)) with per-NIC PBR when multi-AZ scale-out throughput is required.
+
