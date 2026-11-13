@@ -32,7 +32,11 @@ param gpt4oDeploymentName string = 'gpt4o'
 @description('Location for Azure OpenAI resources')
 param openAiLocation string = 'eastus' // Choose a region where GPT-4o is available
 
-@description('Location for Application Insights')
+@description('Location for the Azure Static Web App (must be a supported Static Web Apps region)')
+@allowed(['centralus', 'eastus2', 'westus2', 'westeurope', 'eastasia'])
+param staticWebAppLocation string = 'eastus2'
+
+@description('Location for Log Analytics and Application Insights')
 param location string = resourceGroup().location
 
 @description('Base deployment time for use with dateTimeAdd function')
@@ -48,7 +52,7 @@ param logAnalyticsSku string = 'PerGB2018'
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   name: staticWebAppName
-  location: resourceGroup().location
+  location: staticWebAppLocation
   sku: {
     name: 'Standard'
     tier: 'Standard'

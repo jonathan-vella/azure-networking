@@ -1,53 +1,55 @@
 # Install az-firewall-mon in your environment
 
-`az-firewall-mon` is maintained in [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) under `tools/firewall-monitor/` (originally created by [`nicolgit/azure-firewall-mon`](https://github.com/nicolgit/azure-firewall-mon)).
+`az-firewall-mon` is maintained in [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) under `tools/firewall-monitor/` and originates from [`nicolgit/azure-firewall-mon`](https://github.com/nicolgit/azure-firewall-mon). For architectural guidance on when to pair live Event Hub streaming with Log Analytics, see [Firewall and NVA patterns](../../src/content/docs/04-network-security/firewall-and-nva-patterns.md) and the [Labs and tools guide](../../src/content/docs/06-operations-reviews/labs-and-tools-guide.md).
 
 ![az-firewall-mon logo](firewall-mon-app/src/assets/logo.png)
 
-When installed in your environment, `az-firewall-mon` deploys the following Azure resources:
+A private deployment provisions the following Azure topology inside your subscription:
 
-![architecture](./images/deployment.png)
+![Deployment topology](./images/deployment.svg)
 
-Follow these steps to deploy a private copy of `az-firewall-mon`:
+Complete these steps to deploy a private instance of `az-firewall-mon`:
 
-1. Fork or clone the repository
-2. Create a GitHub Personal Access Token (PAT) for Static Web Apps CI/CD
-3. Deploy the Azure application infrastructure (`bicep/setup.bicep`)
-4. Provision the Event Hub & configure Azure Firewall Structured Logs (`bicep/firewall-mon-azure-stuff.bicep`)
-5. Review environment variables & restrict access
+1. Fork or clone the repository.
+2. Create a fine-grained GitHub personal access token (PAT) for Static Web Apps CI/CD.
+3. Deploy the application infrastructure (`bicep/setup.bicep`).
+4. Deploy the Event Hub and configure Azure Firewall structured logs (`bicep/firewall-mon-azure-stuff.bicep`).
+5. Verify local frontend, backend, and Bicep builds.
+6. Review environment variables and enforce network and identity access controls.
 
-# 1. Fork or clone the GitHub repository
+## 1. Fork or clone the GitHub repository
 
-* Fork [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) into your GitHub account or organization (upstream source credit: [`nicolgit/azure-firewall-mon`](https://github.com/nicolgit/azure-firewall-mon)).
-* Clone your fork locally so you can deploy the Bicep templates directly with the Azure CLI:
+* Fork [`jonathan-vella/azure-networking`](https://github.com/jonathan-vella/azure-networking) into your GitHub account or organization.
+* Clone your fork locally so you can deploy the Bicep templates with the Azure CLI:
 
   ```bash
   git clone https://github.com/<your-github-account>/azure-networking.git
   cd azure-networking
   ```
 
-# 2. Create a GitHub Personal Access Token (PAT)
+## 2. Create a GitHub personal access token
 
-Azure Static Web Apps uses a repository token if you want Azure to bootstrap a GitHub Actions deployment workflow automatically:
+Azure Static Web Apps uses a repository token when bootstrapping a GitHub Actions deployment workflow:
 
-1. Go to GitHub **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens** (<https://github.com/settings/tokens?type=beta>)
-2. Scope the token to **Only select repositories** and pick your `azure-networking` fork
-3. Set an explicit expiration (for example, `30` or `90` days — avoid non-expiring tokens)
+1. Open GitHub **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens** (<https://github.com/settings/tokens?type=beta>).
+2. Scope the token to **Only select repositories** and choose your `azure-networking` fork.
+3. Set an explicit expiration, such as 30 or 90 days. Avoid non-expiring tokens.
 4. Grant repository permissions:
    * **Contents**: Read and write
    * **Workflows**: Read and write
    * **Metadata**: Read-only
-5. Generate and copy the token securely
+5. Generate and store the token securely.
 
-# 3. Deploy all Azure application resources (`bicep/setup.bicep`)
+## 3. Deploy application resources (`bicep/setup.bicep`)
 
-An instance of `az-firewall-mon` consists of:
-* 1 Azure Static Web App (Standard plan)
-* 1 Azure Maps account (for IP geolocation flags)
-* 1 Azure OpenAI account + `gpt-4o` deployment (for natural-language log filtering)
-* 1 Log Analytics Workspace + Application Insights instance
+[`bicep/setup.bicep`](bicep/setup.bicep) provisions:
 
-Deploy [`bicep/setup.bicep`](bicep/setup.bicep) using the Azure CLI:
+* 1 Azure Static Web App (Standard plan, building Angular 22 to `dist/firewall-mon-app` and .NET 8 isolated Azure Functions from `/tools/firewall-monitor/firewall-mon-api`)
+* 1 Azure Maps account (`G2` SKU for public IP country flags)
+* 1 Azure OpenAI account (`S0` SKU) with a `gpt-4o` (`2024-11-20`) deployment for natural-language filter generation
+* 1 Log Analytics workspace (`PerGB2018` SKU) and 1 Application Insights instance
+
+Deploy [`bicep/setup.bicep`](bicep/setup.bicep) with the Azure CLI:
 
 ```bash
 az deployment group create \
@@ -61,16 +63,18 @@ az deployment group create \
 ```
 
 Key template parameters in [`bicep/setup.bicep`](bicep/setup.bicep):
-* `staticWebAppName`: Name for your Azure Static Web App
-* `repositoryUrl`: Your repository URL (defaults to `https://github.com/jonathan-vella/azure-networking`)
-* `repositoryToken`: Secure GitHub PAT used by Static Web Apps to register the deployment workflow
-* `branch`: Branch to deploy from (defaults to `main`)
-* `appLocation`: Defaults to `/tools/firewall-monitor/firewall-mon-app` (override with `/firewall-mon-app` only if deploying from a standalone single-tool repository)
-* `apiLocation`: Defaults to `/tools/firewall-monitor/firewall-mon-api` (override with `/firewall-mon-api` for a standalone repository)
 
-# 4. Provision Event Hub & Azure Firewall Structured Logs (`bicep/firewall-mon-azure-stuff.bicep`)
+* `staticWebAppName`: Name for your Azure Static Web App.
+* `staticWebAppLocation`: Supported Azure Static Web Apps control-plane region (`eastus2`, `centralus`, `westus2`, `westeurope`, or `eastasia`; defaults to `eastus2`).
+* `repositoryUrl`: Repository URL (defaults to `https://github.com/jonathan-vella/azure-networking`).
+* `repositoryToken`: Secure GitHub PAT used by Static Web Apps to register the workflow.
+* `branch`: Branch to deploy from (defaults to `main`).
+* `appLocation`: Defaults to `/tools/firewall-monitor/firewall-mon-app` (override with `/firewall-mon-app` only for a standalone repository).
+* `apiLocation`: Defaults to `/tools/firewall-monitor/firewall-mon-api` (override with `/firewall-mon-api` only for a standalone repository).
 
-Deploy the dedicated Event Hub Namespace, 1-day/1-partition Event Hub, and least-privilege `Listen`-only Shared Access Policy:
+## 4. Provision Event Hub and structured firewall logs (`bicep/firewall-mon-azure-stuff.bicep`)
+
+Deploy the Event Hub Namespace (`Standard`, TLS 1.2), 1-day/1-partition Event Hub (`fwmonhub`), and entity-scoped `Listen`-only Shared Access Policy (`fwmonkey`):
 
 ```bash
 az deployment group create \
@@ -78,64 +82,72 @@ az deployment group create \
   --template-file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep
 ```
 
-Then configure **Monitoring** > **Diagnostic settings** on your Azure Firewall:
-* Enable **Resource-specific** structured log categories (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWDnsQuery`, `AZFWIdpsSignature`, `AZFWThreatIntel`) rather than legacy `AzureDiagnostics`
-* Stream to the Event Hub created above
-* Connect in `az-firewall-mon` using **only** the `Listen`-scoped Event Hub policy connection string — never `RootManageSharedAccessKey` or policies with `Manage`/`Send` claims
+Next, open **Monitoring** > **Diagnostic settings** on your Azure Firewall:
 
-# 5. Local Build & Test Verification
+* Enable **Resource-specific** structured log categories (`AZFWNetworkRule`, `AZFWApplicationRule`, `AZFWNatRule`, `AZFWDnsQuery`, `AZFWIdpsSignature`, `AZFWThreatIntel`) instead of legacy `AzureDiagnostics`.
+* Stream logs to the Event Hub deployed above.
+* Connect in `az-firewall-mon` with the `Listen`-only Event Hub policy connection string. Never use `RootManageSharedAccessKey` or policies that grant `Manage` or `Send` rights.
 
-To build and test both the Angular 20 SPA (Vitest) and the .NET 8 isolated Azure Functions API locally:
+## 5. Local build and test verification
+
+Build and test the Angular 22 SPA (TypeScript 6.0, Vitest 5.1), the .NET 8 isolated Azure Functions backend, the xUnit test suite, and both Bicep templates locally:
 
 ```bash
-# Frontend build & headless unit tests (Vitest)
+# Frontend Angular 22 production build and Vitest 5.1 unit tests
 cd tools/firewall-monitor/firewall-mon-app
-npm install
+npm ci
 npm run build
 npm test
 
-# Backend Azure Functions API build
-cd ../firewall-mon-api
-dotnet build api.csproj
+# Backend .NET 8 isolated Azure Functions build and xUnit tests
+cd ../..
+dotnet build tools/firewall-monitor/firewall-mon-api/api.csproj --configuration Release
+dotnet test tools/firewall-monitor/firewall-mon-api.Tests/firewall-mon-api.Tests.csproj --configuration Release
 
-# Validate Bicep templates
-az bicep build --file ../bicep/setup.bicep --stdout > /dev/null
-az bicep build --file ../bicep/firewall-mon-azure-stuff.bicep --stdout > /dev/null
+# Validate and lint Bicep templates
+az bicep lint --file tools/firewall-monitor/bicep/setup.bicep
+az bicep lint --file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep
+az bicep build --file tools/firewall-monitor/bicep/setup.bicep --stdout > /dev/null
+az bicep build --file tools/firewall-monitor/bicep/firewall-mon-azure-stuff.bicep --stdout > /dev/null
 ```
 
-# 6. Review environment variables
+## 6. Review environment variables
 
-`az-firewall-mon` configures the following Static Web App application settings automatically via [`bicep/setup.bicep`](bicep/setup.bicep):
+[`bicep/setup.bicep`](bicep/setup.bicep) configures the following Static Web App settings:
 
-* **APPLICATIONINSIGHTS_CONNECTION_STRING**: Application Insights connection string
+* `APPLICATIONINSIGHTS_CONNECTION_STRING`: Application Insights connection string for the Functions worker.
 
-Azure Maps settings:
-* **ip_api_key**: Azure Maps API key
-* **ip_throttling_calls**: `'1'`
-* **ip_throttling_window_milliseconds**: `'1000'`
+Azure Maps geolocation settings:
 
-With these settings, the IP geolocation API returns HTTP `429` if more than 1 request per second (`1000` ms) is made per client IP.
+* `ip_api_key`: Azure Maps subscription key, sent by the backend exclusively via the `subscription-key` HTTP header. Private, loopback, link-local, CGNAT, documentation, multicast, and IPv6 unique-local addresses return `zz` locally without calling Azure Maps.
+* `ip_throttling_calls`: `'1'`
+* `ip_throttling_window_milliseconds`: `'1000'`
+
+When a client exceeds 1 public IP lookup per second (`1000` ms, tracked per client IP via `X-Forwarded-For`), `/api/ip/{ipAddress}` returns HTTP `429`.
 
 Azure OpenAI settings:
-* **aoai_api_key**: Azure OpenAI key
-* **aoai_endpoint**: Azure OpenAI endpoint
-* **aoai_deployment**: Azure OpenAI deployment name (`gpt4o` by default)
-* **llm_throttling_calls**: `'5'`
-* **llm_throttling_window_milliseconds**: `'60000'`
 
-With these settings, the Chat API returns HTTP `429` if more than 5 requests per minute (`60000` ms) are made per client IP.
+* `aoai_api_key`: Azure OpenAI API key
+* `aoai_endpoint`: Azure OpenAI endpoint URL
+* `aoai_deployment`: Azure OpenAI model deployment name (`gpt4o` by default)
+* `llm_throttling_calls`: `'5'`
+* `llm_throttling_window_milliseconds`: `'60000'`
 
-Angular application settings:
-* **spa_applicationinsights_connection_string**: Application Insights connection string
-* **spa_builddate**: Build timestamp
-* **spa_local_queuelength**: `'100000'`
+When a client exceeds 5 chat requests per minute (`60000` ms), `/api/chat` returns HTTP `429`.
 
-> **spa_local_queuelength** controls the maximum number of firewall log rows retained in browser memory. Older entries are evicted once the buffer reaches this limit.
+Allowlisted SPA configuration settings (`/api/settings/{attribute}`):
 
-# 7. Limit access
+* `spa_applicationinsights_connection_string`: Application Insights connection string for browser telemetry
+* `spa_builddate`: Deployment timestamp
+* `spa_local_queuelength`: `'100000'` (maximum firewall log rows retained in browser memory before oldest entries are evicted)
 
-After setup is complete, restrict access to your `az-firewall-mon` deployment before connecting production firewall streams:
+`/api/settings/{attribute}` enforces a case-insensitive allowlist (`applicationinsights_connection_string`, `builddate`, `local_queuelength`) and rejects all other attribute names with HTTP `400`.
 
-* [Static Web App Private Endpoint](https://learn.microsoft.com/en-us/azure/static-web-apps/private-endpoint): Expose `az-firewall-mon` exclusively on a private IP inside your virtual network (reachable over VPN or ExpressRoute).
-* [Static Web App Authentication & Authorization](https://learn.microsoft.com/en-us/azure/static-web-apps/authentication-authorization): Restrict authorized identities/roles in [`./firewall-mon-app/src/assets/staticwebapp.config.json`](./firewall-mon-app/src/assets/staticwebapp.config.json).
+## 7. Restrict network and identity access
+
+Restrict access to your `az-firewall-mon` deployment before connecting production firewall streams:
+
+* [Static Web App Private Endpoint](https://learn.microsoft.com/en-us/azure/static-web-apps/private-endpoint): Expose `az-firewall-mon` only on a private IP inside your virtual network over VPN or ExpressRoute.
+* [Static Web App authentication and authorization](https://learn.microsoft.com/en-us/azure/static-web-apps/authentication-authorization): [`firewall-mon-app/src/assets/staticwebapp.config.json`](./firewall-mon-app/src/assets/staticwebapp.config.json) requires the `authenticated` role via Microsoft Entra ID (`/.auth/login/aad`) and blocks GitHub social login (`/.auth/login/github` returns `403`).
+
 

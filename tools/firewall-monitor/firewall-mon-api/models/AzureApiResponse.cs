@@ -1,12 +1,11 @@
-namespace firewallmon.models
-{ 
-        public class AzureAPIResponse
-        {
-                required public CountryRegion countryRegion { get; set; }
-        }
+namespace firewallmon.models;
 
-        public class CountryRegion
-        {
-                required public string isoCode { get; set; }
-        }
+public class AzureAPIResponse
+{
+    public CountryRegion? countryRegion { get; set; }
+}
+
+public class CountryRegion
+{
+    public string? isoCode { get; set; }
 }
