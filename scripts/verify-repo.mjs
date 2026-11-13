@@ -51,7 +51,11 @@ function existsExactCase(targetPath) {
   const segments = rel.split(path.sep);
   let cur = ROOT;
   for (const seg of segments) {
-    if (!fs.existsSync(cur)) return false;
+    try {
+      if (!fs.existsSync(cur) || !fs.statSync(cur).isDirectory()) return false;
+    } catch {
+      return false;
+    }
     const entries = fs.readdirSync(cur);
     if (!entries.includes(seg)) return false;
     cur = path.join(cur, seg);
@@ -59,10 +63,45 @@ function existsExactCase(targetPath) {
   return true;
 }
 
+function stripCodeFromMarkdown(markdown) {
+  return markdown
+    .replace(/^(?:```|~~~)[\s\S]*?^(?:```|~~~)/gm, '')
+    .replace(/`[^`\r\n]+`/g, '');
+}
+
+const MD_LINK_TARGET_RE =
+  /!?\[[^\]]*\]\(\s*(?:<([^>\r\n]+)>|((?:[^()\s]|\([^()\s]*\))+))(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)/g;
+
+function extractMarkdownLinkTargets(prose) {
+  const out = [];
+  const withoutNestedImg = prose.replace(
+    /!\[[^\]]*\]\(\s*(?:<[^>\r\n]+>|(?:[^()\s]|\([^()\s]*\))+)(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)/g,
+    'badge'
+  );
+  for (const src of [prose, withoutNestedImg]) {
+    for (const m of src.matchAll(MD_LINK_TARGET_RE)) {
+      const target = (m[1] ?? m[2] ?? '').trim();
+      if (target) out.push(target);
+    }
+  }
+  return out;
+}
+
+const IGNORED_WALK_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  '.angular',
+  '.terraform',
+  'bin',
+  'obj',
+]);
+
 function walkFiles(dir) {
   const out = [];
   if (!fs.existsSync(dir)) return out;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && IGNORED_WALK_DIRS.has(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       out.push(...walkFiles(full));
@@ -228,15 +267,18 @@ for (const file of docFiles) {
     }
   }
 
-  // Strip fenced code blocks before scanning Markdown links
-  const prose = content.replace(/```[\s\S]*?```/g, '');
-  const linkMatches = [...prose.matchAll(/!?\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)];
-  const hrefAttrMatches = [...prose.matchAll(/\b(?:link|href):\s*([^\s\r\n"']+)/g)];
+  // Strip fenced and inline code before scanning Markdown links
+  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const prose = stripCodeFromMarkdown(content);
+  const fmText = fmMatch ? fmMatch[1] : '';
+  const fmLinkMatches = [...fmText.matchAll(/\b(?:link|href):\s*([^\s\r\n"']+)/g)];
+  const jsxHrefMatches = [...prose.matchAll(/\b(?:link|href)=["']([^"']+)["']/g)];
 
-  const rawTargets = [
-    ...linkMatches.map((m) => m[1]),
-    ...hrefAttrMatches.map((m) => m[1]),
-  ];
+  const rawTargets = new Set([
+    ...extractMarkdownLinkTargets(prose),
+    ...fmLinkMatches.map((m) => m[1]),
+    ...jsxHrefMatches.map((m) => m[1]),
+  ]);
 
   for (const rawTarget of rawTargets) {
     if (
@@ -253,6 +295,7 @@ for (const file of docFiles) {
         .replace(REPO_TREE_PREFIX, '')
         .replace(REPO_BLOB_PREFIX, '')
         .split('#')[0]
+        .split('?')[0]
         .replace(/\/$/, '');
       if (subPath && !existsExactCase(path.join(ROOT, subPath))) {
         fail(`${rel}: GitHub repo link points to missing/wrong-case path "${subPath}"`);
@@ -279,7 +322,8 @@ for (const file of docFiles) {
     }
 
     if (rawTarget.startsWith('/')) {
-      const [routePart, frag] = rawTarget.split('#');
+      const [routeWithQuery, frag] = rawTarget.split('#');
+      const [routePart] = routeWithQuery.split('?');
       if (!routeToFile.has(routePart)) {
         fail(`${rel}: broken internal route "${rawTarget}"`);
       } else if (frag) {
@@ -292,7 +336,7 @@ for (const file of docFiles) {
     }
 
     // Relative asset or markdown path
-    const [relPart] = rawTarget.split('#');
+    const [relPart] = rawTarget.split('#')[0].split('?');
     const resolvedTarget = path.resolve(path.dirname(file), relPart);
     if (!existsExactCase(resolvedTarget)) {
       fail(`${rel}: broken or wrong-case relative path "${rawTarget}"`);
@@ -313,12 +357,99 @@ for (const rootDoc of ['README.md', 'CONTRIBUTING.md', 'THIRD_PARTY_NOTICES.md']
       fail(`${rootDoc}: contains stale consolidation text matching ${pat}`);
     }
   }
-  const prose = text.replace(/```[\s\S]*?```/g, '');
-  for (const m of prose.matchAll(/\[[^\]]+\]\(([^)\s#]+)(?:#[^)]*)?\)/g)) {
-    const target = m[1];
-    if (/^https?:\/\//i.test(target) || target.startsWith('mailto:')) continue;
-    if (!existsExactCase(path.resolve(ROOT, target))) {
+  const prose = stripCodeFromMarkdown(text);
+  for (const rawTarget of new Set(extractMarkdownLinkTargets(prose))) {
+    if (
+      rawTarget.startsWith('#') ||
+      rawTarget.startsWith('mailto:') ||
+      rawTarget.startsWith('tel:') ||
+      rawTarget.startsWith('data:') ||
+      /^https?:\/\//i.test(rawTarget)
+    ) {
+      continue;
+    }
+    const target = rawTarget.split('#')[0].split('?')[0];
+    if (target && !existsExactCase(path.resolve(ROOT, target))) {
       fail(`${rootDoc}: broken or wrong-case link "${target}"`);
+    }
+  }
+}
+
+// 4b. Verify labs/**, samples/**, and tools/** README/INSTALL Markdown docs
+const moduleDocSet = new Set();
+for (const topDir of ['labs', 'samples', 'tools']) {
+  for (const f of walkFiles(path.join(ROOT, topDir))) {
+    if (path.basename(f) === 'README.md') {
+      moduleDocSet.add(f);
+    }
+  }
+}
+const fwInstallDoc = path.join(ROOT, 'tools', 'firewall-monitor', 'INSTALL.md');
+if (fs.existsSync(fwInstallDoc)) {
+  moduleDocSet.add(fwInstallDoc);
+}
+
+for (const mdFile of [...moduleDocSet].sort()) {
+  const rel = path.relative(ROOT, mdFile).replace(/\\/g, '/');
+  const content = fs.readFileSync(mdFile, 'utf8');
+
+  for (const pat of STALE_PATTERNS) {
+    if (pat.test(content)) {
+      fail(`${rel}: contains stale consolidation text matching ${pat}`);
+    }
+  }
+
+  const prose = stripCodeFromMarkdown(content);
+  const htmlAttrMatches = [
+    ...prose.matchAll(/<(?:img|a)\b[^>]*?\b(?:src|href)=["']([^"']+)["']/gi),
+  ];
+
+  const rawTargets = new Set([
+    ...extractMarkdownLinkTargets(prose),
+    ...htmlAttrMatches.map((m) => m[1].trim()),
+  ]);
+
+  for (const rawTarget of rawTargets) {
+    if (
+      !rawTarget ||
+      rawTarget.startsWith('#') ||
+      rawTarget.startsWith('mailto:') ||
+      rawTarget.startsWith('tel:') ||
+      rawTarget.startsWith('data:')
+    ) {
+      continue;
+    }
+
+    if (rawTarget.startsWith(REPO_TREE_PREFIX) || rawTarget.startsWith(REPO_BLOB_PREFIX)) {
+      const subPath = rawTarget
+        .replace(REPO_TREE_PREFIX, '')
+        .replace(REPO_BLOB_PREFIX, '')
+        .split('#')[0]
+        .split('?')[0]
+        .replace(/\/$/, '');
+      if (subPath && !existsExactCase(path.join(ROOT, subPath))) {
+        fail(`${rel}: GitHub repo link points to missing/wrong-case path "${subPath}"`);
+      }
+      continue;
+    }
+
+    if (/^https?:\/\//i.test(rawTarget)) {
+      if (
+        (rel.startsWith('labs/') || rel.startsWith('samples/')) &&
+        /docs\.microsoft\.com/i.test(rawTarget)
+      ) {
+        fail(`${rel}: legacy docs.microsoft.com link should use learn.microsoft.com (${rawTarget})`);
+      }
+      continue;
+    }
+
+    const relTarget = rawTarget.split('#')[0].split('?')[0];
+    if (!relTarget) continue;
+    const resolvedTarget = rawTarget.startsWith('/')
+      ? path.join(ROOT, relTarget.replace(/^\/+/, ''))
+      : path.resolve(path.dirname(mdFile), relTarget);
+    if (!existsExactCase(resolvedTarget)) {
+      fail(`${rel}: broken or wrong-case relative path "${rawTarget}"`);
     }
   }
 }
@@ -327,6 +458,7 @@ for (const rootDoc of ['README.md', 'CONTRIBUTING.md', 'THIRD_PARTY_NOTICES.md']
 for (const lockRel of [
   'package-lock.json',
   'tools/netbench/dashboard/api/package-lock.json',
+  'tools/netbench/dashboard/web/package-lock.json',
   'tools/firewall-monitor/firewall-mon-app/package-lock.json',
 ]) {
   const lockFull = path.join(ROOT, lockRel);
@@ -365,5 +497,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `OK: verified ${docFiles.length} handbook pages, exact-case assets/links/anchors, Mermaid headers, archive manifest, and safe CI workflows.`
+  `OK: verified ${docFiles.length} handbook pages, ${moduleDocSet.size} module docs, exact-case assets/links/anchors, Mermaid headers, archive manifest, and safe CI workflows.`
 );
