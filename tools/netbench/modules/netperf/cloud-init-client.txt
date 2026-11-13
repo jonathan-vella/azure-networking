@@ -12,7 +12,7 @@ write_files:
     permissions: '0755'
     content: |
       #!/usr/bin/env bash
-      set -uo pipefail
+      set -euo pipefail
 
       STORAGE_ACCOUNT="${storage_account_name}"
       STORAGE_TABLE="${storage_table_name}"
@@ -82,7 +82,7 @@ write_files:
         printf '0'
       }
 
-      access_token=$(get_access_token)
+      access_token=$(get_access_token || true)
       if [ -z "$access_token" ]; then
         echo "Failed to acquire Managed Identity access token for Azure Table Storage" >&2
         exit 1
@@ -147,12 +147,14 @@ write_files:
             ThroughputGbps: $tp_gbps
           }')
 
-        curl -fsS -X POST "$TABLE_ENDPOINT" \
+        if ! curl -fsS -X POST "$TABLE_ENDPOINT" \
           -H "Authorization: Bearer $access_token" \
           -H "x-ms-version: 2020-04-08" \
           -H "Accept: application/json;odata=nometadata" \
           -H "Content-Type: application/json" \
-          -d "$payload"
+          -d "$payload"; then
+          echo "Failed to upload benchmark entity for $source_az -> $dest_az" >&2
+        fi
       done
 runcmd:
   - /usr/local/bin/run-netbench.sh

@@ -1,3 +1,10 @@
+variable "subscription_id" {
+  description = "Optional Azure subscription ID where dashboard resources will be deployed (defaults to ARM_SUBSCRIPTION_ID when null)"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "environment_name" {
   description = "The name of the azd environment"
   type        = string
@@ -11,13 +18,11 @@ variable "location" {
 variable "storage_account_name" {
   description = "Name of the existing Azure Storage Account containing benchmark Table Storage data"
   type        = string
-  default     = "sanetprdfrc001"
 }
 
 variable "storage_account_resource_group" {
   description = "Resource group of the existing Azure Storage Account containing benchmark Table Storage data"
   type        = string
-  default     = "rg-net-prd-frc-001"
 }
 
 variable "storage_table_name" {
