@@ -2,25 +2,25 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/aztfmod/azurecaf" {
-  version     = "1.2.34"
-  constraints = "~> 1.2.0"
+  version     = "2.0.0"
+  constraints = "~> 2.0.0"
   hashes = [
-    "h1:CgKUJFeGHClcGbTrfBMCZ846grqT9L8tD/sr7yvVyQQ=",
-    "h1:UUnSnhrpkFurX3VkI2CbcdZTSO/BJO48t3Pjaz4S1rw=",
-    "h1:cO1bKjm5ZC6XrMk/V43Blh0rBoFW4fBS/EbZmZrx1g4=",
-    "h1:mrkPuHfOMgk16gDxKgBbDtIRdpnDAW9zYE6fV3tUTJg=",
-    "zh:17b64b4fb99e6f3e05152f7d2160abc265dbe0ee5caae4256f5c0142dc00d09a",
-    "zh:17efb94cb112c454f1e7fdcfc5d1e0c19d9ba8264f56db528f42c80aa2fcb16d",
-    "zh:1eed802528caf87c1abc9549b5547eca595f4abc596737a9857488fafbea5564",
-    "zh:3f73367324e849a9cb55dc7a0ebdfc608c2afd0d077edb2d4236825577fd8cef",
-    "zh:4991069bf4142905c73f926ba4a27b698166accc8a4012646c83444f5a9f1ca4",
-    "zh:4a71c2a19932383811cc466333e9d5e821dd6f48a164ec4f0714a9a4dcff714e",
-    "zh:5375b480360a0940d663590d07d76baf62409689b50b3fbb1b6a45918a7108ca",
-    "zh:576539290a29faf1f28bf511bb915e52568d8da25f7a9e5da1ef5df3bcc60ec1",
-    "zh:6777a3a4594b456635e6fb439dbfc2991f6c9d4d18f1f7b0549641270bb4b921",
-    "zh:6f5dbde3a7313d955f47a135dbd5b666c0ddabb948b1e7e64f2ee6e490509775",
-    "zh:c36f589a6a6abe712997f7a912f813086623e89792391ab6b00bece900b32df8",
-    "zh:df88277e923ba4400efbecc0f64563cb7488ffd4fb9728354f12ea88850affe5",
+    "h1:572/7YEpb6YTXUIQO/II0MfpZ2MxXFtrsgkBEpu2604=",
+    "h1:Qg7EEjTbshV6pXlgAJ9Myzz4dlAE4SVbpasxZ00goNc=",
+    "h1:fgnGF1MmlqKr42UhI2gAcApxkC5kKk2psLBohezujZQ=",
+    "h1:sv1llanVTH+i6q31vJieea44ZV2GVvXVNzdw8iEqtDQ=",
+    "zh:08dfae213cadf0171a7ca8e396ef8d8cae0a7064de44c7e417c02f367734f0d0",
+    "zh:2a095cb2ec2463de74e1d516ab6631d449a8a25f4ca7092f12503421caaf8145",
+    "zh:31cee66a9376b3490cb94780d748d7a8e2cbd009dc8d830a729db60ab083541c",
+    "zh:5eddefd859d26e815386ee4fb8fb1d5b300d11298c0330b569cbd974eb7f5ebe",
+    "zh:95d934322c60a93629403a7e8b1d7a674c903506885c3c0ea7c6ea06c4a5d196",
+    "zh:9e44fd8614869947ed4333ae79168ab47cbb57c16288b6c3665691ca7531757f",
+    "zh:a97954cfc7c137c8e6e8d305bdf750532a9b5bd9dd8850b8b994a07621273e14",
+    "zh:c28df2e5822d5da03d3e88ead231fc36613c95ae666d4a802b0d6c14c77e5834",
+    "zh:c37dbe8bb13f63ff7fe78181137d0b8a1d8e58a1a1c86fbf881cd72ecc5fdfce",
+    "zh:caf99d33643d8364c45b508c67a17b74baa9877816efa3d8fe94567dbaf289f5",
+    "zh:f531daa9d3e9d29e9dec10d579eee25318befeed1044fa6ddd8bce4e19cbd7c1",
+    "zh:f6ee1fd0114fc971726500c21b924af1c72f63288e1727ab46bc436a14acd62b",
   ]
 }
 

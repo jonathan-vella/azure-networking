@@ -7,7 +7,7 @@ terraform {
     }
     azurecaf = {
       source  = "aztfmod/azurecaf"
-      version = "~> 1.2.0"
+      version = "~> 2.0.0"
     }
   }
 }
@@ -46,7 +46,7 @@ resource "azurecaf_name" "function_storage" {
 
 resource "azurecaf_name" "app_service_plan" {
   name          = var.environment_name
-  resource_type = "azurerm_app_service_plan"
+  resource_type = "azurerm_service_plan"
   random_length = 0
 }
 
