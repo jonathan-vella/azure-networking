@@ -1,5 +1,5 @@
 param avnmName string
-param avvmConnectivityConfigName string
+param avnmConnectivityConfigName string
 
 @allowed([
   'HubAndSpoke'
@@ -21,7 +21,7 @@ param groupConnectivity string = 'None'
 param useHubGateway bool = false
 
 resource avnmConnectivityConfig 'Microsoft.Network/networkManagers/connectivityConfigurations@2025-01-01' = {
-  name: '${avnmName}/${avvmConnectivityConfigName}'
+  name: '${avnmName}/${avnmConnectivityConfigName}'
   properties: {
     connectivityTopology: connectivityTopology
     description: 'LabBuilder AVNM - Connectivity Configuration'

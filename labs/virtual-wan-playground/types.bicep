@@ -1,4 +1,5 @@
 @export()
+@minLength(1)
 @maxLength(2)
 type _Locations = {
   region: string

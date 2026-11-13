@@ -209,6 +209,7 @@
 						{
 							"name": "First",
 							"type": "Microsoft.Common.Section",
+							"label": "First Region Hub Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -228,6 +229,7 @@
 						{
 							"name": "Second",
 							"type": "Microsoft.Common.Section",
+							"label": "Second Region Hub Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -330,8 +332,8 @@
 							"name": "bastionInHubSKU",
 							"type": "Microsoft.Common.DropDown",
 							"label": "Azure Bastion SKU",
-							"defaultValue": "Basic",
-							"toolTip": "Azure Bastion SKU: Basic or Standard",
+							"defaultValue": "Standard",
+							"toolTip": "Azure Bastion SKU: Basic, Standard, or Premium",
 							"constraints": {
 								"required": false,
 								"allowedValues": [
@@ -406,11 +408,11 @@
 								"validations": [
 									{
 										"regex": "\\b\\d{5}\\b",
-										"message": "Only 5 digit mumber"
+										"message": "Only 5 digit number"
 									},
 									{
 										"isValid": "[or(and(equals(steps('Hub').hubBgpAsn,'65515'),equals(steps('Hub').VNETorVWAN,'VWAN')),and(not(equals(steps('Hub').hubBgpAsn,'65515')),equals(steps('Hub').VNETorVWAN,'VNET')))]",
-										"message": "Use only allowed characters. For VNET deployments: default BGP ASN for Hub = 65010. For vWAN deployments: default BGP for vWAN Hub = 6551. Note1: Hub BGP and OnPrem BGP cannot be the same. Note2: BGP on Site-to-Site VPN tunnels between Azure VPN gateways (VNET only) cannot use the Azure default BGP ASN 65515, therefore defaulting to BGP ASN 65010."
+										"message": "Use only allowed characters. For VNET deployments: default BGP ASN for Hub = 65010. For vWAN deployments: default BGP for vWAN Hub = 65515. Note1: Hub BGP and OnPrem BGP cannot be the same. Note2: BGP on Site-to-Site VPN tunnels between Azure VPN gateways (VNET only) cannot use the Azure default BGP ASN 65515, therefore defaulting to BGP ASN 65010."
 									}
 								]
 							},
@@ -598,6 +600,7 @@
 						{
 							"name": "First",
 							"type": "Microsoft.Common.Section",
+							"label": "First Region Spoke Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -617,6 +620,7 @@
 						{
 							"name": "Second",
 							"type": "Microsoft.Common.Section",
+							"label": "Second Region Spoke Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -658,7 +662,7 @@
 							"min": 1,
 							"max": 25,
 							"label": "Amount Of Spokes",
-							"sublabel": "# of Spoke",
+							"subLabel": "# of Spokes",
 							"defaultValue": 2,
 							"showStepMarkers": false,
 							"toolTip": "Amount of Spoke VNETs you want to deploy. Default = 2",
@@ -748,7 +752,7 @@
 						{
 							"name": "Intro",
 							"type": "Microsoft.Common.Section",
-							"label": "Azure Hub & Spoke Playground - Simultate OnPrem",
+							"label": "Azure Hub & Spoke Playground - Simulate OnPrem",
 							"elements": [
 								{
 									"name": "IntroText",
@@ -787,6 +791,7 @@
 						{
 							"name": "First",
 							"type": "Microsoft.Common.Section",
+							"label": "First Region OnPrem Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -806,6 +811,7 @@
 						{
 							"name": "Second",
 							"type": "Microsoft.Common.Section",
+							"label": "Second Region OnPrem Subscription",
 							"elements": [
 								{
 									"name": "InfoText",
@@ -866,8 +872,8 @@
 							"name": "bastionInOnPremSKU",
 							"type": "Microsoft.Common.DropDown",
 							"label": "Azure Bastion SKU",
-							"defaultValue": "Basic",
-							"toolTip": "Azure Bastion SKU: Basic or Standard",
+							"defaultValue": "Standard",
+							"toolTip": "Azure Bastion SKU: Basic, Standard, or Premium",
 							"constraints": {
 								"required": false,
 								"allowedValues": [
@@ -878,6 +884,10 @@
 									{
 										"label": "Basic",
 										"value": "Basic"
+									},
+									{
+										"label": "Premium",
+										"value": "Premium"
 									}
 								]
 							},
@@ -930,19 +940,19 @@
 							"type": "Microsoft.Common.TextBox",
 							"label": "OnPrem BGP ASN",
 							"defaultValue": "65020",
-							"toolTip": "Use only allowed characters",
+							"toolTip": "5-digit BGP ASN (must not use Azure-reserved ASNs 65515-65520 or collide with Hub BGP ASN)",
 							"placeholder": "",
 							"multiLine": false,
 							"constraints": {
 								"required": true,
 								"validations": [
 									{
-										"regex": "\\b\\d{5}\\b",
-										"message": "Only 5 digit mumber"
+										"regex": "^\\d{5}$",
+										"message": "Only 5 digit number"
 									},
 									{
-										"isValid": "[not(equals(steps('Hub').hubBgpAsn, steps('OnPrem').onpremBgpAsn))]",
-										"message": "(vWan) Hub and OnPrem BGP ASN's cannot be the same"
+										"isValid": "[and(not(and(greaterOrEquals(int(coalesce(steps('OnPrem').onpremBgpAsn,'65020')), 65515), lessOrEquals(int(coalesce(steps('OnPrem').onpremBgpAsn,'65020')), 65520))), not(and(equals(steps('Regions').DeployMultiRegion, true), equals(int(coalesce(steps('OnPrem').onpremBgpAsn,'65020')), 65514))), not(equals(int(coalesce(steps('OnPrem').onpremBgpAsn,'65020')), int(if(empty(coalesce(steps('Hub').hubBgpAsn,'')), if(equals(coalesce(steps('Hub').VNETorVWAN,'VNET'), 'VNET'), '65010', '65515'), steps('Hub').hubBgpAsn)))), not(and(equals(steps('Regions').DeployMultiRegion, true), equals(add(int(coalesce(steps('OnPrem').onpremBgpAsn,'65020')), 1), int(if(empty(coalesce(steps('Hub').hubBgpAsn,'')), if(equals(coalesce(steps('Hub').VNETorVWAN,'VNET'), 'VNET'), '65010', '65515'), steps('Hub').hubBgpAsn))))))]",
+										"message": "OnPrem BGP ASN cannot use Azure-reserved ASNs (65515-65520, or 65514 in multi-region mode) and cannot match the Hub BGP ASN (including region 2's OnPrem ASN + 1)."
 									}
 								]
 							},
@@ -1052,7 +1062,7 @@
 						{
 							"name": "deployAMA",
 							"type": "Microsoft.Common.OptionsGroup",
-							"label": "Deploy Azure Monitor Agent (AMA) including Depency Agent (Service Map)",
+							"label": "Deploy Azure Monitor Agent (AMA) including Dependency Agent (Service Map)",
 							"toolTip": "Dependency Agent Only applicable on Windows VM's",
 							"defaultValue": "no",
 							"constraints": {
@@ -1116,8 +1126,9 @@
 									"name": "vmSize",
 									"type": "Microsoft.Compute.SizeSelector",
 									"label": "Virtual Machine SKU Size (Spokes)",
-									"toolTip": "Virtual Machine SKU Siz. Default = Standard_B2s",
+									"toolTip": "Virtual Machine SKU Size. Default = Standard_B2ls_v2",
 									"recommendedSizes": [
+										"Standard_B2ls_v2",
 										"Standard_B2s"
 									],
 									"constraints": {
@@ -1128,6 +1139,10 @@
 									},
 									"osPlatform": "Windows",
 									"count": "[steps('Spoke').amountOfSpokes]",
+									"scope": {
+										"subscriptionId": "[coalesce(steps('Spoke').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId)]",
+										"location": "[steps('Regions').First.Region.name]"
+									},
 									"visible": true
 								}
 							],
@@ -1163,8 +1178,9 @@
 									"name": "vmSize",
 									"type": "Microsoft.Compute.SizeSelector",
 									"label": "Virtual Machine SKU Size (OnPrem)",
-									"toolTip": "Virtual Machine SKU Siz. Default = Standard_B2s",
+									"toolTip": "Virtual Machine SKU Size. Default = Standard_B2ls_v2",
 									"recommendedSizes": [
+										"Standard_B2ls_v2",
 										"Standard_B2s"
 									],
 									"constraints": {
@@ -1175,6 +1191,10 @@
 									},
 									"osPlatform": "Windows",
 									"count": 1,
+									"scope": {
+										"subscriptionId": "[coalesce(steps('OnPrem').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId)]",
+										"location": "[steps('Regions').First.Region.name]"
+									},
 									"visible": true
 								}
 							],
@@ -1184,7 +1204,7 @@
 							"name": "VMUserAccountInfo",
 							"type": "Microsoft.Common.InfoBox",
 							"options": {
-								"text": "Enter Local Admin Username and Password for Virtual Machine deployement.",
+								"text": "Enter Local Admin Username and Password for Virtual Machine deployment (do not use 'root' when deploying Linux VMs).",
 								"style": "Info"
 							},
 							"visible": "[or(equals(steps('VirtualMachines').deployVMsInSpokes,true),equals(steps('VirtualMachines').deployVMinOnPrem,true))]"
@@ -1256,7 +1276,7 @@
 		},
 		"outputs": {
 			"parameters": {
-				"locations": "[if(equals(steps('Regions').DeployMultiRegion, true), parse(concat('[{\"region\":\"', steps('Regions').First.Region.name, '\", \"addressSpace\":\"', steps('Regions').First.AddressSpace, '\", \"hubSubscriptionID\":\"', steps('Hub').First.Subscription.subscriptionId, '\", \"spokeSubscriptionID\":\"', steps('Spoke').First.Subscription.subscriptionId, '\", \"onPremSubscriptionID\":\"', steps('OnPrem').First.Subscription.subscriptionId, '\"}, {\"region\":\"', steps('Regions').Second.Region.name, '\", \"addressSpace\":\"', steps('Regions').Second.AddressSpace, '\", \"hubSubscriptionID\":\"', steps('Hub').Second.Subscription.subscriptionId, '\", \"spokeSubscriptionID\":\"', steps('Spoke').Second.Subscription.subscriptionId, '\", \"onPremSubscriptionID\":\"', steps('OnPrem').Second.Subscription.subscriptionId, '\"}]')), parse(concat('[{\"region\":\"', steps('Regions').First.Region.name, '\", \"addressSpace\":\"', steps('Regions').First.AddressSpace, '\", \"hubSubscriptionID\":\"', steps('Hub').First.Subscription.subscriptionId, '\", \"spokeSubscriptionID\":\"', steps('Spoke').First.Subscription.subscriptionId, '\", \"onPremSubscriptionID\":\"', steps('OnPrem').First.Subscription.subscriptionId, '\"}]')))]",
+				"locations": "[if(equals(steps('Regions').DeployMultiRegion, true), parse(concat('[{\"region\":\"', steps('Regions').First.Region.name, '\", \"addressSpace\":\"', steps('Regions').First.AddressSpace, '\", \"hubSubscriptionID\":\"', coalesce(steps('Hub').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"spokeSubscriptionID\":\"', coalesce(steps('Spoke').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"onPremSubscriptionID\":\"', coalesce(steps('OnPrem').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\"}, {\"region\":\"', steps('Regions').Second.Region.name, '\", \"addressSpace\":\"', steps('Regions').Second.AddressSpace, '\", \"hubSubscriptionID\":\"', coalesce(steps('Hub').Second.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"spokeSubscriptionID\":\"', coalesce(steps('Spoke').Second.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"onPremSubscriptionID\":\"', coalesce(steps('OnPrem').Second.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\"}]')), parse(concat('[{\"region\":\"', steps('Regions').First.Region.name, '\", \"addressSpace\":\"', steps('Regions').First.AddressSpace, '\", \"hubSubscriptionID\":\"', coalesce(steps('Hub').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"spokeSubscriptionID\":\"', coalesce(steps('Spoke').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\", \"onPremSubscriptionID\":\"', coalesce(steps('OnPrem').First.Subscription.subscriptionId, steps('basics').resourceScope.subscription.subscriptionId), '\"}]')))]",
 				"tagsByResource": "[steps('tags').tagsByResource]",
 				"adminUsername": "[coalesce(steps('VirtualMachines').adminUsername,'')]",
 				"adminPassword": "[coalesce(steps('VirtualMachines').adminPassword.password,'')]",
@@ -1264,38 +1284,38 @@
 				"deployVMinOnPrem": "[coalesce(steps('VirtualMachines').deployVMinOnPrem,false)]",
 				"deploySpokes": "[coalesce(steps('Spoke').Deploy,false)]",
 				"defaultOutboundAccess": "[coalesce(steps('Spoke').EnablePrivateSubnet,true)]",
-				"amountOfSpokes": "[steps('Spoke').amountOfSpokes]",
+				"amountOfSpokes": "[coalesce(steps('Spoke').amountOfSpokes,2)]",
 				"deployVnetPeeringMesh": "[coalesce(steps('Spoke').deployVnetPeeringMesh,false)]",
 				"deployAvnmUDRs": "[coalesce(steps('Spoke').deployAvnmUDRs,false)]",
 				"deployHUB": "[coalesce(steps('Hub').Deploy,false)]",
-				"hubType": "[steps('Hub').VNETorVWAN]",
-				"deployVnetPeeringAVNM": "[steps('Hub').deployVnetPeeringAVNM]",
-				"hubRgName": "[steps('Hub').hubRgName]",
+				"hubType": "[coalesce(steps('Hub').VNETorVWAN,'VNET')]",
+				"deployVnetPeeringAVNM": "[coalesce(steps('Hub').deployVnetPeeringAVNM,false)]",
+				"hubRgName": "[coalesce(steps('Hub').hubRgName,'rg-hub')]",
 				"deployBastionInHub": "[coalesce(steps('Hub').deployBastionInHub,false)]",
-				"deployGatewayInHub": "[or(steps('Hub').deployGatewayInHub,steps('OnPrem').deploySite2Site)]",
+				"deployGatewayInHub": "[or(coalesce(steps('Hub').deployGatewayInHub,false),coalesce(steps('OnPrem').deploySite2Site,false))]",
 				"hubBgp": "[coalesce(steps('Hub').hubBgp,false)]",
-				"hubBgpAsn": "[steps('Hub').hubBgpAsn]",
+				"hubBgpAsn": "[int(if(empty(coalesce(steps('Hub').hubBgpAsn,'')),if(equals(coalesce(steps('Hub').VNETorVWAN,'VNET'),'VNET'),'65010','65515'),steps('Hub').hubBgpAsn))]",
 				"deployFirewallInHub": "[coalesce(steps('Hub').deployFirewallInHub,false)]",
-				"AzureFirewallTier": "[steps('Hub').AzureFirewallTier]",
-				"deployUDRs": "[steps('Hub').deployUDRs]",
-				"spokeRgNamePrefix": "[steps('Spoke').spokeRgNamePrefix]",
+				"AzureFirewallTier": "[coalesce(steps('Hub').AzureFirewallTier,'Standard')]",
+				"deployUDRs": "[coalesce(steps('Hub').deployUDRs,true)]",
+				"spokeRgNamePrefix": "[coalesce(steps('Spoke').spokeRgNamePrefix,'rg-spoke')]",
 				"deployFirewallrules": "[coalesce(steps('Hub').deployFirewallrules,false)]",
 				"firewallDNSproxy": "[coalesce(steps('Hub').AzureFirewallDNSproxy,false)]",
 				"deployOnPrem": "[coalesce(steps('OnPrem').Deploy,false)]",
-				"onpremRgName": "[steps('OnPrem').OnPremRgName]",
+				"onpremRgName": "[coalesce(steps('OnPrem').OnPremRgName,'rg-onprem')]",
 				"deployBastionInOnPrem": "[coalesce(steps('OnPrem').deployBastionInOnPrem,false)]",
 				"deployGatewayinOnPrem": "[coalesce(steps('OnPrem').deployGatewayInOnPrem,false)]",
 				"onpremBgp": "[coalesce(steps('OnPrem').onpremBgp,false)]",
-				"onpremBgpAsn": "[steps('OnPrem').onpremBgpAsn]",
+				"onpremBgpAsn": "[int(if(empty(coalesce(steps('OnPrem').onpremBgpAsn,'')),'65020',steps('OnPrem').onpremBgpAsn))]",
 				"deploySiteToSite": "[and(equals(steps('OnPrem').deploySite2Site,true),equals(steps('OnPrem').deployGatewayInOnPrem,true),equals(steps('Hub').deployGatewayInHub,true))]",
-				"sharedKey": "[steps('OnPrem').sharedKey]",
-				"bastionInHubSKU": "[steps('Hub').bastionInHubSKU]",
-				"bastionInOnPremSKU": "[steps('OnPrem').bastionInOnPremSKU]",
-				"vmSizeSpoke": "[steps('VirtualMachines').SpokevmSizeSection.vmSize]",
-				"vmSizeOnPrem": "[steps('VirtualMachines').OnPremvmSizeSection.vmSize]",
-				"osTypeSpoke": "[steps('VirtualMachines').SpokevmSizeSection.osType]",
-				"osTypeOnPrem": "[steps('VirtualMachines').OnPremvmSizeSection.osType]",
-				"diagnosticWorkspaceId": "[steps('VirtualMachines').lawSelectorForAMA.id]",
+				"sharedKey": "[coalesce(steps('OnPrem').sharedKey,'')]",
+				"bastionInHubSKU": "[coalesce(steps('Hub').bastionInHubSKU,'Standard')]",
+				"bastionInOnPremSKU": "[coalesce(steps('OnPrem').bastionInOnPremSKU,'Standard')]",
+				"vmSizeSpoke": "[coalesce(steps('VirtualMachines').SpokevmSizeSection.vmSize,'Standard_B2ls_v2')]",
+				"vmSizeOnPrem": "[coalesce(steps('VirtualMachines').OnPremvmSizeSection.vmSize,'Standard_B2ls_v2')]",
+				"osTypeSpoke": "[coalesce(steps('VirtualMachines').SpokevmSizeSection.osType,'Windows')]",
+				"osTypeOnPrem": "[coalesce(steps('VirtualMachines').OnPremvmSizeSection.osType,'Windows')]",
+				"diagnosticWorkspaceId": "[coalesce(steps('VirtualMachines').lawSelectorForAMA.id,'')]",
 				"internetTrafficRoutingPolicy": "[or(equals(steps('Hub').enableRoutingIntent,'internet'),equals(steps('Hub').enableRoutingIntent,'privateAndInternet'))]",
 				"privateTrafficRoutingPolicy": "[or(equals(steps('Hub').enableRoutingIntent,'private'),equals(steps('Hub').enableRoutingIntent,'privateAndInternet'))]"
 			},

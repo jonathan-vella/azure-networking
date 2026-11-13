@@ -72,7 +72,7 @@ resource hubrg 'Microsoft.Resources/resourceGroups@2025-04-01' existing = {
 
 module vpnvWan 'modules/vwanvpnconnection.bicep' = {
   scope: hubrg
-  name: 'vwanVPNsites-${OnPremLocation}'
+  name: 'vwanVPNsites-${OnPremLocation}${vWanCrossRegionPostfix}'
   params: {
     enableBgp: enableBgp
     addressPrefixes: OnPremAddressPrefixes

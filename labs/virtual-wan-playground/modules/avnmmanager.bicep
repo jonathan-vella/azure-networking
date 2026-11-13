@@ -39,7 +39,7 @@ module roleAssignment 'avnmroleassignment.bicep' = {
   name: 'RoleAssignmentForAVNMDeploymentScript'
   params: {
     principalID: userAssignedIdentity.outputs.principalID
-    avnmName: avnmName
+    avnmName: avnm.name
   }
 }
 

@@ -37,7 +37,7 @@ module s2s 'VpnConnections.bicep' = if (isvNet) {
     OnPremBgpPeeringAddress: OnPrem.BgpPeeringAddress
 
     tagsByResource: tagsByResource
-    enableBgp: HubVPN.enableBgp && HubVPN.enableBgp
+    enableBgp: HubVPN.enableBgp && OnPrem.enableBgp
     sharedKey: sharedKey
     hubSubscriptionID: split(HubVPN.GatewayID, '/')[2]
     onPremSubscriptionID: split(OnPrem.GatewayID, '/')[2]
@@ -68,7 +68,7 @@ module vwans2s 'vWanVpnConnections.bicep' = if (isvWan) {
     OnPremBgpAsn: OnPrem.BgpAsn
 
     tagsByResource: tagsByResource
-    enableBgp: HubVPN.enableBgp && HubVPN.enableBgp
+    enableBgp: HubVPN.enableBgp && OnPrem.enableBgp
     sharedKey: sharedKey
     hubSubscriptionID: split(HubVPN.vWanID, '/')[2]
     onPremSubscriptionID: split(OnPrem.GatewayID, '/')[2]

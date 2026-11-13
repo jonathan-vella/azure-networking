@@ -3,6 +3,7 @@ targetScope = 'subscription'
 import { _VPNSettings } from './types.bicep'
 
 // Subscriptions
+param rootSubscriptionID string
 param hubSubscriptionID string
 param spokeSubscriptionID string
 param onPremSubscriptionID string
@@ -88,6 +89,7 @@ param deployBastionInOnPrem bool
 @allowed([
   'Basic'
   'Standard'
+  'Premium'
 ])
 param bastionInOnPremSKU string
 param deployVMinOnPrem bool
@@ -134,7 +136,7 @@ module hubVnet 'HubResourceGroup.bicep' = if (deployHUB && isVnetHub) {
     AllSpokeAddressSpaces: skip(AllAddressSpaces, 1)
     SecondRegionAddressSpace: isMultiRegion ? SecondRegionAddressSpace : ''
     vpnGwBgpAsn: hubBgp ? hubBgpAsn : 65515
-    vpnGwEnebaleBgp: hubBgp
+    vpnGwEnableBgp: hubBgp
     deployUDRs: deployUDRs
     bastionSku: bastionInHubSKU
     firewallDNSproxy: firewallDNSproxy && deployFirewallInHub && isVnetHub
@@ -143,7 +145,7 @@ module hubVnet 'HubResourceGroup.bicep' = if (deployHUB && isVnetHub) {
 
 //  Deploy Azure vWAN with vWAN Hub and Azure Firewall
 module vwan 'vWanResourceGroup.bicep' = if (deployHUB && isVwanHub) {
-  scope: subscription(hubSubscriptionID)
+  scope: subscription(rootSubscriptionID)
   name: '${hubRgName}-${shortLocationCode}-VWAN'
   params: {
     location: location
@@ -187,7 +189,7 @@ module spokeVnets 'SpokeResourceGroup.bicep' = [
       tagsByResource: tagsByResource
       osType: osTypeSpoke
       deployUDRs: deployAvnmUDRs ? false : deployUDRs
-      firewallDNSproxy: firewallDNSproxy && deployFirewallInHub
+      firewallDNSproxy: deployHUB && firewallDNSproxy && deployFirewallInHub
       dcrID: dcrID ?? ''
       defaultOutboundAccess: defaultOutboundAccess
     }
@@ -209,7 +211,7 @@ module vnetPeerings 'VnetPeerings.bicep' = [
 
 // VNET Peerings AVNM
 module vnetPeeringsAVNM 'Avnm.bicep' = if (deployHUB && deploySpokes && isVnetHub && deployVnetPeeringAVNM) {
-  scope: subscription(hubSubscriptionID)
+  scope: subscription(rootSubscriptionID)
   name: 'AVNM-${shortLocationCode}'
   params: {
     avnmName: avnmName
@@ -245,7 +247,7 @@ module vnetConnections 'vWanVnetConnections.bicep' = [
       vwanHubName: deployHUB && deploySpokes && isVwanHub ? vwan!.outputs.vWanHubName : 'No VNET peering'
       deployFirewallInHub: deployFirewallInHub && isVwanHub
       counter: i
-      hubSubscriptionID: hubSubscriptionID
+      hubSubscriptionID: rootSubscriptionID
       enableRoutingIntent: internetTrafficRoutingPolicy || privateTrafficRoutingPolicy
       shortLocationCode: shortLocationCode
     }
@@ -270,14 +272,14 @@ module onprem 'OnPremResourceGroup.bicep' = if (deployOnPrem) {
     tagsByResource: tagsByResource
     osType: osTypeOnPrem
     vpnGwBgpAsn: onpremBgp ? onpremBgpAsn : 65515
-    vpnGwEnebaleBgp: onpremBgp
+    vpnGwEnableBgp: onpremBgp
     bastionSku: bastionInOnPremSKU
     dcrID: dcrID ?? ''
   }
 }
 
 // variable to validate if we need to deploy VPN connections
-var deployVPNConnectionsVNET = deployGatewayInHub && deployGatewayinOnPrem && deploySiteToSite && isVnetHub && deployHUB
+var deployVPNConnectionsVNET = deployGatewayInHub && deployGatewayinOnPrem && deploySiteToSite && isVnetHub && deployHUB && deployOnPrem
 
 // Deploy S2s VPN from OnPrem Gateway to Hub Gateway
 module s2s 'VpnConnections.bicep' = if (deployVPNConnectionsVNET) {
@@ -334,7 +336,7 @@ module vwans2s 'vWanVpnConnections.bicep' = if (deployVPNConnectionsVWAN) {
     tagsByResource: tagsByResource
     enableBgp: hubBgp && onpremBgp && deployVPNConnectionsVWAN
     sharedKey: deployVPNConnectionsVWAN ? sharedKey : 'none'
-    hubSubscriptionID: hubSubscriptionID
+    hubSubscriptionID: rootSubscriptionID
     onPremSubscriptionID: onPremSubscriptionID
     deployFirewallInHub: deployFirewallInHub && deployVPNConnectionsVWAN
     isCrossRegion: false
