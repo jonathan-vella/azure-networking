@@ -5,144 +5,150 @@ sidebar:
   order: 2
 ---
 
-Azure software-defined networking (SDN) does not forward packets hop-by-hop using traditional Ethernet ARP broadcasts or router-interface ACLs. Every virtual machine network interface (NIC) has an **effective route table** programmed by the Azure host fabric before the first packet leaves the guest OS. Almost every "intermittent firewall drop," "broken ExpressRoute return path," or "Private Endpoint bypassing inspection" incident in production traces back to misunderstanding the exact mathematical order in which Azure evaluates that table.
+Azure software-defined networking (SDN) does not forward packets hop-by-hop using Ethernet ARP broadcasts or router-interface ACLs. Instead, the Azure host programs an **effective route table** onto every virtual machine network interface (NIC) before the first packet leaves the guest OS. Common production incidents such as intermittent stateful firewall drops, broken ExpressRoute return paths, and Private Endpoints bypassing inspection trace directly to the evaluation order of that table.
 
 ---
 
-## The Deterministic NIC Route Selection Algorithm
+## Deterministic NIC route selection
 
-When a NIC transmits an IPv4 or IPv6 packet, the Azure host evaluates all **Active** routes in the subnet's effective route table using a strict three-stage pipeline. There are no exceptions to stage order.
+When a NIC transmits an IPv4 or IPv6 packet, the Azure host filters all `Active` routes containing the destination IP and evaluates them in [three strict stages](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview).
 
 ```mermaid
 flowchart TD
   Start(["Outbound Packet Leaves VM NIC<br/>(Destination IP D)"]) --> Match["Filter Active Routes Containing D"]
-  Match --> Step1{"Stage 1: Longest Prefix Match (LPM)<br/>Is one prefix mask strictly longer?<br/>(e.g. /32 vs /24 vs /16 vs /0)"}
+  Match --> Guard{"Protected System Route?<br/>(VNetLocal, VNetPeering, or ServiceEndpoint<br/>vs. more-specific BGP route)"}
+  Guard -- "Yes (BGP cannot override local/peering/SE)" --> Step1Sys["Evaluate UDR vs. Protected System Route via LPM"]
+  Guard -- "No" --> Step1{"Stage 1: Longest Prefix Match (LPM)<br/>Is one prefix mask strictly longer?<br/>(/32 vs. /24 vs. /16 vs. /0)"}
 
-  Step1 -- "Yes (Unique Longest Mask)" --> WinLPM(["Winner Selected Immediately!<br/>(Origin & AS-Path Ignored)"])
+  Step1Sys --> Step1
+  Step1 -- "Yes (Unique Longest Mask)" --> WinLPM(["Winner Selected Immediately<br/>(Origin & AS-Path Not Compared)"])
   Step1 -- "Tie (Identical Prefix Length, e.g. two /16s)" --> Step2{"Stage 2: Route Origin Precedence<br/>Compare Origin of Tied Routes"}
 
-  Step2 -- "User-Defined Route (UDR)" --> WinUDR(["1st Priority: UDR Wins"])
+  Step2 -- "User-Defined Route (UDR)" --> WinUDR(["1st Priority: UDR Wins<br/>(Explicit IP beats Service Tag)"])
   Step2 -- "No UDR, BGP Route Exists" --> Step3{"Multiple Equal-Length BGP Routes?"}
-  Step2 -- "System Routes Only" --> WinSys(["3rd Priority: System Route Wins<br/>(VNet / Peering / ServiceEndpoint > Internet)"])
+  Step2 -- "System Routes Only" --> WinSys(["3rd Priority: System Route Wins"])
 
   Step3 -- "Single BGP Route" --> WinBGP(["2nd Priority: BGP Wins over System"])
-  Step3 -- "Multiple BGP Paths" --> TieBGP["Stage 3: BGP Path / Gateway Selection<br/>(Local vs Remote, ER vs VPN, Shortest AS-Path, ECMP)"]
+  Step3 -- "Multiple BGP Paths" --> TieBGP["Stage 3: Gateway & BGP Path Selection<br/>(ER > VPN by default, AS-Path, ECMP)"]
   TieBGP --> WinBGP2(["Selected BGP Next-Hop(s) Programmed"])
 ```
 
-### Stage 1: Longest Prefix Match (LPM) Always Wins First
+### Stage 1: Longest prefix match (LPM) and fabric-protected routes
 
-Before Azure looks at whether a route came from your manual Route Table (UDR), ExpressRoute BGP, or an internal System route, **the longest subnet mask wins unconditionally**:
+Across candidate routes, **the longest subnet mask wins first**:
 
-- A `/32` System route created by a **Private Endpoint** (`InterfaceEndpoint`) beats a `/24` UDR and beats a `0.0.0.0/0` firewall UDR.
-- A `/24` on-premises prefix learned via **ExpressRoute BGP** beats a `10.0.0.0/8` summary UDR pointing to Azure Firewall.
-- A `/16` System route from **VNet Peering** beats a `0.0.0.0/0` default route advertised by Azure Route Server or configured via UDR.
+- A `/32` `InterfaceEndpoint` system route created by a Private Endpoint beats a `/24` UDR and beats a `0.0.0.0/0` firewall UDR (unless Private Endpoint network policies are enabled on the endpoint's subnet).
+- A `/24` on-premises prefix learned over ExpressRoute BGP beats a `10.0.0.0/8` summary UDR pointing to Azure Firewall.
+- A `/16` `VirtualNetworkPeering` system route beats a `0.0.0.0/0` default route advertised by Azure Route Server or configured in a UDR.
 
-:::danger[The #1 Misconception in Azure Networking]
-Creating a `0.0.0.0/0 -> Azure Firewall` UDR on a spoke subnet **does not** send spoke-to-hub, spoke-to-peered-spoke, or spoke-to-on-premises traffic through the firewall if more-specific System (`/16`) or BGP (`/24`) routes remain active on that NIC! `0.0.0.0/0` is the shortest possible mask (`/0`); every other active route in the table beats it on LPM.
+Azure enforces two fabric protections that qualify pure LPM:
+1. **BGP cannot hijack intra-VNet, peering, or Service Endpoint space.** System routes for `VNetLocal`, `VirtualNetworkPeering`, and `VirtualNetworkServiceEndpoint` are preferred over BGP routes *even when an NVA or gateway advertises a longer, more-specific BGP prefix* via [Azure Route Server](/azure-networking/02-core-topologies/hub-spoke-and-route-server/) or VPN. Steering intra-VNet or peered VNet traffic through a firewall requires an explicit UDR.
+2. **`VirtualNetworkServiceEndpoint` routes cannot be overridden by UDRs.** Enabling a Virtual Network Service Endpoint on a subnet injects high-priority Azure backbone routes for that service that even a UDR cannot redirect. Migrate from Service Endpoints to Private Endpoints when traffic must traverse a central firewall.
+
+:::danger[The #1 routing misconception in Azure]
+Attaching a `0.0.0.0/0 -> Azure Firewall` UDR to a spoke subnet **does not** send spoke-to-hub, spoke-to-peered-spoke, or spoke-to-on-premises traffic through the firewall while more-specific `/16` peering or `/24` BGP routes remain active on that NIC. Because `/0` is the shortest possible mask, every other active route beats it at Stage 1.
 :::
 
-### Stage 2: Route Origin Tie-Breaker (`UDR > BGP > System`)
+### Stage 2: Route origin tie-breaker (`UDR > BGP > System`)
 
-Only when two or more active routes match the destination with the **exact same prefix length** (for example, two routes for `10.50.0.0/16`, or two routes for `0.0.0.0/0`) does Azure invoke origin precedence:
+When two or more active routes match the destination with the **exact same prefix length** (such as two routes for `10.50.0.0/16` or two routes for `0.0.0.0/0`), Azure breaks the tie by route origin:
 
-1. **User-Defined Route (UDR)** — highest precedence.
-2. **BGP Route** (ExpressRoute Gateway, VPN Gateway, Azure Route Server, or Virtual WAN hub propagation) — second precedence.
-3. **System Default Route** (`VnetLocal`, `VNetPeering`, `GlobalVNetPeering`, `ConnectedGroup`, `VirtualNetworkServiceEndpoint`, `InterfaceEndpoint`, `Internet`) — lowest precedence.
+1. **User-Defined Route (UDR)** wins first. If an explicit IP prefix UDR ties with a [Service Tag UDR](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview) (up to 25 Service Tag UDRs per route table), the explicit IP prefix wins. Among overlapping Service Tags, Azure evaluates regional service tags (`Storage.WestEurope`) before top-level service tags (`Storage`), then regional `AzureCloud.<region>`, and finally `AzureCloud`.
+2. **BGP route** (learned from ExpressRoute Gateway, VPN Gateway, Azure Route Server, or Virtual WAN hub propagation) wins second. Note that adding a `0.0.0.0/0` UDR (or learning `0.0.0.0/0` with next hop `VirtualNetworkGateway`) also causes Azure to remove the default `None` discard system routes for `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, and `100.64.0.0/10` on that subnet.
+3. **System default route** (`VNetLocal`, `VirtualNetworkPeering`, `VirtualNetworkServiceEndpoint`, `InterfaceEndpoint`, `Internet`, `None`) ranks last.
 
-*Subtle System-vs-BGP protection rule*: Within a VNet's own address space and direct VNet peerings, Azure protects local fabric reachability—an NVA peered with [Azure Route Server](/azure-networking/02-core-topologies/hub-spoke-and-route-server/) cannot hijack intra-VNet or direct VNet-peering prefixes simply by advertising a more-specific BGP route; steering traffic away from `VnetLocal` or `VNetPeering` requires an explicit UDR.
+### Stage 3: Why BGP AS-path prepending loses to LPM and hub preference
 
-### Stage 3: Why BGP AS-Path Prepending Cannot Beat UDRs or LPM
+Engineers accustomed to MPLS WANs often prepend `AS_PATH` (`65001 65001 65001`) expecting Azure to avoid a backup path. Azure evaluates `AS_PATH` length only inside the BGP control plane among **equal-prefix BGP candidates**, and even then after gateway routing preference:
 
-Network engineers coming from MPLS/Cisco WAN backgrounds routinely attempt to steer traffic away from a failover path by prepending `AS_PATH` four times (`65001 65001 65001 65001`). In Azure, **AS-path length is evaluated only inside the BGP gateway/router control plane among equal-prefix BGP candidates**:
+- If S2S VPN advertises `10.20.1.0/24` with a triple-prepended `AS_PATH` while ExpressRoute advertises `10.20.0.0/16` with a single ASN, **S2S VPN still wins** because `/24` beats `/16` at Stage 1 before BGP attributes are compared.
+- For identical `/16` prefixes in a [Virtual WAN hub](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/) or [Azure Route Server](https://learn.microsoft.com/en-us/azure/route-server/route-server-faq) VNet, default **Hub Routing Preference (`ExpressRoute`)** selects ExpressRoute over S2S VPN or SD-WAN *before* comparing `AS_PATH` length unless you explicitly change routing preference to `ASPath` (see [ExpressRoute Resiliency](/azure-networking/03-hybrid-connectivity/expressroute-resiliency/)).
+- When multiple NVAs advertise the identical prefix with equal `AS_PATH` length to Azure Route Server, Route Server programs all next hops onto VM NICs for **Equal-Cost Multi-Path (ECMP)** forwarding. Never include ASN `65515` in an NVA's `AS_PATH`: Route Server uses `65515` itself and drops the prefix under BGP loop prevention. Also note that ExpressRoute strips private BGP ASNs when advertising routes to on-premises, presenting them under Microsoft's `AS 12076`.
 
-- If Path A advertises `10.20.1.0/24` with AS-path `65001 65001 65001` over S2S VPN, and Path B advertises `10.20.0.0/16` with AS-path `65001` over ExpressRoute, **VPN wins** because `/24` beats `/16` at Stage 1 (LPM) before AS-path is ever inspected.
-- Even for identical `/16` prefixes in a Virtual WAN hub or Route Server VNet, default **Hub Routing Preference (`ExpressRoute`)** prefers local ExpressRoute over local S2S VPN *before* comparing AS-path length—unless you explicitly switch routing preference to `ASPath` (see [Virtual WAN & Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/) and [ExpressRoute Resiliency](/azure-networking/03-hybrid-connectivity/expressroute-resiliency/)).
+### Concrete route evaluation examples
 
-### Concrete Route Evaluation Scenarios
+Assume a spoke VM (`10.64.16.4`) sends a packet to `10.100.20.15` (or `10.64.32.10` in row 5):
 
-Assume a spoke VM (`10.64.16.4`) sends a packet to `10.100.20.15`. Below is how different effective route combinations resolve:
-
-| Candidate Routes Present on Spoke NIC | Winning Route | Why It Won |
+| Active / candidate routes on spoke NIC | Winning route | Selection reason |
 | --- | --- | --- |
-| 1) System `0.0.0.0/0 -> Internet`<br/>2) UDR `0.0.0.0/0 -> 10.64.0.68 (Firewall)`<br/>3) BGP `10.100.0.0/16 -> 10.64.0.4 (ER GW)` | **BGP `10.100.0.0/16 -> ER GW`** | `/16` beats `/0` on **LPM (Stage 1)**. Traffic bypasses the firewall completely! |
-| 1) UDR `10.100.0.0/16 -> 10.64.0.68 (Firewall)`<br/>2) BGP `10.100.0.0/16 -> 10.64.0.4 (ER GW)` | **UDR `10.100.0.0/16 -> Firewall`** | Tied at `/16`; **UDR beats BGP (Stage 2)**. |
-| 1) UDR `10.100.0.0/16 -> 10.64.0.68 (Firewall)`<br/>2) BGP `10.100.20.0/24 -> 10.64.0.4 (ER GW)` | **BGP `10.100.20.0/24 -> ER GW`** | On-prem advertised a de-aggregated `/24`, beating the `/16` UDR on **LPM (Stage 1)** and silently bypassing inspection again. |
-| 1) UDR `0.0.0.0/0 -> 10.64.0.68 (Firewall)` (with **Propagate gateway routes = Disabled**)<br/>2) *(BGP routes suppressed)* | **UDR `0.0.0.0/0 -> Firewall`** | Suppressing BGP propagation removes all `/16` and `/24` gateway routes from the spoke NIC, leaving `0.0.0.0/0` as the sole match. |
-| 1) UDR `10.64.32.0/24 -> 10.64.0.68 (Firewall)`<br/>2) System `10.64.32.10/32 -> InterfaceEndpoint` | **System `/32 -> InterfaceEndpoint`** | Private Endpoint `/32` beats `/24` UDR on **LPM (Stage 1)** unless PE Network Policies (`RouteTableEnabled`) and a `/32` UDR are applied. |
+| 1) System `0.0.0.0/0 -> Internet`<br/>2) UDR `0.0.0.0/0 -> 10.64.0.68 (Firewall)`<br/>3) BGP `10.100.0.0/16 -> 10.64.0.4 (ER GW)` | **BGP `10.100.0.0/16 -> ER GW`** | `/16` beats `/0` at **Stage 1 (LPM)**. Hybrid traffic bypasses the firewall. |
+| 1) UDR `10.100.0.0/16 -> 10.64.0.68 (Firewall)`<br/>2) BGP `10.100.0.0/16 -> 10.64.0.4 (ER GW)` | **UDR `10.100.0.0/16 -> Firewall`** | Tied at `/16`; **UDR beats BGP at Stage 2** (BGP route becomes `Invalid`). |
+| 1) UDR `10.100.0.0/16 -> 10.64.0.68 (Firewall)`<br/>2) BGP `10.100.20.0/24 -> 10.64.0.4 (ER GW)` | **BGP `10.100.20.0/24 -> ER GW`** | On-premises advertised a de-aggregated `/24`, beating the `/16` UDR at **Stage 1 (LPM)** and bypassing inspection. |
+| 1) UDR `0.0.0.0/0 -> 10.64.0.68 (Firewall)` with `disableBgpRoutePropagation: true`<br/>2) *(BGP routes suppressed)* | **UDR `0.0.0.0/0 -> Firewall`** | Disabling gateway route propagation keeps all `/16` and `/24` BGP routes off the spoke NIC, so `0.0.0.0/0` wins. |
+| 1) UDR `10.64.32.0/22 -> 10.64.0.68 (Firewall)`<br/>2) System `10.64.32.10/32 -> InterfaceEndpoint` (Spoke B VNet `10.64.32.0/22`) | **System `/32`** if policy `Disabled`;<br/>**UDR `/22 -> Firewall`** if `RouteTableEnabled` or `Enabled` | With [Private Endpoint network policies](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy) enabled, any UDR prefix equal to or more specific than the target VNet's address space (`/22` or `/24` here, never `0.0.0.0/0`) overrides the `/32` route. |
 
 ---
 
-## `DisableBgpRoutePropagation`: Precision Tool with Blast Radius
+## `disableBgpRoutePropagation`: precision tool with blast radius
 
-Every Azure Route Table exposes a boolean property: **`disableBgpRoutePropagation`** (labeled **"Propagate gateway routes: Yes / No"** in the Azure Portal). Setting `disableBgpRoutePropagation: true` stops Azure from injecting *any* BGP-learned prefixes (from ExpressRoute Gateways, VPN Gateways, Azure Route Server, or Virtual WAN hubs) into subnets associated with that route table.
+Every Azure Route Table includes **`disableBgpRoutePropagation`** (shown as **"Propagate gateway routes: Yes / No"** in the Azure Portal). Setting `disableBgpRoutePropagation: true` blocks ExpressRoute Gateways, VPN Gateways, Azure Route Server, and Virtual WAN hubs from injecting gateway and BGP routes into associated subnets.
 
-### Where Engineers Use It Correctly
+![Hub-and-Spoke Route Precedence and Symmetric Firewall Inspection](../../../assets/diagrams/foundations/hub-spoke-symmetric-routing.svg)
 
-1. **Customer-Managed Hub-and-Spoke Spoke Subnets**: When all spoke-to-on-premises and spoke-to-internet traffic must pass through a hub firewall (`10.64.0.68`), disabling gateway route propagation on spoke route tables prevents hundreds of specific `/24` on-premises BGP prefixes from entering the spoke NICs and out-matching `0.0.0.0/0 -> Firewall` via LPM.
-2. **NVA Untrusted / Transit Interfaces**: In multi-NIC third-party NVA or [AVS transit](/azure-networking/05-workload-networking/avs-networking/) designs, disabling BGP propagation on the internet-facing or cross-hub NIC prevents Azure Route Server from programming a routing loop back into the appliance that originated the route.
+### Valid production uses
 
-### Three Destructive Misconfigurations
+In customer-managed hub-and-spoke spoke subnets, setting `disableBgpRoutePropagation: true` alongside `0.0.0.0/0 -> 10.64.0.68` stops hundreds of specific on-premises `/24` BGP prefixes from landing on spoke NICs and out-matching the firewall default route.
 
-1. **Setting `disableBgpRoutePropagation: true` on `GatewaySubnet`**: Never disable BGP propagation on `GatewaySubnet`! ExpressRoute and VPN gateways require BGP route exchange to function; Azure Portal blocks this today, and forcing it via legacy templates breaks hybrid routing completely.
-2. **Setting `disableBgpRoutePropagation: true` on `AzureFirewallSubnet`**: Your hub firewall *needs* the specific on-premises `/24` and `/16` BGP routes from `GatewaySubnet` so it knows how to forward inspected packets down the ExpressRoute or VPN tunnel! Keep propagation **Enabled** on `AzureFirewallSubnet`, and attach a route table containing **only `0.0.0.0/0 -> Internet`** (plus explicit spoke prefixes if multi-hub) so the firewall never loops default-route traffic back to an ARS-peered NVA.
-3. **Setting `disableBgpRoutePropagation: true` in Virtual WAN Spokes**: In a [Virtual WAN Secured Hub with Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/), the hub dynamically pushes `0.0.0.0/0` and RFC 1918 next-hops via BGP propagation. Disabling gateway route propagation on a vWAN spoke subnet blackholes all hub-learned routes!
+In multi-NIC third-party NVA or [AVS transit](/azure-networking/05-workload-networking/avs-networking/) designs, disabling BGP propagation on untrusted or internet-facing appliance NICs prevents Azure Route Server from programming a routing loop back into the appliance that originated the prefix.
+
+### Three destructive misconfigurations
+
+1. **Disabling propagation on `GatewaySubnet`**: Never set `disableBgpRoutePropagation: true` (or attach a `0.0.0.0/0` UDR) on `GatewaySubnet`. ExpressRoute and VPN gateways stop functioning when BGP route propagation or management reachability is blocked.
+2. **Disabling propagation on `AzureFirewallSubnet`**: The hub firewall *must* learn on-premises `/24` and `/16` BGP routes from `GatewaySubnet` so it knows how to forward inspected packets down the ExpressRoute circuit or VPN tunnel. Keep propagation **Enabled** on `AzureFirewallSubnet`, and attach a route table with `0.0.0.0/0 -> Internet` so an NVA advertising `0.0.0.0/0` to Route Server cannot loop firewall internet egress. Also note that `nextHopType: VirtualNetworkGateway` in a manual UDR works only when the VNet's gateway is a VPN Gateway, never an ExpressRoute Gateway or Route Server.
+3. **Disabling propagation on Virtual WAN spoke subnets**: A [Virtual WAN Secured Hub with Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/) distributes `0.0.0.0/0` and private RFC 1918 firewall routes to spokes via BGP propagation. Setting `disableBgpRoutePropagation: true` on a Virtual WAN spoke blackholes hub-learned connectivity.
 
 ---
 
-## Asymmetric Routing Pitfalls with Stateful Firewalls
+## Asymmetric routing pitfalls with stateful firewalls
 
-Stateful firewalls (Azure Firewall, Palo Alto VM-Series, Fortinet FortiGate, Check Point CloudGuard) track TCP 3-way handshakes (`SYN -> SYN-ACK -> ACK`) in a session table. If the forward `SYN` traverses the firewall, **the return `SYN-ACK` must traverse the exact same firewall cluster**. If the return packet takes a direct path around the firewall, either the return packet lacks a session or subsequent `ACK`/data packets hit the firewall without a completed handshake and are dropped (`TCP Out-of-State` / `Invalid SYN-ACK`).
+Stateful firewalls (Azure Firewall, Palo Alto VM-Series, Fortinet FortiGate, Check Point CloudGuard) track TCP 3-way handshakes (`SYN -> SYN-ACK -> ACK`). When the forward `SYN` crosses a firewall cluster, the return `SYN-ACK` must cross that exact same firewall cluster. If the return leg takes a direct peering or `/32` shortcut, subsequent `ACK` and data packets hit the firewall without an established session and drop as out-of-state TCP.
 
-### Failure Case 1: Missing `GatewaySubnet` UDR on Return from On-Premises
+### Missing `GatewaySubnet` return UDR from on-premises
 
 ```mermaid
 flowchart LR
   OnPrem["On-Premises Host<br/>(10.100.20.15)"]
-  ERGW["Hub GatewaySubnet<br/>(ExpressRoute GW)"]
+  ERGW["Hub GatewaySubnet<br/>(ER GW 10.64.0.4)"]
   AFW["Hub Azure Firewall<br/>(10.64.0.68)"]
-  SpokeVM["Spoke VM<br/>(10.64.16.4)"]
+  SpokeVM["Spoke A VM<br/>(10.64.16.4 in 10.64.16.0/22)"]
 
   SpokeVM -- "1. SYN (UDR 0.0.0.0/0 -> AFW)" --> AFW
   AFW -- "2. SYN (BGP 10.100.0.0/16 -> ERGW)" --> ERGW
   ERGW -- "3. SYN" --> OnPrem
   OnPrem -. "4. SYN-ACK" .-> ERGW
-  ERGW -. "5. BROKEN: VNetPeering System Route<br/>10.64.16.0/24 bypasses AFW!" .-> SpokeVM
+  ERGW -. "5. BROKEN without UDR: VNetPeering<br/>10.64.16.0/22 bypasses AFW" .-> SpokeVM
 ```
 
-- **Why it breaks**: Spoke subnet has `disableBgpRoutePropagation: true` and `0.0.0.0/0 -> AFW`. Outbound `SYN` hits AFW, then ERGW, then On-Prem. When `SYN-ACK` returns to `GatewaySubnet`, ERGW sees the VNet Peering system route `10.64.16.0/24 -> VNetPeering` and delivers `SYN-ACK` straight to the Spoke VM—bypassing AFW! Seconds later, AFW drops the spoke's `ACK` because AFW never saw `SYN-ACK`.
-- **The Surgical Fix**: Attach a dedicated Route Table (`rt-hub-gateway`) to `GatewaySubnet` (with **Propagate gateway routes = Enabled**!) containing exact spoke summary or VNet UDRs (`10.64.16.0/24 -> 10.64.0.68`). By Stage 2 (`UDR > System`), `GatewaySubnet` now forwards inbound traffic for `10.64.16.0/24` to Azure Firewall, restoring full symmetry.
+When Spoke A (`10.64.16.0/22`) sets `disableBgpRoutePropagation: true` and `0.0.0.0/0 -> 10.64.0.68`, outbound `SYN` packets cross Azure Firewall and `GatewaySubnet` to reach on-premises. When `SYN-ACK` returns to `GatewaySubnet`, an unconfigured gateway subnet follows the `VirtualNetworkPeering` system route (`10.64.16.0/22`) straight to the spoke VM, bypassing Azure Firewall. Moments later, Azure Firewall drops the spoke's `ACK`.
 
-### Failure Case 2: Private Endpoint `/32` Bypass
+Fix this symmetrically by associating a dedicated route table (`rt-hub-gateway`) with `GatewaySubnet`, keeping **Propagate gateway routes = Enabled**, and adding UDRs that match (or are more specific than) each peered spoke VNet's address space (for example, `10.64.16.0/22 -> 10.64.0.68` and `10.64.32.0/22 -> 10.64.0.68`). Do **not** rely on a broader `/20` summary UDR (`10.64.16.0/20`) on `GatewaySubnet`: because VNet peering injects each spoke's `/22` `VirtualNetworkPeering` route onto `GatewaySubnet`, `/22` beats `/20` at Stage 1 (LPM) and bypasses the firewall. Matching `/22` UDRs tie on prefix length and beat `VirtualNetworkPeering` at Stage 2 (`UDR > System`). Standard route tables hold up to **400 UDRs**, while **Azure Virtual Network Manager (AVNM) UDR configurations** raise that limit to **1,000 UDRs per route table** for large hub-and-spoke estates.
 
-By default (`privateEndpointNetworkPolicies: Disabled`), deploying a Private Endpoint in Spoke B (`10.64.32.10`) injects a `/32` `InterfaceEndpoint` system route into Spoke B, the Hub, and `GatewaySubnet`.
-- When On-Premises connects to `10.64.32.10`, `GatewaySubnet`'s `/32` `InterfaceEndpoint` route beats your `10.64.32.0/24 -> AFW` UDR via LPM and jumps straight to the Private Endpoint.
-- Worse, in Virtual WAN with Private Routing Intent or multi-spoke inspection, forward traffic may traverse the firewall while return traffic takes a direct path—or vice versa.
-- **The Surgical Fix**: Set **`privateEndpointNetworkPolicies: RouteTableEnabled`** (or `Enabled` if NSGs are also required) on the subnet hosting the Private Endpoints. This suppresses wide `/32` route injection or lets broader subnet UDRs govern routing cleanly across `GatewaySubnet` and peerings. See [Private Link & DNS at Scale](/azure-networking/04-network-security/private-link-and-dns-at-scale/).
+### Private Endpoint `/32` bypass and return-path SNAT
 
-### SNAT vs. Symmetric UDR Placement
+With default subnet settings (`privateEndpointNetworkPolicies: Disabled`), deploying a Private Endpoint in Spoke B (`10.64.32.10`) propagates a `/32` `InterfaceEndpoint` system route across Spoke B, the Hub VNet, and `GatewaySubnet`. That `/32` beats every `/24` or `/16` firewall UDR on LPM. Even worse, Private Endpoint NICs do not evaluate UDRs on their own subnet when emitting return packets, so return traffic always follows direct system routing toward the client's source IP.
 
-When engineers cannot immediately fix a missing return UDR during an incident, they often enable **Private Range SNAT** on Azure Firewall or the NVA (`SNAT: Always` instead of `Never` for RFC 1918). SNAT rewrites the client's source IP to the firewall's internal IP, forcing the destination to reply back to the firewall.
+Apply a two-part fix in customer-managed hub-and-spoke topologies (see [Private Link & Enterprise DNS at Scale](/azure-networking/04-network-security/private-link-and-dns-at-scale/)):
+1. Set **`privateEndpointNetworkPolicies: Enabled`** (or `RouteTableEnabled`) on the subnet hosting Private Endpoints, and configure client/gateway UDRs with a prefix mask **equal to or more specific than the Private Endpoint VNet's address space** (`0.0.0.0/0` never overrides a Private Endpoint route).
+2. Enable SNAT at the hub firewall *specifically* for inspected Private Endpoint flows (Azure Firewall Application Rules SNAT automatically; Network Rules or third-party NVAs require explicit SNAT unless deployed in a Virtual WAN Secured Hub with Private Routing Intent, which handles Private Endpoint symmetry natively).
 
-**Treat Private SNAT as an emergency band-aid, never a target architecture**:
-- Downstream servers, NSG flow logs, SQL audit trails, and Active Directory event logs see **every connection in the company originating from the firewall's four subnet IPs**, destroying forensic attribution and zero-trust identity/IP policies.
-- High east-west throughput exhausts ephemeral SNAT ports between internal tiers.
-- Fix the routing symmetry with deterministic UDRs (or Virtual WAN Routing Intent) and set Azure Firewall Private SNAT (`snat.privateRanges`) so RFC 1918 + `100.64.0.0/10` are **never SNATed** internally.
+### Why general Private-to-Private SNAT is an anti-pattern
+
+During routing outages, teams sometimes set Azure Firewall Private SNAT to `Always` across all RFC 1918 traffic to mask asymmetric return paths. Refuse that shortcut for general VM-to-VM and hybrid traffic. Rewriting every internal connection to the firewall's subnet IPs destroys source-IP attribution in SQL audit trails, Active Directory security logs, and NSG flow logs, and risks internal SNAT port exhaustion. Fix the missing UDRs instead and keep `snat.privateRanges` (`IANAPrivateRanges`: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`) un-SNATed for standard east-west and hybrid VM flows.
 
 ---
 
-## Validating Effective Routes in Production
+## Validating effective routes in production
 
-Never guess what Azure programmed by reading static Route Table resources in the portal—a disconnected peering, stopped NVA, or forgotten `disableBgpRoutePropagation` toggle changes the live NIC state. Always inspect the **NIC effective route table** and **Network Watcher Next Hop**:
+Static Route Table blades in the portal do not show invalidated peerings, BGP withdrawals, or shadowed system routes. Always inspect the live NIC effective route table and [Network Watcher Next Hop](https://learn.microsoft.com/en-us/azure/network-watcher/next-hop-overview):
 
 ```bash
-# 1. Inspect the exact active/invalid routes programmed on a VM NIC
+# 1. Inspect active and shadowed/invalid routes programmed on a running VM NIC
 az network nic show-effective-route-table \
   --resource-group rg-prod-spoke-app \
   --name nic-vm-app-01 \
   --output table
 
-# 2. Deterministically test Azure's LPM + Tie-breaker winner for a specific flow
+# 2. Test Azure's exact LPM + origin winner for a source/destination pair
 az network watcher show-next-hop \
   --resource-group rg-prod-spoke-app \
   --vm vm-app-01 \
@@ -151,15 +157,27 @@ az network watcher show-next-hop \
   --output json
 ```
 
-Look closely at the **`State`** column in `show-effective-route-table`:
-- **`Active`**: Eligible for Stage 1–3 selection.
-- **`Invalid`**: Suppressed—either shadowed by an exact-prefix higher-precedence route (`UDR` shadowing `BGP` or `System`) or invalidated because a peered VNet / virtual network gateway went down.
+Check two fields in `show-effective-route-table`:
+- **`Active` state**: Eligible for Stage 1 to Stage 3 selection (watch for `nextHopType: None`, which drops packets intentionally when reserved ranges are unrouted or an NVA/gateway is unhealthy).
+- **`Invalid` state**: Shadowed by an equal-prefix higher-precedence route (such as a `User` UDR overriding a `Default` or `VirtualNetworkGateway` route) or disabled by a down peering.
 
 ---
 
-:::tip[What I Recommend]
-1. **Summarize Spoke Address Spaces Per Region**: If all regional spokes live inside `10.64.16.0/20`–`10.65.240.0/20`, `GatewaySubnet` needs only a handful of summary UDRs pointing to Azure Firewall rather than hitting Azure's **400-UDR-per-route-table ceiling**.
-2. **Never Disable BGP Propagation on `GatewaySubnet`, `AzureFirewallSubnet`, or Virtual WAN Spokes**: Reserve `disableBgpRoutePropagation: true` strictly for customer-managed hub-and-spoke workload subnets (where `0.0.0.0/0 -> Firewall` must catch hybrid traffic) and NVA loop-prevention NICs.
-3. **Enable `RouteTableEnabled` on Every Private Endpoint Subnet**: Eliminate `/32` LPM surprises across `GatewaySubnet` and hub firewalls from day one.
-4. **Refuse Private-to-Private SNAT as a Permanent Design**: Preserve client source IPs end-to-end across RFC 1918 and `100.64.0.0/10`; fix asymmetric paths with symmetric UDRs or [Virtual WAN Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/). (Only exception: PaaS Private Endpoints accessed via certain Layer-7 proxies or specific [Azure Firewall DNAT patterns](/azure-networking/04-network-security/firewall-and-nva-patterns/) where return routing cannot hold a UDR.)
+:::tip[What I recommend]
+1. **Match `GatewaySubnet` UDR masks to exact spoke VNet prefixes.** Because `VirtualNetworkPeering` injects each spoke VNet's exact prefix onto `GatewaySubnet`, `rt-hub-gateway` needs matching (or longer) spoke UDRs pointing to Azure Firewall to win at Stage 2. Use **AVNM UDR routing configurations** when you need up to **1,000 UDRs per route table** beyond the standard 400-route limit.
+2. **Keep BGP propagation enabled on `GatewaySubnet`, `AzureFirewallSubnet`, and Virtual WAN spokes.** Use `disableBgpRoutePropagation: true` only on customer-managed spoke subnets (paired with `0.0.0.0/0 -> Firewall`) and NVA loop-prevention interfaces.
+3. **Set `privateEndpointNetworkPolicies: Enabled` on every Private Endpoint subnet.** Remember that `0.0.0.0/0` never overrides Private Endpoint `/32` routes; your UDR mask must be at least as specific as the VNet hosting the Private Endpoint.
+4. **Keep general east-west and hybrid traffic free of Private SNAT.** Preserve true client IPs across `IANAPrivateRanges` (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`) using symmetric UDRs or [Virtual WAN Routing Intent](/azure-networking/02-core-topologies/virtual-wan-and-routing-intent/), reserving internal SNAT strictly for non-UDR Private Endpoint or [DNAT hairpin flows](/azure-networking/04-network-security/firewall-and-nva-patterns/).
 :::
+
+---
+
+## References
+
+- [Azure virtual network traffic routing (system routes, UDRs, Service Tag precedence, and route selection)](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview)
+- [Manage network policies for Private Endpoints (`RouteTableEnabled` and UDR prefix rules)](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy)
+- [Azure Route Server FAQ (ASN `65515`, ECMP, AS-path behavior, and limits)](https://learn.microsoft.com/en-us/azure/route-server/route-server-faq)
+- [Azure Network Watcher Next Hop overview](https://learn.microsoft.com/en-us/azure/network-watcher/next-hop-overview)
+- [Diagnose a virtual machine network routing problem using the Azure CLI](https://learn.microsoft.com/en-us/azure/network-watcher/diagnose-vm-network-routing-problem-cli)
+- [Azure Firewall SNAT private IP address ranges](https://learn.microsoft.com/en-us/azure/firewall/snat-private-range)
+
