@@ -1,137 +1,166 @@
 ---
 title: Hub-and-Spoke, AVNM & Azure Route Server
-description: Designing single- and multi-region Hub-and-Spoke networks, VNet peering gateway transit limits, AVNM Connected Groups, and Azure Route Server BGP/NVA architecture without 0.0.0.0/0 blackholes.
+description: Engineering single- and multi-region Hub-and-Spoke networks, VNet peering gateway transit rules, AVNM UDR and Security Admin Rule guardrails, and Azure Route Server BGP/NVA architecture.
 sidebar:
   order: 2
 ---
 
-Customer-managed and AVNM-managed Hub-and-Spoke topologies give network architects complete control over subnet layout, dual-stack IPv4/IPv6 addressing, third-party NVA placement, and peering economics. That control comes with an explicit contract: **Azure will not automatically route transit traffic between two spokes or across two regional hubs for you**. Every transit hop must be engineered deliberately using VNet Peering flags, symmetric UDRs, AVNM Connected Groups, or **Azure Route Server (ARS)**.
+Customer-managed and [Azure Virtual Network Manager (AVNM)](https://learn.microsoft.com/en-us/azure/virtual-network-manager/overview) Hub-and-Spoke topologies give network teams direct control over subnet layout, dual-stack IPv4/IPv6 addressing, third-party Network Virtual Appliance (NVA) placement, and peering cost. In exchange, Azure does not automatically route transit packets between two spokes or across two regional hubs. Every transit hop must be configured explicitly through [virtual network peering](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview) flags, symmetric [user-defined routes (UDRs)](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview), AVNM Connected Groups, or [Azure Route Server](https://learn.microsoft.com/en-us/azure/route-server/overview).
 
 ---
 
-## Single- and Multi-Region Hub-and-Spoke Mechanics
+## Single- and multi-region Hub-and-Spoke mechanics
 
-### The Non-Transitivity Rule & Gateway Transit Boundaries
+### Non-transitivity and gateway transit boundaries
 
-VNet Peering (`VNetPeering` intra-region and `GlobalVNetPeering` cross-region) is **strictly non-transitive**: if Spoke A peers with Hub 1, and Spoke B peers with Hub 1, Spoke A and Spoke B cannot exchange a single packet unless a router or firewall inside Hub 1 forwards it (and IP forwarding is enabled on that appliance's NIC, or Azure Firewall is used).
+Virtual network peering (`VNetPeering` within a region and `GlobalVNetPeering` across regions) is non-transitive. When Spoke A and Spoke B both peer with Hub 1, packets between Spoke A and Spoke B drop unless UDRs steer them to an IP-forwarding NVA or Azure Firewall inside Hub 1 and `allowForwardedTraffic: true` is set on the spoke peerings.
 
-Peering exposes two critical hybrid gateway flags that must be paired symmetrically:
-- On the **Hub -> Spoke** peering: **`allowGatewayTransit: true`**
-- On the **Spoke -> Hub** peering: **`useRemoteGateways: true`**
+Sharing a hub ExpressRoute or VPN gateway with spokes requires symmetric gateway-transit flags:
 
-Observe three hard platform constraints on gateway transit:
-1. **One Remote Gateway Hub per Spoke**: A spoke VNet can set `useRemoteGateways: true` on **at most one peering** (and cannot already contain its own `GatewaySubnet`).
-2. **No Multi-Hop Gateway Chaining Across Regional Hubs**: If Spoke A (West Europe) uses Hub 1's gateway, and Hub 1 is globally peered to Hub 2 (North Europe), Spoke A **cannot** automatically use Hub 2's ExpressRoute/VPN gateway via `useRemoteGateways`. Cross-region hybrid failover goes either over ExpressRoute circuits dual-homed to both regional hubs (recommended; see [ExpressRoute Resiliency](/azure-networking/03-hybrid-connectivity/expressroute-resiliency/)) or through Hub 1's firewall -> Global VNet Peering -> Hub 2's firewall -> Hub 2's gateway via explicit UDRs.
-3. **Global Peering + Internal Load Balancer Compatibility**: Standard SKU Internal Load Balancers (which front HA NVA clusters) fully support Global VNet Peering; Basic Load Balancers are retired/unsupported across global peerings.
+- Set `allowGatewayTransit: true` on the Hub-to-Spoke peering.
+- Set `useRemoteGateways: true` on the Spoke-to-Hub peering.
 
-### Multi-Region Hub-to-Hub Symmetric Inspection
+Three platform boundaries govern gateway transit:
 
-In a two-region enterprise Hub-and-Spoke (for example, Hub 1 `10.64.0.0/20` summarizing Region 1 `10.64.0.0/14` and Hub 2 `10.68.0.0/20` summarizing Region 2 `10.68.0.0/14`):
-- Peer Hub 1 <-> Hub 2 via **Global VNet Peering** (`allowForwardedTraffic: true` on both sides).
-- Spoke subnets in Region 1 carry `0.0.0.0/0 -> Hub 1 Firewall (10.64.0.68)` (or explicit `10.0.0.0/8` RFC 1918 summary UDRs).
-- `AzureFirewallSubnet` in Hub 1 carries a route table with `0.0.0.0/0 -> Internet` **plus** `10.68.0.0/14 -> Hub 2 Firewall (10.68.0.68)`.
-- `AzureFirewallSubnet` in Hub 2 mirrors `10.64.0.0/14 -> Hub 1 Firewall (10.64.0.68)`.
-- Both regional firewalls stay in the forward and return paths symmetrically without Private SNAT.
+1. A spoke VNet can enable `useRemoteGateways: true` on at most one peering and cannot contain its own `GatewaySubnet`.
+2. Gateway transit does not chain across two peered regional hubs. If Spoke A in West Europe uses Hub 1's gateway and Hub 1 peers globally with Hub 2 in North Europe, Spoke A cannot traverse Hub 2's ExpressRoute or VPN gateway through `useRemoteGateways`. Cross-region hybrid failover instead uses ExpressRoute circuits connected directly to both regional hubs (see [ExpressRoute Resiliency](/azure-networking/03-hybrid-connectivity/expressroute-resiliency/)) or explicit UDR forwarding between Hub 1's firewall and Hub 2's firewall.
+3. Standard SKU Internal Load Balancers (which front active-active NVA clusters) work across Global VNet Peering; retired Basic Load Balancers do not.
 
-### AVNM Hub-and-Spoke vs. Connected Group Mesh
+### Multi-region hub-to-hub symmetric routing
 
-Managing `N` hub-spoke peerings and matching spoke route tables across hundreds of subscriptions via standalone Terraform state files creates cross-team pipeline locks. **Azure Virtual Network Manager (AVNM)** centralizes this at Management Group scope:
+Consider a two-region design where Hub 1 (`10.64.0.0/20`) summarizes Region 1 (`10.64.0.0/14`) and Hub 2 (`10.68.0.0/20`) summarizes Region 2 (`10.68.0.0/14`):
 
-- **Hub-and-Spoke Connectivity Configuration**: Automatically maintains bi-directional VNet peerings for up to **1,000 spokes per hub**. Always set **`peeringEnforcement: Enforced`** so subscription owners cannot accidentally delete or tamper with hub peerings. *(Watch out: enabling "Use hub as a gateway" in AVNM before deploying a VPN/ER gateway in the hub causes the spoke-to-hub peering leg to fail provisioning.)*
-- **Direct Connectivity (`ConnectedGroup` Mesh)**: Enabling *Direct connectivity* on a specific Spoke Network Group (for example, `ng-prod-data-mesh`) builds a platform-managed **Connected Group** (`nextHopType: ConnectedGroup`) directly among member VNets—scaling up to **250 VNets by default** (and **3,000 VNets / 20,000 Private Endpoints** with high-scale features enabled)—bypassing hub firewall bottlenecks for trusted intra-group east-west flows.
-- **Guard Against Silent Overlap Drops**: By default, AVNM sets `ConnectedGroupAddressOverlap: Allowed` and silently drops traffic to overlapping CIDRs if someone adds a conflicting VNet to a mesh. **Always set `ConnectedGroupAddressOverlap: Disallowed`** so AVNM blocks overlapping VNets at configuration deployment time.
+1. Connect Hub 1 and Hub 2 with Global VNet Peering and set `allowForwardedTraffic: true` on both peerings.
+2. Associate spoke subnets in Region 1 with a route table containing `0.0.0.0/0 -> 10.64.0.68` (Hub 1 Azure Firewall) or RFC 1918 summary routes.
+3. Associate `AzureFirewallSubnet` in Hub 1 with a route table containing `0.0.0.0/0 -> Internet` and `10.68.0.0/14 -> 10.68.0.68` (Hub 2 Azure Firewall).
+4. Associate `AzureFirewallSubnet` in Hub 2 with a mirrored route table containing `0.0.0.0/0 -> Internet` and `10.64.0.0/14 -> 10.64.0.68`.
+
+Both regional firewalls remain in the forward and return paths symmetrically without requiring source NAT on private traffic.
+
+### AVNM peering, UDR, and Security Admin Rule guardrails
+
+Managing hundreds of spoke peerings and route tables across separate workload Terraform states creates pipeline contention. Deploying [AVNM at management-group scope](https://learn.microsoft.com/en-us/azure/virtual-network-manager/how-to-manage-user-defined-routes-multiple-hub-spoke-topologies) (supported on management groups with fewer than 15,000 subscriptions) centralizes connectivity, routing, and baseline L4 security:
+
+#### Hub-and-Spoke connectivity and peering enforcement
+An AVNM hub-and-spoke configuration maintains bi-directional peerings for up to 1,000 spokes per hub (compared with the 500 CAF baseline and 650 ARM standalone VNet peering limit). Set `peeringEnforcement: Enforced` so subscription owners cannot delete hub peerings. Deploy the hub's VPN or ExpressRoute gateway before you turn on "Use hub as a gateway" in AVNM, or spoke peering provisioning fails.
+
+#### Automated UDR rule collections
+[AVNM UDR management](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-user-defined-routes) attaches managed `NM_*` route tables (up to 1,000 UDRs per route table) to target network groups of spoke VNets or hub `GatewaySubnet` and `AzureFirewallSubnet` subnets. Selecting "Import Azure firewall private IP address" in a routing rule populates the regional firewall next hop automatically as new spokes join dynamic Azure Policy network groups.
+
+#### Connected Group overlap, scale, and BareMetal limits
+A VNet can belong to up to two Connected Groups by default, and scaling a Connected Group past 250 VNets (to 3,000 in regional preview via `AllowHighScaleConnectedGroup`, or to 5,000 VNets and past 128,000 peered private IP addresses) requires Microsoft's [high-scale enablement and scaling forms](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-limitations#limitations-for-connected-groups). By default, AVNM permits overlapping CIDRs inside a Connected Group and drops packets destined for overlapped addresses; set `ConnectedGroupAddressOverlap: Disallowed` so deployments reject conflicting VNets up front. Also watch external peerings: if a Connected Group member peers with an external VNet that overlaps another group member's CIDR, traffic to that range becomes unreachable across the rest of the group. BareMetal services ([Azure VMware Solution](/azure-networking/05-workload-networking/avs-networking/), Nutanix Cloud Clusters on Azure, Oracle Database@Azure, and Azure Payment HSM) cannot join Connected Groups and must attach through standard hub VNet gateways.
+
+#### Security Admin Rules
+[Security Admin Rules](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-security-admins) evaluate at the VM vSwitch before spoke NSGs (up to 100 admin rules and 20,000 combined IP prefixes per AVNM instance). Use `Deny` to block high-risk inbound management ports (`TCP 3389`, `TCP 22`) from untrusted external ranges, `Allow` to pass traffic on to spoke NSGs for workload-level filtering, and `AlwaysAllow` sparingly for mandatory platform telemetry or scanner flows that spoke NSGs must not block. Avoid `Deny` rules between internal spoke CIDRs that still need hub-firewall-inspected communication, because Admin Rules drop matching destination prefixes at the source NIC before UDRs forward packets to the hub firewall. Note that `AzurePlatformDNS`, `AzurePlatformIMDS`, and `AzurePlatformLKM` service tags are unsupported in Security Admin Rules.
 
 ---
 
-## Azure Route Server (ARS) Deep Dive
+## Azure Route Server architecture
 
-Before **Azure Route Server**, integrating third-party BGP-capable NVAs (SD-WAN headends, Palo Alto/Fortinet/Check Point firewalls, Linux FRR/BIRD routers) into a VNet required custom Failover API scripts that rewrote Azure Route Tables via ARM REST calls during NVA failovers—taking 1–3 minutes to converge and frequently hitting ARM throttling limits.
+Integrating BGP-capable third-party NVAs (SD-WAN appliances, NGFW clusters, or Linux BIRD/FRR daemons) into a standard VNet without [Azure Route Server (ARS)](https://learn.microsoft.com/en-us/azure/route-server/overview) requires custom failover scripts that rewrite Azure Route Tables through ARM APIs and take minutes to converge. ARS replaces API polling with a zone-redundant, managed BGP control plane (`ASN 65515`).
 
-ARS solves this natively by acting as a **managed BGP route reflector (`ASN 65515`)** between your NVAs, your VNet's SDN control plane, and your VNet's ExpressRoute/VPN Gateways.
+![Azure Route Server Control Plane vs. NVA Data Plane Architecture](../../../assets/diagrams/topologies/ars-nva-hub-spoke.svg)
 
-### Control Plane Only — Zero Data-Plane Packets
+### Control plane only: zero data-plane transit
 
-The most important mental model for ARS: **no workload packet ever passes through `RouteServerSubnet`**. ARS consists of two active-active control-plane instances inside a dedicated `/27` `RouteServerSubnet`. ARS speaks **TCP port 179 (BGP)** with your NVAs, learns their advertised prefixes + next-hop IPs, and programs those routes directly into the NIC effective route tables of every VM in the Hub VNet and directly peered Spoke VNets (`useRemoteGateways: true`).
+No workload packet ever traverses `RouteServerSubnet`. ARS runs two active-active control-plane instances inside a dedicated `RouteServerSubnet` of `/26` or larger and requires a Standard static IPv4 public IP for certificate-authenticated Azure management access. ARS exchanges BGP routes over TCP port 179 with your NVAs and programs learned prefixes plus next-hop IPs directly into the SDN effective route tables of VMs in the hub VNet and peered spoke VNets (`useRemoteGateways: true`).
+
+Do not attach an NSG, UDR table, or service endpoint policy to `RouteServerSubnet`; [ARS does not support them](https://learn.microsoft.com/en-us/azure/route-server/secure-route-server#network-security) and they can destabilize management communication. Also note that ARS BGP routes never override `VirtualNetwork`, `VNetPeering`, or `ServiceEndpoint` system routes, even when the BGP prefix is more specific; steering traffic between subnets inside the same VNet still requires UDRs.
+
+### eBGP peering and gateway coexistence rules
+
+Follow five rules from the [Azure Route Server FAQ](https://learn.microsoft.com/en-us/azure/route-server/route-server-faq) when peering NVAs and gateways:
+
+1. Assign your NVA a distinct 16-bit (2-byte) ASN such as `65001` to `65514`. ARS is fixed to `ASN 65515`, does not support 32-bit (4-byte) ASNs, and rejects Azure-reserved ASNs (`8074`, `8075`, `12076`, `65515`, `65517` to `65520`) and IANA special-use ASNs (`23456`, `64496` to `64511`, `65535` to `65551`). Any route advertised to ARS with `65515` already in its `AS_PATH` is dropped by BGP loop prevention.
+2. Peer every NVA instance with both ARS private IPs (typically `.4` and `.5` in `RouteServerSubnet`) so maintenance on one ARS instance never drops routing. Enable `ebgp-multihop` (TTL >= 2) on the NVA because ARS resides in its own subnet. ARS uses a 60-second keepalive and 180-second hold timer.
+3. Ensure your NVA supports BGP route refresh. Adding a new hub-to-spoke VNet peering triggers an ARS BGP soft reset toward all peered NVAs; if an NVA lacks route-refresh capability, ARS falls back to a hard BGP reset and briefly disrupts transit traffic.
+4. Configure coexisting Azure VPN Gateways in active-active mode with `ASN 65515` (BGP does not have to be enabled on the VPN gateway itself to exchange routes with ARS). Schedule a 60-minute maintenance window when creating or deleting ARS in a VNet that already contains an ExpressRoute or VPN gateway, as existing gateways experience roughly 10 minutes of downtime.
+5. Turn on `Branch-to-branch` (`allowBranchToBranchTraffic: true`) when ARS must exchange routes among NVAs, ExpressRoute gateways, and S2S VPN gateways. `Branch-to-branch` supports transit between ExpressRoute and S2S VPN, not Point-to-Site (P2S) VPN. Also note that NVA-advertised routes do not propagate from one ARS VNet through an ExpressRoute MSEE bow-tie into a second ARS VNet; the second ARS drops them.
+
+### Stateful NVA high availability vs. native ECMP
+
+ARS handles multiple NVA peers differently depending on `AS_PATH` length and `NEXT_HOP`:
+
+- For stateless routers or source-NATed SD-WAN headends, multiple active-active NVAs can advertise the same prefix with equal `AS_PATH` length and their own NIC IPs as `NEXT_HOP`. ARS programs equal-cost multi-path (ECMP) next hops onto VM NICs. Do not use raw NIC ECMP for stateful east-west firewalls without SNAT, because forward `SYN` and return `SYN-ACK` packets hash independently and drop asymmetric flows.
+- For stateful third-party NGFW clusters, place the active-active NVA pair behind a zone-redundant Standard Internal Load Balancer configured with HA Ports (`VIP: 10.64.2.10`) and set the NVA outbound BGP route-map next hop to `10.64.2.10`. ARS preserves third-party BGP `NEXT_HOP` attributes so forward and return 5-tuples stay symmetric on the ILB. Add a UDR on NVA subnets for `RouteServerSubnet` with next hop `VirtualNetwork` so BGP control-plane TCP/179 packets never hairpin through another firewall.
+- For Azure Firewall (which does not run BGP natively) in scenarios such as [AVS transit inspection](/azure-networking/05-workload-networking/avs-networking/), deploy two small Linux VMs running BIRD or FRR that peer with ARS and advertise `0.0.0.0/0` or summary supernets with `NEXT_HOP` set to the Azure Firewall private IP. Attach a UDR with `0.0.0.0/0 -> Internet` on `AzureFirewallSubnet` so ARS does not program Azure Firewall to route Internet traffic back to itself. Runnable BIRD configurations are available in the [Labs & Tools Guide](/azure-networking/06-operations-reviews/labs-and-tools-guide/).
+
+### ARS scale limits and the 4,000-route update calculation
+
+| Azure Route Server Metric | Platform Limit | Operational Behavior When Exceeded |
+| --- | --- | --- |
+| **Subnet minimum size** | `/26` (`RouteServerSubnet`) | Smaller prefixes fail validation or block platform scaling; no NSG or UDR allowed |
+| **Max BGP peers per ARS** | 16 (raised from legacy 8) | ARM rejects additional BGP peering resources |
+| **Max routes advertised per BGP peer** | 4,000 (current + update) | Immediate BGP session teardown; see update calculation note below |
+| **Max routes advertised toward ExpressRoute** | 1,000 (`Branch-to-branch` enabled) | Exceeds ExpressRoute private-peering ceiling; summarize via [ARS Route Maps](https://learn.microsoft.com/en-us/azure/route-server/route-maps-about) or tag `NO_ADVERTISE` |
+| **Max total prefixes (on-premises + VNet)** | 10,000 | Additional prefixes are not programmed |
+| **Supported VNets, VMs, and RIUs** | 500 VNets; 50,000 VMs across 2 to 48 RIUs | Default 2 RIUs support 4,000 VMs; scale via `virtualRouterAutoScaleConfiguration.minCapacity` (+1,000 VMs/RIU; scale-out takes up to 25 minutes) |
+| **Address family** | IPv4 GA ([dual-stack in regional preview](https://learn.microsoft.com/en-us/azure/route-server/route-maps-dual-stack-portal)) | Deploying GA IPv4 ARS in a dual-stack VNet breaks IPv6 inside that VNet |
 
 ```mermaid
-flowchart TB
-  subgraph HubVNet["Regional Hub VNet (10.64.0.0/20)"]
-    ARS["Azure Route Server<br/>RouteServerSubnet (/27)<br/>ASN 65515 | Control Plane ONLY<br/>(.4 & .5 BGP Peers)"]
-    ERGW["ExpressRoute Gateway<br/>GatewaySubnet (/26)"]
-    VPNGW["S2S VPN Gateway<br/>GatewaySubnet (/26)"]
-    NVA["Active-Active Firewall / SD-WAN NVAs<br/>(ASN 65001) behind ILB HA-Ports<br/>VIP: 10.64.2.10"]
-  end
-
-  subgraph SpokeVNet["Peered Spoke VNet (useRemoteGateways = true)"]
-    VM["Workload VM NIC<br/>Effective Route Programmed:<br/>10.200.0.0/16 -> 10.64.2.10 (BGP)"]
-  end
-
-  SDWANBranch["SD-WAN Branch<br/>(10.200.0.0/16)"]
-  OnPremDC["ExpressRoute Datacenter<br/>(10.100.0.0/16)"]
-
-  %% Control Plane (Dashed)
-  ARS <-. "eBGP (TCP 179)<br/>Learns 10.200.0.0/16 NH 10.64.2.10" .-> NVA
-  ARS <-. "Internal BGP Exchange<br/>(Branch-to-branch = Enabled)" .-> ERGW
-  ARS <-. "Internal BGP Exchange<br/>(Branch-to-branch = Enabled)" .-> VPNGW
-  ARS -. "SDN Control Plane:<br/>Programs Spoke & Hub NICs" .-> VM
-
-  %% Data Plane (Solid)
-  VM == "Data Plane Packet:<br/>Direct VM -> NVA ILB VIP (Bypasses ARS!)" ==> NVA
-  NVA == "Overlay Tunnel" ==> SDWANBranch
-  ERGW == "Private Peering" ==> OnPremDC
+flowchart LR
+  NVA["NVA BGP Peer<br/>(2,001 learned routes)"] -- "Sends BGP UPDATE<br/>readvertising 2,001 routes" --> Calc{"ARS Limit Check:<br/>2,001 current + 2,001 update<br/>= 4,002 > 4,000!"}
+  Calc -- "Exceeds 4,000" --> Drop["ARS Tears Down<br/>BGP Session"]
+  Safe["Keep per-peer prefixes < 2,000<br/>& summarize upstream"] --> OK["BGP Session Stable<br/>During Re-advertisements"]
 ```
 
-### eBGP Peering Rules with NVAs
-
-1. **Always Use eBGP with a Distinct Private ASN**: Azure Route Server is hardcoded to **`ASN 65515`**. Assign your NVA a distinct private 2-byte ASN (for example, `65001`–`65514`). Do not use Azure-reserved ASNs (`8074`, `8075`, `12076`, `65515`, `65517`–`65520`). If an NVA advertises any prefix whose `AS_PATH` already contains `65515`, ARS silently drops that route via standard BGP loop prevention.
-2. **Peer Both ARS Instances & Enable eBGP Multihop**: Every ARS deployment exposes **two peer IPs** (typically `.4` and `.5` in `RouteServerSubnet`). Configure BGP sessions from every NVA instance to **both** ARS IPs. Because the NVA sits in a different subnet from `RouteServerSubnet`, enable **`ebgp-multihop` (TTL >= 2)** on your NVA BGP configuration so the TCP/179 session establishes cleanly.
-3. **ARS `Branch-to-branch` Toggle (`allowBranchToBranchTraffic`)**:
-   - **Disabled (default)**: ARS exchanges routes *only* between NVAs and the VNet/Spoke SDN fabric. ExpressRoute and S2S VPN gateways ignore ARS.
-   - **Enabled**: ARS dynamically exchanges BGP prefixes between **ExpressRoute Gateways, S2S VPN Gateways, and your BGP NVAs**. Enabling `Branch-to-branch` unlocks three major enterprise patterns:
-     - **Automated S2S VPN Failover for ExpressRoute** (ER and VPN gateways exchange routes dynamically).
-     - **SD-WAN NVA <-> ExpressRoute Transit** (SD-WAN branches reach ExpressRoute datacenters or [Azure VMware Solution](/azure-networking/05-workload-networking/avs-networking/) through the hub).
-
-### Next-Hop IP Programming & Active-Active Stateful NVA ECMP
-
-ARS supports two distinct HA patterns for NVAs—picking the wrong one for stateful firewalls causes asymmetric packet drops:
-
-- **Stateless Routers / SNATed SD-WAN Appliances -> Native BGP ECMP**: Up to **8 active-active NVA instances** can advertise the exact same prefix with their own individual NIC IPs as `NEXT_HOP`. ARS programs all equal-cost next-hops into VNet NICs using ECMP hashing. *Danger*: For **stateful east-west firewalls without SNAT**, ECMP across separate NVA NICs can hash forward `SYN` to NVA-1 and return `SYN-ACK` (from ExpressRoute or another spoke) to NVA-2, dropping the connection!
-- **Stateful Firewalls & Azure Firewall -> BGP `NEXT_HOP` = ILB VIP (or AzFW IP)**: ARS honors explicit third-party BGP `NEXT_HOP` attributes!
-  - **Third-Party Stateful NVA Cluster**: Place active-active NVAs behind a Standard Internal Load Balancer with **HA Ports** (`VIP: 10.64.2.10`), which hashes symmetric 5-tuples consistently, and set your NVA outbound route-map `set ip next-hop 10.64.2.10` toward ARS.
-  - **Azure Firewall + Routing NVA (BIRD / FRR) Pattern**: Because Azure Firewall does not speak BGP natively, scenarios like [AVS internet/transit inspection](/azure-networking/05-workload-networking/avs-networking/) deploy two lightweight Linux VMs running BIRD/FRR (control plane only!) that peer with ARS and advertise `0.0.0.0/0` (or summary supernets) with **`NEXT_HOP = Azure Firewall Private IP`**. *(Critical loop guard: attach a UDR `0.0.0.0/0 -> Internet` on `AzureFirewallSubnet` so ARS does not program the firewall to route to itself!)* See runnable BIRD configs in our [Labs & Tools Guide](/azure-networking/06-operations-reviews/labs-and-tools-guide/).
-
-### Hard Scale Limits & Guardrails
-
-| Azure Route Server Resource / Metric | Platform Limit | Failure Mode When Exceeded |
-| --- | --- | --- |
-| **Max BGP peers per ARS** | **16** *(increased from the legacy 8-peer limit)* | Additional BGP peering creation rejected by ARM. |
-| **Max routes advertised *per BGP peer* to ARS** | **4,000** | **Hard BGP session teardown!** Always enforce outbound prefix-lists / max-prefix guards on your NVA toward ARS. |
-| **Max routes ARS + VNet advertise *toward ExpressRoute*** | **1,000** (when `Branch-to-branch` enabled) | Hits ExpressRoute circuit private-peering advertisement limit; summarize prefixes using **ARS Route Maps** before they hit ER. |
-| **Max supported VNets (Hub + Peered Spokes)** | **500** (and up to **50,000 VMs** total) | Route programming latency or peering limits reached. |
-| **Address Family Support** | **IPv4 only** | IPv6 prefixes cannot be exchanged or programmed by ARS. |
+Pay close attention to [how ARS calculates the 4,000-route limit](https://learn.microsoft.com/en-us/azure/route-server/route-server-faq#how-is-the-4000-route-limit-calculated-on-a-bgp-peering-session-between-an-nva-and-azure-route-server): during a BGP update, ARS sums the routes already learned from that peer plus the routes carried in the incoming update message. If an NVA advertises 2,001 prefixes and later re-advertises those same 2,001 prefixes in one BGP update, ARS evaluates `2,001 + 2,001 = 4,002` and drops the BGP session. Keep per-peer route counts below 2,000 prefixes and enforce outbound `max-prefix` and summarization policies on the NVA.
 
 ---
 
-## The Classic `0.0.0.0/0` Advertisement Trap Over ExpressRoute
+## Preventing `0.0.0.0/0` leaks onto ExpressRoute
 
-One of the most catastrophic production outages in Azure networking happens in less than ten seconds when an engineer combines three seemingly innocent settings:
+A frequent hybrid outage occurs when three settings meet in the same hub VNet:
 
-1. Hub VNet has an **ExpressRoute Gateway** connected to corporate MPLS/datacenters.
-2. Engineer deploys **Azure Route Server** with **`Branch-to-branch: Enabled`** so an SD-WAN or Firewall NVA can learn on-premises routes.
-3. Engineer configures the Firewall NVA to advertise **`0.0.0.0/0`** to ARS so spoke VMs automatically send internet traffic to the firewall without UDRs.
+1. An ExpressRoute gateway connects the hub VNet to corporate MPLS or datacenter routers.
+2. ARS runs with `Branch-to-branch` enabled so an NVA and ExpressRoute exchange routes.
+3. A firewall NVA advertises `0.0.0.0/0` to ARS so spoke VMs send Internet traffic to the firewall without UDRs.
 
-**What immediately happens**: Because `Branch-to-branch` is enabled, ARS dutifully takes `0.0.0.0/0` from the NVA and **advertises `0.0.0.0/0` out the ExpressRoute Gateway to your on-premises core routers**! Within seconds, every datacenter, hospital, or factory on your corporate WAN that lacks an inbound default-route filter swings its entire internet egress across ExpressRoute into Azure—saturating your ExpressRoute circuit and blackholing corporate internet access!
+With `Branch-to-branch` enabled, ARS propagates `0.0.0.0/0` to the ExpressRoute gateway, which advertises `0.0.0.0/0` over ExpressRoute Private Peering to on-premises routers. Any corporate site lacking an inbound default-route filter immediately shifts its Internet egress over ExpressRoute into Azure and saturates circuits or drops traffic.
 
-### How to Prevent the `0.0.0.0/0` Hybrid Hijack
+Use three layered defenses to prevent accidental default-route leaks:
 
-1. **Outbound Route Maps on ARS / Inbound BGP Filters On-Premises**: Configure an **Azure Route Server Route Map** (or inbound prefix-list on your on-premises CE/MSEE peerings) that explicitly **drops `0.0.0.0/0`** toward ExpressRoute and S2S VPN connections unless forced-tunneling from on-premises into Azure is an intentional, signed-off requirement (such as dedicated AVS private clouds).
-2. **Use Spoke UDRs (via AVNM) for `0.0.0.0/0` Instead of ARS**: In standard Hub-and-Spoke designs, advertise only specific SD-WAN/extranet prefixes via ARS, and push `0.0.0.0/0 -> Firewall` to spoke subnets declaratively via AVNM UDR configurations. That way `0.0.0.0/0` never enters BGP at all.
+1. Push `0.0.0.0/0 -> Firewall` to spoke subnets via AVNM UDR configurations instead of advertising `0.0.0.0/0` into ARS whenever hybrid ExpressRoute circuits share the hub without intentional on-premises forced tunneling.
+2. Tag NVA-originated routes that should program VNet NICs without leaving Azure using the BGP `NO_ADVERTISE` community (`65535:65282`), which ARS honors by suppressing propagation to other BGP peers including ExpressRoute.
+3. Apply an outbound [ARS Route Map](https://learn.microsoft.com/en-us/azure/route-server/route-maps-about) on the ExpressRoute connection to drop `0.0.0.0/0` and summarize spoke CIDRs below 1,000 prefixes (note that Route Maps incur extra charges, creating the first map triggers a one-time ~30-minute ARS upgrade, and creation fails if a coexisting VPN gateway has a P2S configuration). Pair this with inbound prefix-list filters on your on-premises Customer Edge routers.
 
----
+### Inspecting ARS routes with Azure CLI
 
-:::tip[What I Recommend]
-1. **Manage Hub-and-Spoke Peerings & UDRs with AVNM Above 20 Spokes**: Enable `peeringEnforcement: Enforced` and `ConnectedGroupAddressOverlap: Disallowed`. Use Connected Groups selectively for high-bandwidth, same-trust-zone spoke groups to eliminate unnecessary hub firewall hairpins.
-2. **Use ILB HA-Ports (`NEXT_HOP = VIP`) Whenever Pairing ARS with Stateful NVAs**: Never let ARS program raw active-active stateful firewall NIC IPs via ECMP unless flows are SNATed; front the NVA pair with a zone-redundant Standard Internal Load Balancer and rewrite BGP `NEXT_HOP` to the ILB VIP.
-3. **Enforce `max-prefix` and Block `0.0.0.0/0` Before Enabling `Branch-to-branch` on ARS**: Protect against accidental 4,000-route BGP session drops and never let an NVA leak `0.0.0.0/0` onto corporate ExpressRoute circuits without explicit outbound Route Map filters.
-4. **Keep `RouteServerSubnet` (`/27`) and NVA Untrusted NICs Loop-Free**: Disable gateway route propagation (`disableBgpRoutePropagation: true`) on NVA internet/untrusted subnets, and place an explicit `0.0.0.0/0 -> Internet` UDR on `AzureFirewallSubnet` whenever BIRD/FRR NVAs inject default routes into ARS.
+Verify learned and advertised prefixes before you turn on `Branch-to-branch` in production using [Azure CLI (`virtual-wan` extension)](https://learn.microsoft.com/en-us/azure/route-server/view-route-server-effective-routes):
+
+```bash
+# Check prefixes ARS learned from a specific NVA peer
+az network routeserver peering list-learned-routes \
+  --resource-group rg-hub-weu \
+  --routeserver ars-hub-weu \
+  --name nva-fw-01 -o table
+
+# Check prefixes ARS advertises back to that NVA peer
+az network routeserver peering list-advertised-routes \
+  --resource-group rg-hub-weu \
+  --routeserver ars-hub-weu \
+  --name nva-fw-01 -o table
+
+# Inspect overall ARS effective routes (uses the virtualHubs resource API)
+az network vhub get-effective-routes \
+  --resource-group rg-hub-weu \
+  --name ars-hub-weu -o json
+```
+
+:::tip[Architecture recommendations]
+1. Use AVNM with `peeringEnforcement: Enforced` and `ConnectedGroupAddressOverlap: Disallowed` once a hub-and-spoke estate exceeds 20 to 30 spokes, and manage spoke and `AzureFirewallSubnet` route tables through AVNM UDR rule collections.
+2. Allocate at least a `/26` `RouteServerSubnet` with no NSG or UDR, peer every NVA with both ARS IP addresses over `ebgp-multihop`, and pre-scale `virtualRouterAutoScaleConfiguration.minCapacity` above 2 RIUs whenever connected spoke VMs exceed 4,000.
+3. Front stateful active-active NVAs with a zone-redundant Standard ILB (`HA Ports`) and set BGP `NEXT_HOP` to the ILB VIP rather than exposing individual stateful firewall NICs to ECMP.
+4. Keep per-peer NVA advertisements below 2,000 prefixes to avoid the 4,000-route transient update teardown, and block `0.0.0.0/0` toward ExpressRoute using `NO_ADVERTISE`, ARS outbound Route Maps, or AVNM UDRs.
 :::
+
+## References
+
+- [What is Azure Route Server?](https://learn.microsoft.com/en-us/azure/route-server/overview)
+- [Azure Route Server frequently asked questions and limits](https://learn.microsoft.com/en-us/azure/route-server/route-server-faq)
+- [Azure Route Server capacity and Routing Infrastructure Units](https://learn.microsoft.com/en-us/azure/route-server/route-server-capacity)
+- [Secure your Azure Route Server deployment](https://learn.microsoft.com/en-us/azure/route-server/secure-route-server)
+- [About route maps for Azure Route Server](https://learn.microsoft.com/en-us/azure/route-server/route-maps-about)
+- [Manage UDRs across multiple hub-and-spoke topologies with AVNM](https://learn.microsoft.com/en-us/azure/virtual-network-manager/how-to-manage-user-defined-routes-multiple-hub-spoke-topologies)
+- [Limitations with Azure Virtual Network Manager](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-limitations)
+- [Security admin rules in Azure Virtual Network Manager](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-security-admins)
