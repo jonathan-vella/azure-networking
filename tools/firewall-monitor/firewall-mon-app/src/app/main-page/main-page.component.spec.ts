@@ -1,7 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,7 +52,6 @@ describe('MainPageComponent', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [
         FormsModule,
-        NoopAnimationsModule,
         RouterModule.forRoot([]),
         ScrollingModule,
         TableVirtualScrollModule,

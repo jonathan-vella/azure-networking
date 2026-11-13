@@ -1,41 +1,37 @@
 module "locations" {
   source   = "azurerm/locations/azure"
+  version  = "0.2.10"
   location = var.location
 }
 
-module "resource_group" {
-  source      = "azurerm/resources/azure//modules/resource_group"
-  location    = var.location
-  environment = "tst"
-  workload    = "netperf"
-  instance    = "001"
+resource "azurerm_resource_group" "this" {
+  name     = "rg-netperf-tst-${module.locations.short_name}-001"
+  location = var.location
 }
 
-module "virtual_network" {
-  source              = "azurerm/resources/azure//modules/virtual_network"
+resource "azurerm_virtual_network" "this" {
+  name                = "vnet-netperf-tst-${module.locations.short_name}-001"
   location            = var.location
-  environment         = "tst"
-  workload            = "netperf"
-  instance            = "001"
-  resource_group_name = module.resource_group.name
+  resource_group_name = azurerm_resource_group.this.name
   address_space       = ["10.200.0.0/24"]
 }
 
-module "subnet" {
-  source               = "azurerm/resources/azure//modules/subnet"
-  location             = var.location
-  environment          = "tst"
-  workload             = "netperf"
-  instance             = "001"
-  resource_group_name  = module.resource_group.name
-  virtual_network_name = module.virtual_network.name
+resource "azurerm_subnet" "this" {
+  name                 = "snet-netperf-tst-${module.locations.short_name}-001"
+  resource_group_name  = azurerm_resource_group.this.name
+  virtual_network_name = azurerm_virtual_network.this.name
   address_prefixes     = ["10.200.0.0/25"]
+}
+
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "azurerm_network_security_group" "this" {
   name                = "nsg-netperf-tst-${module.locations.short_name}-001"
   location            = var.location
-  resource_group_name = module.resource_group.name
+  resource_group_name = azurerm_resource_group.this.name
 
   security_rule {
     name                       = "AllowQperfIntraVnet"
@@ -87,54 +83,121 @@ resource "azurerm_network_security_group" "this" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "this" {
-  subnet_id                 = module.subnet.id
+  subnet_id                 = azurerm_subnet.this.id
   network_security_group_id = azurerm_network_security_group.this.id
 }
 
-module "linux_virtual_machine_server" {
-  count                         = 3
-  source                        = "azurerm/resources/azure//modules/linux_virtual_machine"
-  location                      = var.location
-  environment                   = module.locations.short_name
-  workload                      = "srv"
-  instance                      = "az${count.index + 1}"
-  resource_group_name           = module.resource_group.name
-  subnet_id                     = module.subnet.id
-  size                          = var.size
-  priority                      = "Spot"
-  zone                          = lookup(local.locationMappings[var.location], "az${count.index + 1}")
-  custom_data                   = base64encode(file("${path.module}/cloud-init-server.txt"))
-  enable_accelerated_networking = true
+resource "azurerm_network_interface" "server" {
+  count                          = 3
+  name                           = "lx-srv-${module.locations.short_name}-az${count.index + 1}-nic"
+  location                       = var.location
+  resource_group_name            = azurerm_resource_group.this.name
+  accelerated_networking_enabled = true
+
+  ip_configuration {
+    name                          = "ipconfig1"
+    subnet_id                     = azurerm_subnet.this.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "server" {
+  count                 = 3
+  name                  = "lx-srv-${module.locations.short_name}-az${count.index + 1}"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.this.name
+  size                  = var.size
+  zone                  = lookup(local.locationMappings[var.location], "az${count.index + 1}")
+  network_interface_ids = [azurerm_network_interface.server[count.index].id]
+  admin_username        = "azureuser"
+  priority              = "Spot"
+  eviction_policy       = "Deallocate"
+  max_bid_price         = -1
+  custom_data           = base64encode(file("${path.module}/cloud-init-server.txt"))
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh.public_key_openssh
+  }
+
+  os_disk {
+    name                 = "lx-srv-${module.locations.short_name}-az${count.index + 1}-dsk"
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
   tags = {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az${count.index + 1}")
     "physical-zone" = "az${count.index + 1}"
   }
+
   depends_on = [azurerm_subnet_network_security_group_association.this]
 }
 
-module "linux_virtual_machine_client_1" {
-  source                        = "azurerm/resources/azure//modules/linux_virtual_machine"
-  location                      = var.location
-  environment                   = module.locations.short_name
-  workload                      = "cli"
-  instance                      = "az1"
-  resource_group_name           = module.resource_group.name
-  subnet_id                     = module.subnet.id
-  size                          = var.size
-  priority                      = "Spot"
-  zone                          = lookup(local.locationMappings[var.location], "az1")
-  custom_data                   = local.client_cloud_init
-  enable_accelerated_networking = true
-  identity_type                 = "UserAssigned"
-  identity_ids = [
-    azurerm_user_assigned_identity.this.id
-  ]
+resource "azurerm_network_interface" "client" {
+  for_each                       = toset(["az1", "az2", "az3"])
+  name                           = "lx-cli-${module.locations.short_name}-${each.key}-nic"
+  location                       = var.location
+  resource_group_name            = azurerm_resource_group.this.name
+  accelerated_networking_enabled = true
+
+  ip_configuration {
+    name                          = "ipconfig1"
+    subnet_id                     = azurerm_subnet.this.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "client_1" {
+  name                  = "lx-cli-${module.locations.short_name}-az1"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.this.name
+  size                  = var.size
+  zone                  = lookup(local.locationMappings[var.location], "az1")
+  network_interface_ids = [azurerm_network_interface.client["az1"].id]
+  admin_username        = "azureuser"
+  priority              = "Spot"
+  eviction_policy       = "Deallocate"
+  max_bid_price         = -1
+  custom_data           = local.client_cloud_init
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.this.id]
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh.public_key_openssh
+  }
+
+  os_disk {
+    name                 = "lx-cli-${module.locations.short_name}-az1-dsk"
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
   tags = {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az1")
     "physical-zone" = "az1"
   }
+
   depends_on = [
-    module.linux_virtual_machine_server,
+    azurerm_linux_virtual_machine.server,
     azurerm_subnet_network_security_group_association.this,
     azurerm_private_endpoint.this,
     azurerm_private_dns_zone_virtual_network_link.this,
@@ -144,66 +207,106 @@ module "linux_virtual_machine_client_1" {
 
 resource "time_sleep" "wait_client_2" {
   create_duration = "60s"
-  depends_on      = [module.linux_virtual_machine_client_1]
+  depends_on      = [azurerm_linux_virtual_machine.client_1]
 }
 
-module "linux_virtual_machine_client_2" {
-  source                        = "azurerm/resources/azure//modules/linux_virtual_machine"
-  location                      = var.location
-  environment                   = module.locations.short_name
-  workload                      = "cli"
-  instance                      = "az2"
-  resource_group_name           = module.resource_group.name
-  subnet_id                     = module.subnet.id
-  size                          = var.size
-  priority                      = "Spot"
-  zone                          = lookup(local.locationMappings[var.location], "az2")
-  custom_data                   = local.client_cloud_init
-  enable_accelerated_networking = true
-  identity_type                 = "UserAssigned"
-  identity_ids = [
-    azurerm_user_assigned_identity.this.id
-  ]
+resource "azurerm_linux_virtual_machine" "client_2" {
+  name                  = "lx-cli-${module.locations.short_name}-az2"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.this.name
+  size                  = var.size
+  zone                  = lookup(local.locationMappings[var.location], "az2")
+  network_interface_ids = [azurerm_network_interface.client["az2"].id]
+  admin_username        = "azureuser"
+  priority              = "Spot"
+  eviction_policy       = "Deallocate"
+  max_bid_price         = -1
+  custom_data           = local.client_cloud_init
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.this.id]
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh.public_key_openssh
+  }
+
+  os_disk {
+    name                 = "lx-cli-${module.locations.short_name}-az2-dsk"
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
   tags = {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az2")
     "physical-zone" = "az2"
   }
+
   depends_on = [time_sleep.wait_client_2]
 }
 
 resource "time_sleep" "wait_client_3" {
   create_duration = "60s"
-  depends_on      = [module.linux_virtual_machine_client_2]
+  depends_on      = [azurerm_linux_virtual_machine.client_2]
 }
 
-module "linux_virtual_machine_client_3" {
-  source                        = "azurerm/resources/azure//modules/linux_virtual_machine"
-  location                      = var.location
-  environment                   = module.locations.short_name
-  workload                      = "cli"
-  instance                      = "az3"
-  resource_group_name           = module.resource_group.name
-  subnet_id                     = module.subnet.id
-  size                          = var.size
-  priority                      = "Spot"
-  zone                          = lookup(local.locationMappings[var.location], "az3")
-  custom_data                   = local.client_cloud_init
-  enable_accelerated_networking = true
-  identity_type                 = "UserAssigned"
-  identity_ids = [
-    azurerm_user_assigned_identity.this.id
-  ]
+resource "azurerm_linux_virtual_machine" "client_3" {
+  name                  = "lx-cli-${module.locations.short_name}-az3"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.this.name
+  size                  = var.size
+  zone                  = lookup(local.locationMappings[var.location], "az3")
+  network_interface_ids = [azurerm_network_interface.client["az3"].id]
+  admin_username        = "azureuser"
+  priority              = "Spot"
+  eviction_policy       = "Deallocate"
+  max_bid_price         = -1
+  custom_data           = local.client_cloud_init
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.this.id]
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh.public_key_openssh
+  }
+
+  os_disk {
+    name                 = "lx-cli-${module.locations.short_name}-az3-dsk"
+    caching              = "ReadWrite"
+    storage_account_type = "StandardSSD_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
   tags = {
     "logical-zone"  = lookup(local.locationMappings[var.location], "az3")
     "physical-zone" = "az3"
   }
+
   depends_on = [time_sleep.wait_client_3]
 }
 
 resource "azurerm_user_assigned_identity" "this" {
   location            = var.location
   name                = "mi-net-tst-${module.locations.short_name}-001"
-  resource_group_name = module.resource_group.name
+  resource_group_name = azurerm_resource_group.this.name
 }
 
 resource "azurerm_role_assignment" "this" {
@@ -215,8 +318,8 @@ resource "azurerm_role_assignment" "this" {
 resource "azurerm_private_endpoint" "this" {
   name                = "${data.azurerm_storage_account.this.name}-${module.locations.short_name}-pe"
   location            = var.location
-  resource_group_name = module.resource_group.name
-  subnet_id           = module.subnet.id
+  resource_group_name = azurerm_resource_group.this.name
+  subnet_id           = azurerm_subnet.this.id
 
   private_service_connection {
     name                           = "${data.azurerm_storage_account.this.name}-${module.locations.short_name}-psc"
@@ -233,12 +336,11 @@ resource "azurerm_private_endpoint" "this" {
 
 resource "azurerm_private_dns_zone" "this" {
   name                = "privatelink.table.core.windows.net"
-  resource_group_name = module.resource_group.name
+  resource_group_name = azurerm_resource_group.this.name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "this" {
-  name                  = "${module.locations.short_name}-link"
-  resource_group_name   = module.resource_group.name
-  private_dns_zone_name = azurerm_private_dns_zone.this.name
-  virtual_network_id    = module.virtual_network.id
+  name                = "${module.locations.short_name}-link"
+  private_dns_zone_id = azurerm_private_dns_zone.this.id
+  virtual_network_id  = azurerm_virtual_network.this.id
 }

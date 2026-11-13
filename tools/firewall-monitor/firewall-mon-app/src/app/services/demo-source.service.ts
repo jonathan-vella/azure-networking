@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { LoggingService } from './logging.service';
 
 import { IFirewallSource, FirewallDataRow, ModelService } from '../services/model.service';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

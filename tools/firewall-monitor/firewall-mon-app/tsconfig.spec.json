@@ -8,7 +8,7 @@
     ]
   },
   "files": [
-    "src/main.ts",
+    "src/app/app.module.ts",
     "src/polyfills.ts"
   ],
   "include": [
