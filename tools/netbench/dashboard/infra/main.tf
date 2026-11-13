@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 4.0"
+      version = "~> 5.13"
     }
     azurecaf = {
       source  = "aztfmod/azurecaf"
-      version = "~>1.2.0"
+      version = "~> 1.2.0"
     }
   }
 }
@@ -18,6 +18,7 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
+  subscription_id     = var.subscription_id
   storage_use_azuread = true
 }
 
@@ -88,11 +89,13 @@ resource "azurerm_static_web_app" "main" {
 
 # Storage Account for Function App
 resource "azurerm_storage_account" "function" {
-  name                     = azurecaf_name.function_storage.result
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+  name                            = azurecaf_name.function_storage.result
+  resource_group_name             = azurerm_resource_group.main.name
+  location                        = azurerm_resource_group.main.location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  min_tls_version                 = "TLS1_2"
+  allow_nested_items_to_be_public = false
 
   tags = merge(local.tags, {
     "SecurityControl" = "Ignore"
@@ -119,6 +122,7 @@ resource "azurerm_linux_function_app" "main" {
   storage_account_name       = azurerm_storage_account.function.name
   storage_account_access_key = azurerm_storage_account.function.primary_access_key
   service_plan_id            = azurerm_service_plan.main.id
+  https_only                 = true
 
   identity {
     type = "SystemAssigned"
@@ -126,7 +130,7 @@ resource "azurerm_linux_function_app" "main" {
 
   app_settings = {
     "FUNCTIONS_WORKER_RUNTIME"                 = "node"
-    "WEBSITE_NODE_DEFAULT_VERSION"             = "~18"
+    "WEBSITE_NODE_DEFAULT_VERSION"             = "~22"
     "AZURE_STORAGE_ACCOUNT_NAME"               = data.azurerm_storage_account.netbench.name
     "AZURE_STORAGE_TABLE_NAME"                 = var.storage_table_name
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "DefaultEndpointsProtocol=https;AccountName=${azurerm_storage_account.function.name};AccountKey=${azurerm_storage_account.function.primary_access_key};EndpointSuffix=core.windows.net"
@@ -136,7 +140,7 @@ resource "azurerm_linux_function_app" "main" {
 
   site_config {
     application_stack {
-      node_version = "18"
+      node_version = "22"
     }
 
     cors {

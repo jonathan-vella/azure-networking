@@ -6,6 +6,7 @@ class NetworkBenchmarkDashboard {
         this.isLoading = false;
         this.eventListenersSetup = false;
         this.refreshInterval = null;
+        this.loadedWindow = null;
         this.latencySortOrder = 'alphabetical'; // Default sort order
         this.selectedMetric = 'latency'; // 'latency' | 'throughputGbps' | 'throughputMbps'
         
@@ -22,23 +23,29 @@ class NetworkBenchmarkDashboard {
         }
     }
 
-    async loadData() {
+    async loadData(requestedWindow = null) {
         // Prevent concurrent calls
         if (this.isLoading) {
             return;
         }
         
         this.showLoading(true);
+        const timeFilterEl = document.getElementById('timeFilter');
+        const activeTimeFilter = timeFilterEl ? timeFilterEl.value : '7d';
+        const windowParam = requestedWindow || (activeTimeFilter === 'all' || this.loadedWindow === 'all' ? 'all' : '30d');
         
         try {
             // Use real API to get data from Azure Table Storage
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                // For local development, use mock data
-                this.data = this.generateMockData();
+                // For local development, use mock data (includes >30d history when window=all)
+                this.data = this.generateMockData(windowParam === 'all' ? 45 : 30);
+                this.loadedWindow = windowParam;
             } else {
                 try {
-                    // Real call to Azure Table Storage via Function App (configurable via window.NETBENCH_API_URL, defaults to /api/data with legacy fallback)
-                    const apiUrl = window.NETBENCH_API_URL || '/api/data';
+                    // Real call to Azure Table Storage via Function App (configurable via window.NETBENCH_API_URL, defaults to /api/data)
+                    const baseApiUrl = window.NETBENCH_API_URL || '/api/data';
+                    const separator = baseApiUrl.includes('?') ? '&' : '?';
+                    const apiUrl = `${baseApiUrl}${separator}window=${encodeURIComponent(windowParam)}`;
                     console.log('Fetching data from API:', apiUrl);
                     
                     const response = await fetch(apiUrl);
@@ -48,17 +55,19 @@ class NetworkBenchmarkDashboard {
                     
                     const apiData = await response.json();
                     console.log('API returned data:', apiData.length, 'records');
+                    this.loadedWindow = windowParam;
                     
                     if (apiData.length === 0) {
                         console.warn('No data returned from API, using mock data as fallback');
-                        this.data = this.generateMockData();
+                        this.data = this.generateMockData(windowParam === 'all' ? 45 : 30);
                     } else {
                         this.data = apiData;
                     }
                 } catch (apiError) {
                     console.error('API call failed:', apiError.message);
                     console.log('Using mock data as fallback');
-                    this.data = this.generateMockData();
+                    this.data = this.generateMockData(windowParam === 'all' ? 45 : 30);
+                    this.loadedWindow = windowParam;
                     
                     // Show a warning message
                     this.showError(`Using test data - API unavailable: ${apiError.message}`);
@@ -74,15 +83,15 @@ class NetworkBenchmarkDashboard {
         }
     }
 
-    generateMockData() {
+    generateMockData(totalDays = 30) {
         const regions = ['francecentral', 'westeurope', 'northeurope', 'centralus', 'eastasia'];
         const sources = ['az1', 'az2', 'az3'];
         const destinations = ['az1', 'az2', 'az3'];
         const mockData = [];
 
-        // Generate data for the last 30 days
+        // Generate data for the requested number of days
         const now = new Date();
-        for (let days = 0; days < 30; days++) {
+        for (let days = 0; days < totalDays; days++) {
             for (let hours = 0; hours < 24; hours += 6) { // Every 6 hours
                 regions.forEach(region => {
                     sources.forEach(source => {
@@ -197,7 +206,7 @@ class NetworkBenchmarkDashboard {
 
             return {
                 timestamp: new Date(item.Timestamp),
-                region: item.RowKey || 'unknown',
+                region: this.normalizeRegion(item.region ?? item.Region ?? item.RowKey),
                 source: item.Source || 'unknown',
                 destination: item.Destination || 'unknown',
                 bandwidth: throughputGbps ?? 0,
@@ -297,8 +306,15 @@ class NetworkBenchmarkDashboard {
         }
         
         // Filters
-        ['regionFilter', 'sourceFilter', 'destinationFilter', 'timeFilter'].forEach(filterId => {
+        ['regionFilter', 'sourceFilter', 'destinationFilter'].forEach(filterId => {
             document.getElementById(filterId).addEventListener('change', () => this.applyFilters());
+        });
+        document.getElementById('timeFilter').addEventListener('change', async (event) => {
+            if (event.target.value === 'all' && this.loadedWindow !== 'all') {
+                await this.loadData('all');
+                return;
+            }
+            this.applyFilters();
         });
 
         // Auto refresh every 5 minutes
@@ -1034,39 +1050,120 @@ class NetworkBenchmarkDashboard {
     }
 
     populateFilters() {
-        const regions = [...new Set(this.data.map(item => item.region))].sort();
+        const regions = [...new Set(this.data.map(item => item.region))].sort((a, b) =>
+            this.formatRegionName(a).localeCompare(this.formatRegionName(b))
+        );
         const sources = [...new Set(this.data.map(item => item.source))].sort();
         const destinations = [...new Set(this.data.map(item => item.destination))].sort();
 
-        // Populate region filter
+        // Populate region filter while preserving existing selection across data refreshes
         const regionFilter = document.getElementById('regionFilter');
+        const selectedRegions = new Set(Array.from(regionFilter.selectedOptions).map(opt => opt.value));
         regionFilter.innerHTML = '';
         regions.forEach(region => {
             const option = document.createElement('option');
             option.value = region;
             option.textContent = this.formatRegionName(region);
+            option.selected = selectedRegions.has(region);
             regionFilter.appendChild(option);
         });
 
-        // Populate source filter
+        // Populate source filter while preserving existing selection
         const sourceFilter = document.getElementById('sourceFilter');
+        const selectedSources = new Set(Array.from(sourceFilter.selectedOptions).map(opt => opt.value));
         sourceFilter.innerHTML = '';
         sources.forEach(source => {
             const option = document.createElement('option');
             option.value = source;
             option.textContent = source;
+            option.selected = selectedSources.has(source);
             sourceFilter.appendChild(option);
         });
 
-        // Populate destination filter
+        // Populate destination filter while preserving existing selection
         const destinationFilter = document.getElementById('destinationFilter');
+        const selectedDestinations = new Set(Array.from(destinationFilter.selectedOptions).map(opt => opt.value));
         destinationFilter.innerHTML = '';
         destinations.forEach(destination => {
             const option = document.createElement('option');
             option.value = destination;
             option.textContent = destination;
+            option.selected = selectedDestinations.has(destination);
             destinationFilter.appendChild(option);
         });
+    }
+
+    normalizeRegion(region) {
+        if (!region) {
+            return 'unknown';
+        }
+        const shortCodeMap = {
+            'ae': 'australiaeast',
+            'ase': 'australiasoutheast',
+            'acl': 'australiacentral',
+            'acl2': 'australiacentral2',
+            'bec': 'belgiumcentral',
+            'brs': 'brazilsouth',
+            'brse': 'brazilsoutheast',
+            'cnc': 'canadacentral',
+            'cae': 'canadaeast',
+            'inc': 'centralindia',
+            'ci': 'centralindia',
+            'cus': 'centralus',
+            'clc': 'chilecentral',
+            'ea': 'eastasia',
+            'eus': 'eastus',
+            'eus2': 'eastus2',
+            'frc': 'francecentral',
+            'frs': 'francesouth',
+            'gn': 'germanynorth',
+            'gwc': 'germanywestcentral',
+            'idc': 'indonesiacentral',
+            'ilc': 'israelcentral',
+            'isc': 'israelcentral',
+            'itn': 'italynorth',
+            'jpe': 'japaneast',
+            'jpw': 'japanwest',
+            'krc': 'koreacentral',
+            'krs': 'koreasouth',
+            'myw': 'malaysiawest',
+            'mxc': 'mexicocentral',
+            'nzn': 'newzealandnorth',
+            'ncus': 'northcentralus',
+            'ne': 'northeurope',
+            'nwe': 'norwayeast',
+            'noe': 'norwayeast',
+            'now': 'norwaywest',
+            'plc': 'polandcentral',
+            'qac': 'qatarcentral',
+            'san': 'southafricanorth',
+            'saw': 'southafricawest',
+            'scus': 'southcentralus',
+            'sea': 'southeastasia',
+            'ins': 'southindia',
+            'spc': 'spaincentral',
+            'sdc': 'swedencentral',
+            'sds': 'swedensouth',
+            'szn': 'switzerlandnorth',
+            'szw': 'switzerlandwest',
+            'twn': 'taiwannorth',
+            'twnw': 'taiwannorthwest',
+            'uac': 'uaecentral',
+            'uan': 'uaenorth',
+            'uks': 'uksouth',
+            'ukw': 'ukwest',
+            'wcus': 'westcentralus',
+            'we': 'westeurope',
+            'inw': 'westindia',
+            'wus': 'westus',
+            'wus2': 'westus2',
+            'wus3': 'westus3'
+        };
+        const normalized = String(region).trim().toLowerCase().replace(/[\s_-]+/g, '');
+        if (!normalized) {
+            return 'unknown';
+        }
+        return Object.hasOwn(shortCodeMap, normalized) ? shortCodeMap[normalized] : normalized;
     }
 
     formatRegionName(region) {
@@ -1102,8 +1199,9 @@ class NetworkBenchmarkDashboard {
             'centralindia': 'Central India',
             'indiacentral': 'India Central',
             'indonesiacentral': 'Indonesia Central',
-            'indiawest': 'India West',
-            'indiasouth': 'India South',
+            'indiawest': 'West India',
+            'westindia': 'West India',
+            'indiasouth': 'South India',
             'japaneast': 'Japan East',
             'japanwest': 'Japan West',
             'koreacentral': 'Korea Central',
@@ -1166,9 +1264,10 @@ class NetworkBenchmarkDashboard {
             'cae': 'Canada East',
             'gwc': 'Germany West Central',
             'gn': 'Germany North',
-            'inc': 'India Central',
-            'inw': 'India West',
-            'ins': 'India South',
+            'inc': 'Central India',
+            'ci': 'Central India',
+            'inw': 'West India',
+            'ins': 'South India',
             'jpe': 'Japan East',
             'jpw': 'Japan West',
             'krc': 'Korea Central',
@@ -1206,11 +1305,13 @@ class NetworkBenchmarkDashboard {
             'az2': 'Availability Zone 2', 
             'az3': 'Availability Zone 3',
             
-            // Add fallback for unknown regions
+        // Add fallback for unknown regions
             'unknown': 'Unknown Region'
         };
         
-        return regionNames[region] || region.charAt(0).toUpperCase() + region.slice(1);
+        return Object.hasOwn(regionNames, region)
+            ? regionNames[region]
+            : region.charAt(0).toUpperCase() + region.slice(1);
     }
 
     showLoading(show) {

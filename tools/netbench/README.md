@@ -1,124 +1,128 @@
-# Azure Network Internal Zone Latency & Throughput Benchmark (`netbench`)
+# Azure network internal zone latency and throughput benchmark (`netbench`)
 
-> **Attribution:** Adapted and modernized from [`vmisson/azure-netbench`](https://github.com/vmisson/azure-netbench) into [`jonathan-vella/azure-networking/tools/netbench`](https://github.com/jonathan-vella/azure-networking/tree/main/tools/netbench). See the repository [LICENSE](../../LICENSE) and [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) for licensing details.
+> **Attribution:** Adapted from [`vmisson/azure-netbench`](https://github.com/vmisson/azure-netbench) into [`jonathan-vella/azure-networking/tools/netbench`](https://github.com/jonathan-vella/azure-networking/tree/main/tools/netbench). See [LICENSE](../../LICENSE) and [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) for license terms and provenance.
 
-A self-contained Terraform + Azure Static Web Apps benchmark harness for measuring **intra-zone and inter-zone one-way TCP latency (`qperf`)** and **parallel-stream TCP throughput (`iperf3`)** across physical Azure Availability Zones in **36 global regions**.
+Terraform benchmark suite and Azure Static Web Apps dashboard for measuring intra-zone and inter-zone one-way TCP latency (`qperf`) and 4-stream TCP throughput (`iperf3`) across physical Azure Availability Zones in 36 regions.
 
-> **Disclaimer**: This is an **unofficial** community tool, not affiliated with Microsoft Azure. Results are provided on a **best-effort basis** for informational purposes only. Always validate performance with your own production SKUs and workloads.
+- **Handbook guide:** [Hands-On Labs & Operational Tools Guide (`tools/netbench`)](../../src/content/docs/06-operations-reviews/labs-and-tools-guide.md#5-azure-netbench-latency--throughput-suite-toolsnetbench) ([live site](https://jonathan-vella.github.io/azure-networking/06-operations-reviews/labs-and-tools-guide/#5-azure-netbench-latency--throughput-suite-toolsnetbench))
+- **Related handbook chapters:** [ExpressRoute Resiliency](../../src/content/docs/03-hybrid-connectivity/expressroute-resiliency.md) and [Virtual WAN Review Checklist (`PERF-01`)](../../src/content/docs/06-operations-reviews/vwan-review-checklist.md#perf-01)
 
-## Purpose
+> **Disclaimer:** This is an unofficial community tool and is not affiliated with Microsoft. Benchmark figures depend on VM SKU, host placement, and regional load. Validate production architectures with your target SKUs and workloads.
 
-This tool deploys ephemeral Accelerated Networking Linux VMs across all three physical Availability Zones in a target Azure region, runs automated zone-to-zone `qperf` latency and `iperf3` multi-stream throughput benchmarks, persists structured metrics to Azure Table Storage over Private Link, and visualizes trends in an interactive web dashboard.
+## Overview
 
-## Azure Availability Zones: Physical vs Logical
+`netbench` provisions ephemeral Ubuntu 24.04 LTS Spot VMs with Accelerated Networking across all three physical Availability Zones in a selected Azure region (`azurerm ~> 5.13`). Client VMs run staggered `qperf` latency and `iperf3` throughput tests against each server zone, write JSON entities to Azure Table Storage over an Azure Private Endpoint using Managed Identity tokens, and expose historical trends through a Node.js 22 LTS Azure Functions API and Static Web App dashboard.
 
-### Understanding Azure Zone Architecture
+## Physical vs. logical Availability Zones
 
-Azure exposes a two-level zone model:
+Azure separates subscription-visible zone labels from underlying datacenter identifiers:
 
-- **Logical Zones**: Subscription-scoped labels (`Zone 1`, `Zone 2`, `Zone 3`).
-- **Physical Zones**: The underlying physical datacenters in a region (`<region>-az1`, `<region>-az2`, `<region>-az3`).
+- **Logical zones:** Subscription-scoped numbers (`1`, `2`, `3`).
+- **Physical zones:** Regional datacenter identifiers (`<region>-az1`, `<region>-az2`, `<region>-az3`).
 
-### Subscription-Specific Physical Mapping
+Azure assigns logical-to-physical mappings independently for each subscription. Logical `Zone 1` in Subscription A can map to physical `westeurope-az3` while Logical `Zone 1` in Subscription B maps to `westeurope-az1`.
 
-Logical-to-physical zone assignments are randomized per Azure subscription:
+![Azure Availability Zones logical to physical mapping](images/azure-az.svg)
 
-- Logical `Zone 1` in Subscription A may map to Physical `az3`, while Logical `Zone 1` in Subscription B maps to Physical `az1`.
+### How `netbench` resolves physical zones
 
-![Azure Availability Zones](images/azure-az.png)
-
-### How `netbench` Resolves Physical Zones
-
-1. Reads `availabilityZoneMappings.json` to map physical zones (`az1`, `az2`, `az3`) to your subscription's logical zone numbers.
-2. Tags every VM with both `physical-zone` and `logical-zone` for repeatable cross-subscription comparisons.
-3. Provides `./get-locations.sh <subscription-id>` to refresh `availabilityZoneMappings.json` for your subscription via the Azure Resource Manager Locations API.
+1. `modules/netperf/locals.tf` reads `availabilityZoneMappings.json` to map physical zones (`az1`, `az2`, `az3`) to the active subscription's logical zone numbers.
+2. Terraform places each VM in its resolved logical zone and tags every VM with both `physical-zone` and `logical-zone`.
+3. `./get-locations.sh <subscription-id>` queries the Azure Resource Manager Locations API (`api-version=2022-12-01`) to refresh `availabilityZoneMappings.json` for your subscription before running benchmarks.
 
 ## Architecture
 
-- **Deployment Topology**:
-  - 3 Spot Linux Server VMs (`lx-srv-<shortregion>-az1..az3`) with Accelerated Networking enabled — one per physical Availability Zone.
-  - 3 Spot Linux Client VMs (`lx-cli-<shortregion>-az1..az3`) with Accelerated Networking and a User-Assigned Managed Identity — staggered by 60 seconds (`time_sleep`) to avoid cross-client contention.
-  - Dedicated Subnet Network Security Group explicitly permitting intra-VNet benchmark traffic on `qperf` (`19765-19766` TCP/UDP), `iperf3` (`5201` TCP/UDP), and Private Endpoint HTTPS (`443` TCP) while denying inbound Internet traffic.
+### Regional topology
 
-![Architecture High Level Diagram](images/archi-hld.png)
+- Three Ubuntu 24.04 LTS Noble Gen2 (`Canonical:ubuntu-24_04-lts:server:latest`) Spot server VMs (`lx-srv-<short>-az1..az3`) with Accelerated Networking, one per physical Availability Zone.
+- Three Ubuntu 24.04 LTS Noble Gen2 Spot client VMs (`lx-cli-<short>-az1..az3`) with Accelerated Networking and a User-Assigned Managed Identity (`mi-net-tst-<short>-001`), staggered by 60 seconds (`time_sleep`) so two clients do not saturate the same server NIC at the same time.
+- A subnet Network Security Group that allows intra-VNet benchmark traffic on `qperf` (`19765-19766`), `iperf3` (`5201`), and Private Endpoint HTTPS (`443`), and denies inbound Internet traffic.
 
-- **End-to-End Benchmark Execution**:
-  - **Server VMs (`cloud-init-server.txt`)**: Provision persistent `systemd` services for both `qperf` (`qperf-server.service`) and `iperf3 -s -D` (`iperf3-server.service`).
-  - **Client VMs (`cloud-init-client.txt`)**:
-    1. Acquire an Azure AD access token for `https://storage.azure.com/` via IMDS using the User-Assigned Managed Identity.
-    2. Wait for server readiness on **both** `qperf` (`19765`) and `iperf3` (`5201`) across `az1`, `az2`, and `az3`.
-    3. Measure TCP one-way latency via `qperf <target> tcp_lat` (`LatencyUs`) and 4-stream TCP throughput over 10 seconds via `iperf3 -c <target> -P 4 -t 10 -J` (`ThroughputMbps` / `ThroughputGbps`).
-    4. Write each zone-pair measurement directly to Azure Table Storage over an Azure Private Endpoint (`privatelink.table.core.windows.net`).
+![Azure Netbench high-level architecture](images/archi-hld.svg)
 
-![Architecture Low Level Diagram](images/archi-lld.png)
+### Benchmark execution flow
 
-## Collected Metrics & Table Storage Schema
+- **Server VMs (`cloud-init-server.txt`):** Configure `systemd` units for `qperf` (`qperf-server.service`) and `iperf3 -s -D` (`iperf3-server.service`).
+- **Client VMs (`cloud-init-client.txt`):**
+  1. Request a Microsoft Entra ID access token for `https://storage.azure.com/` from IMDS (`169.254.169.254`) using the User-Assigned Managed Identity.
+  2. Poll TCP ports `19765` and `5201` on `lx-srv-<short>-az1..az3` until both daemons accept connections.
+  3. Measure TCP one-way latency with `qperf <target> tcp_lat` (`LatencyUs`) and 4-stream TCP throughput over 10 seconds with `iperf3 -c <target> -P 4 -t 10 -J` (`ThroughputMbps` and `ThroughputGbps`).
+  4. Upload each zone-pair entity over HTTPS to Azure Table Storage through the VNet Private Endpoint (`privatelink.table.core.windows.net`).
 
-Each client-to-server zone pair writes an entity to the configured Azure Table Storage table (default `perf`):
+![Azure Netbench low-level execution flow](images/archi-lld.svg)
+
+## Collected metrics and Table Storage schema
+
+Each client-to-server zone pair inserts one entity into Azure Table Storage (default table `perf`):
 
 | Property | Type | Description |
 | --- | --- | --- |
 | `PartitionKey` | `string` | Unique run UUID |
-| `RowKey` | `string` | Region short code (e.g., `we`, `frc`, `eus2`) |
+| `RowKey` | `string` | Region short code from `azurerm/locations/azure` (for example `we`, `frc`, `eus2`) |
 | `Source` | `string` | Source physical Availability Zone (`az1`, `az2`, `az3`) |
 | `Destination` | `string` | Destination physical Availability Zone (`az1`, `az2`, `az3`) |
-| `LatencyUs` | `number` | Numeric TCP one-way latency in microseconds (`qperf tcp_lat`) |
-| `ThroughputMbps` | `number` | Numeric 4-stream TCP throughput in Mbps (`iperf3 -P 4 -t 10 -J`) |
-| `ThroughputGbps` | `number` | Numeric 4-stream TCP throughput in Gbps (`iperf3 -P 4 -t 10 -J`) |
-| `Latency` | `string` | Legacy-compatible formatted latency string (e.g., `"84.50 us"`) |
-| `Bandwidth` | `string` | Legacy-compatible formatted throughput string (e.g., `"12.485 Gb/sec"`) |
+| `LatencyUs` | `number` | TCP one-way latency in microseconds (`qperf tcp_lat`) |
+| `ThroughputMbps` | `number` | 4-stream TCP throughput in Mbps (`iperf3 -P 4 -t 10 -J`) |
+| `ThroughputGbps` | `number` | 4-stream TCP throughput in Gbps (`iperf3 -P 4 -t 10 -J`) |
+| `Latency` | `string` | Formatted latency string kept for historical compatibility (for example `"84.50 us"`) |
+| `Bandwidth` | `string` | Formatted throughput string kept for historical compatibility (for example `"12.485 Gb/sec"`) |
 
-### Latency Alert Thresholds
-- **Intra-zone** (`azX -> azX`): `> 500 µs` highlighted as abnormal
-- **Inter-zone** (`azX -> azY`): `> 1000 µs` highlighted in dashboard (`> 5000 µs` critical)
+### Latency alert thresholds
 
-## Supported Regions (`regions.json`)
+- **Intra-zone (`azX -> azX`):** Values above `500 µs` are flagged as abnormal.
+- **Inter-zone (`azX -> azY`):** Values above `1000 µs` are flagged as warning (`> 5000 µs` critical).
 
-All **36 regions** are consolidated into a single [`regions.json`](regions.json) region-to-SKU map (eliminating per-region `.tfvars` duplication):
+## Supported regions (`regions.json`)
 
-- **Americas (10)**: `centralus`, `eastus`, `eastus2`, `southcentralus`, `westus2`, `westus3`, `canadacentral`, `brazilsouth`, `chilecentral`, `mexicocentral`
-- **Europe (12)**: `belgiumcentral`, `francecentral`, `germanywestcentral`, `italynorth`, `northeurope`, `norwayeast`, `polandcentral`, `spaincentral`, `swedencentral`, `switzerlandnorth`, `uksouth`, `westeurope`
-- **Asia-Pacific (10)**: `australiaeast`, `centralindia`, `eastasia`, `indonesiacentral`, `japaneast`, `japanwest`, `koreacentral`, `malaysiawest`, `newzealandnorth`, `southeastasia`
-- **Middle East & Africa (4)**: `israelcentral`, `qatarcentral`, `southafricanorth`, `uaenorth`
+[`regions.json`](regions.json) maps all 36 supported Availability Zone regions to default Accelerated Networking VM SKUs:
 
-## Quick Start
+- **Americas (10):** `centralus`, `eastus`, `eastus2`, `southcentralus`, `westus2`, `westus3`, `canadacentral`, `brazilsouth`, `chilecentral`, `mexicocentral`
+- **Europe (12):** `belgiumcentral`, `francecentral`, `germanywestcentral`, `italynorth`, `northeurope`, `norwayeast`, `polandcentral`, `spaincentral`, `swedencentral`, `switzerlandnorth`, `uksouth`, `westeurope`
+- **Asia-Pacific (10):** `australiaeast`, `centralindia`, `eastasia`, `indonesiacentral`, `japaneast`, `japanwest`, `koreacentral`, `malaysiawest`, `newzealandnorth`, `southeastasia`
+- **Middle East and Africa (4):** `israelcentral`, `qatarcentral`, `southafricanorth`, `uaenorth`
+
+## Quick start
 
 ### Prerequisites
-- Azure subscription with Contributor + RBAC Administrator permissions (for Managed Identity role assignment)
-- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (`az`)
-- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 
-### 1. Refresh Subscription Zone Mappings (Recommended Once per Subscription)
+- Azure subscription with `Contributor` and `Role Based Access Control Administrator` permissions (needed to assign `Storage Table Data Contributor` to the benchmark Managed Identity)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (`az`)
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.9 (`azurerm ~> 5.13`, `azapi ~> 2.13`)
+- [Node.js](https://nodejs.org/) >= 20 (Node.js 22 LTS on Azure Functions) for running dashboard API tests locally
+
+### 1. Refresh subscription zone mappings
+
+Run once per subscription so `availabilityZoneMappings.json` matches your tenant's logical-to-physical zone map:
 
 ```bash
 cd tools/netbench
 ./get-locations.sh "<YOUR_SUBSCRIPTION_ID>"
 ```
 
-### 2. Run a Benchmark for Any Region
+### 2. Deploy a regional benchmark
 
-`variables.tf` defaults `location` to `"westeurope"` and automatically resolves the regional VM SKU from `regions.json`:
+`variables.tf` defaults `location` to `"westeurope"` and looks up the regional VM SKU from `regions.json`:
 
 ```bash
 cd tools/netbench
 
-# Initialize Terraform (use -backend=false for local state, or configure backend flags)
+# Initialize Terraform without remote state (or pass -backend-config flags for remote state)
 terraform init -backend=false
 
-# Deploy default region (westeurope -> Standard_D4als_v6 from regions.json)
+# Benchmark the default region (westeurope -> Standard_D4als_v6)
 terraform apply \
   -var="subscription_id=<YOUR_SUBSCRIPTION_ID>" \
   -var="storage_account_name=<YOUR_STORAGE_ACCOUNT>" \
   -var="storage_account_resource_group=<YOUR_STORAGE_RG>"
 
-# Deploy any of the 36 regions (automatically selects its SKU from regions.json)
+# Benchmark any of the 36 regions in regions.json
 terraform apply \
   -var="location=japaneast" \
   -var="subscription_id=<YOUR_SUBSCRIPTION_ID>" \
   -var="storage_account_name=<YOUR_STORAGE_ACCOUNT>" \
   -var="storage_account_resource_group=<YOUR_STORAGE_RG>"
 
-# Override VM SKU explicitly when desired
+# Override the regional VM SKU when testing a specific instance family
 terraform apply \
   -var="location=westeurope" \
   -var="vm_sku=Standard_D8as_v5" \
@@ -126,16 +130,17 @@ terraform apply \
   -var="storage_account_name=<YOUR_STORAGE_ACCOUNT>" \
   -var="storage_account_resource_group=<YOUR_STORAGE_RG>"
 
-# Wait ~5 minutes for staggered client runs to complete, then tear down
+# Wait ~5 minutes for staggered client sweeps to finish, then destroy ephemeral resources
 terraform destroy \
   -var="location=westeurope" \
+  -var="subscription_id=<YOUR_SUBSCRIPTION_ID>" \
   -var="storage_account_name=<YOUR_STORAGE_ACCOUNT>" \
   -var="storage_account_resource_group=<YOUR_STORAGE_RG>"
 ```
 
-### 3. Configure GitHub Secrets (Optional CI Automation)
+### 3. Configure GitHub secrets (optional)
 
-`setup-github-secrets.sh` is fully parameterized via CLI flags or environment variables:
+`setup-github-secrets.sh` accepts CLI flags or environment variables:
 
 ```bash
 cd tools/netbench
@@ -148,52 +153,57 @@ cd tools/netbench
   --yes
 ```
 
-Run `./setup-github-secrets.sh --help` to inspect all supported options and environment variables.
+Run `./setup-github-secrets.sh --help` to list all flags and environment variables.
 
-## Visualization Dashboard
+## Visualization dashboard and API tests
 
-Deploy the Static Web App + Azure Functions API from `tools/netbench/dashboard`:
+See [`dashboard/README.md`](dashboard/README.md) for full dashboard deployment and API documentation.
 
 ```bash
+# Run the zero-dependency Node.js API unit test suite
+cd tools/netbench/dashboard/api
+npm test
+
+# Deploy the Static Web App and Node.js 22 LTS Function App with Azure Developer CLI
 cd tools/netbench/dashboard
 azd auth login
 azd init
 azd up
 ```
 
-### Dashboard Highlights
-- **Metric View Toggle**: Switch all regional bar charts and time-series charts between **Latency (µs)**, **Throughput (Gbps)**, and **Throughput (Mbps)**.
-- **Backward-Compatible API**: Seamlessly renders historical latency-only Table Storage rows alongside new `qperf` + `iperf3` records.
-- **Filtering & CSV Export**: Filter by region, source AZ, destination AZ, and time window (`72h`, `7d`, `30d`, `all`) and export to CSV.
-
-## Project Structure
+## Project structure
 
 ```text
 tools/netbench/
-├── main.tf                         # Root Terraform orchestration
+├── main.tf                         # Root Terraform module call
 ├── locals.tf                       # Resolves location -> VM SKU via regions.json
 ├── variables.tf                    # Input variables (location defaults to westeurope)
 ├── outputs.tf                      # Resource group and resolved benchmark map outputs
-├── providers.tf                    # Provider and optional backend configuration
-├── regions.json                    # Consolidated 36-region default VM SKU map
+├── providers.tf                    # Provider constraints (azurerm ~> 5.13, azapi ~> 2.13)
+├── regions.json                    # 36-region default VM SKU map
 ├── availabilityZoneMappings.json   # Subscription physical-to-logical AZ mapping
-├── get-locations.sh                # Helper to refresh availabilityZoneMappings.json
-├── setup-github-secrets.sh         # Parameterized GitHub Actions secret setup script
-├── modules/netperf/                # Per-region benchmark VNet, NSG, PE, and Spot VMs
-│   ├── main.tf                     # VNet, Subnet, NSG (19765-19766/5201/443), VMs, PE
-│   ├── locals.tf                   # Zone mapping + templated client cloud-init
+├── get-locations.sh                # Refreshes availabilityZoneMappings.json via ARM REST
+├── setup-github-secrets.sh         # Parameterized GitHub repository secret helper
+├── images/                         # Official Azure V23 architecture SVGs
+│   ├── azure-az.svg                # Logical vs. physical Availability Zone mapping
+│   ├── archi-hld.svg               # High-level VNet, Private Link, and SWA topology
+│   └── archi-lld.svg               # Staggered cloud-init and Table REST execution flow
+├── modules/netperf/                # Per-region VNet, NSG, Private Endpoint, and Spot VMs
+│   ├── main.tf                     # Ubuntu 24.04 LTS Spot VMs, NSG, PE, Private DNS
+│   ├── locals.tf                   # Zone lookup and templated client cloud-init
 │   ├── variables.tf                # Module inputs
-│   ├── data.tf                     # Benchmark Storage Account lookup
+│   ├── data.tf                     # Benchmark Storage Account data source
 │   ├── outputs.tf                  # Module outputs
-│   ├── cloud-init-server.txt       # systemd daemons for qperf + iperf3 -s -D
-│   └── cloud-init-client.txt       # Readiness wait + qperf/iperf3 runner + Table POST
-└── dashboard/                      # Azure Static Web App + Functions visualization
-    ├── api/                        # Azure Functions Node.js API (/api/data)
-    ├── web/                        # Bootstrap 5 + Chart.js dashboard UI
-    └── infra/                      # Terraform infrastructure for dashboard hosting
+│   ├── versions.tf                 # Module provider version constraints
+│   ├── cloud-init-server.txt       # systemd units for qperf and iperf3 -s -D
+│   └── cloud-init-client.txt       # IMDS token, readiness probe, qperf/iperf3, Table POST
+└── dashboard/                      # Azure Static Web App and Node.js 22 LTS Functions API
+    ├── api/                        # GET /api/data normalization, OData filter, node:test suite
+    ├── web/                        # Bootstrap 5 + Chart.js frontend
+    └── infra/                      # Terraform hosting stack (azurerm ~> 5.13)
 ```
 
 ## License
 
-Licensed under the MIT License — see [LICENSE](../../LICENSE) and [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) (original upstream project: [`vmisson/azure-netbench`](https://github.com/vmisson/azure-netbench)).
+Licensed under the MIT License. See [LICENSE](../../LICENSE) and [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) (upstream project: [`vmisson/azure-netbench`](https://github.com/vmisson/azure-netbench)).
 
